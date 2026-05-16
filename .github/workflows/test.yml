@@ -30,7 +30,7 @@ jobs:
         run: npx playwright test --reporter=junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: ./test-results/playwright-junit.xml
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_BASE_URL: https://dev.d10myke4nv5c9b.amplifyapp.com
         continue-on-error: true
       - name: Upload test results
         if: always()
