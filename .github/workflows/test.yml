@@ -1,0 +1,55 @@
+name: AIVIC Auto Test
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # 800+ Playwright テストでも収まるように 60 分まで確保
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+      - name: Run Jest unit tests
+        id: jest
+        # --passWithNoTests: tests/unit/ が空のワークショップでは Jest 単体テストが
+        # 一切無いことが正常状態（業務ロジック非依存の UI のみのアプリ等）。0 件で
+        # exit 1 を返すのは「正常状態を異常扱い」する誤った挙動なのでフラグで修正する。
+        # （AI フォールバックや既定値挿入ではなく、CI コントラクトの定義変更）
+        run: npx jest --ci --passWithNoTests --reporters=default --reporters=jest-junit
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ./test-results
+          JEST_JUNIT_OUTPUT_NAME: jest-junit.xml
+        continue-on-error: true
+      - name: Run Playwright E2E tests
+        id: playwright
+        run: npx playwright test --reporter=junit
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: ./test-results/playwright-junit.xml
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+        continue-on-error: true
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+      - name: Determine overall status
+        if: always()
+        run: |
+          jest_outcome="${{ steps.jest.outcome }}"
+          playwright_outcome="${{ steps.playwright.outcome }}"
+          echo "Jest: $jest_outcome / Playwright: $playwright_outcome"
+          if [ "$jest_outcome" != "success" ] || [ "$playwright_outcome" != "success" ]; then
+            echo "::error::Tests failed (jest=$jest_outcome, playwright=$playwright_outcome)"
+            exit 1
+          fi
