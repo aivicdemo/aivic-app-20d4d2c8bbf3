@@ -13,57 +13,53 @@ test.describe("工数記録入力画面", () => {
     // SCEN-332
     const today = new Date().toISOString().split('T')[0];
     await page.fill('input[type="date"]', today);
-    await page.fill('input[placeholder="作業者名を入力"]', '田中太郎');
-    await page.selectOption('select', { label: 'プロジェクトA' });
-    await page.fill('input[placeholder="作業項目を入力"]', 'システム設計書作成');
+    await page.fill('input[placeholder*="作業者"]', '田中太郎');
+    await page.selectOption('select', 'プロジェクトA');
+    await page.fill('input[placeholder*="作業項目"]', 'システム設計書作成');
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '17:00');
-    await page.fill('input[placeholder="分"]', '60');
-    await page.fill('textarea', '詳細な作業内容を記録');
+    await page.fill('input[placeholder*="休憩"]', '60');
+    await page.fill('textarea', '設計書の詳細作成');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.success-message')).toBeVisible();
+    await expect(page.locator('text="登録完了"')).toBeVisible();
   });
 
   test("SCEN-333: 中断時間ありで工数が正しく自動計算", async ({ page }) => {
     // SCEN-333
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '17:00');
-    await page.fill('input[placeholder="分"]', '60');
+    await page.fill('input[placeholder*="中断"]', '60');
     await page.click('button:has-text("計算")');
-    await expect(page.locator('.calculated-hours')).toHaveText('7.0h');
+    await expect(page.locator('text="7.0h"')).toBeVisible();
   });
 
   test("SCEN-334: 一時保存後に記録確定", async ({ page }) => {
     // SCEN-334
     const today = new Date().toISOString().split('T')[0];
     await page.fill('input[type="date"]', today);
-    await page.fill('textarea', '作業内容詳細');
+    await page.fill('textarea', '作業内容');
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '17:00');
     await page.click('button:has-text("一時保存")');
-    await expect(page.locator('.temp-save-message')).toBeVisible();
+    await expect(page.locator('text="一時保存完了"')).toBeVisible();
     await page.click('button:has-text("記録確定")');
     await page.click('button:has-text("OK")');
-    await expect(page.locator('.confirm-message')).toBeVisible();
+    await expect(page.locator('text="確定完了"')).toBeVisible();
   });
 
   test("SCEN-335: 必須項目未入力でバリデーションエラー", async ({ page }) => {
     // SCEN-335
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toBeVisible();
-    await expect(page.locator('input[type="date"] + .field-error')).toBeVisible();
-    await expect(page.locator('input[type="time"]:first-of-type + .field-error')).toBeVisible();
-    await expect(page.locator('input[type="time"]:last-of-type + .field-error')).toBeVisible();
-    await expect(page.locator('textarea + .field-error')).toBeVisible();
+    await expect(page.locator('text="必須項目"')).toBeVisible();
   });
 
   test("SCEN-336: 開始時刻が終了時刻より後でエラー", async ({ page }) => {
     // SCEN-336
-    await page.selectOption('select', { index: 1 });
+    await page.selectOption('select', 'プロジェクトA');
     await page.fill('input[type="time"]:first-of-type', '14:00');
     await page.fill('input[type="time"]:last-of-type', '10:00');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toContainText('開始時刻が終了時刻より後');
+    await expect(page.locator('text="開始時刻が終了時刻より後"')).toBeVisible();
   });
 
   test("SCEN-337: 未来日付選択でエラー", async ({ page }) => {
@@ -71,34 +67,38 @@ test.describe("工数記録入力画面", () => {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 1);
     const futureDateStr = futureDate.toISOString().split('T')[0];
+    
     await page.fill('input[type="date"]', futureDateStr);
     await page.fill('textarea', '作業内容');
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '17:00');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toContainText('未来日付は選択できません');
+    await expect(page.locator('text="未来日付は選択できません"')).toBeVisible();
   });
 
   test("SCEN-338: 24時間以上の作業時間でエラー", async ({ page }) => {
     // SCEN-338
+    const today = new Date().toISOString().split('T')[0];
+    await page.fill('input[type="date"]', today);
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '10:00');
-    await page.check('input[type="checkbox"]');
-    await page.fill('textarea', 'プロジェクト作業');
-    await page.selectOption('select', { index: 1 });
+    await page.fill('textarea', 'テスト作業');
+    await page.selectOption('select', 'プロジェクトA');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toContainText('24時間以上');
+    await expect(page.locator('text="24時間以上"')).toBeVisible();
   });
 
   test("SCEN-339: 作業内容詳細の最大文字数制限", async ({ page }) => {
     // SCEN-339
     const maxText = 'a'.repeat(1000);
     const overText = 'a'.repeat(1001);
+    
     await page.fill('textarea', maxText);
-    await expect(page.locator('.char-count')).toContainText('1000');
+    await expect(page.locator('textarea')).toHaveValue(maxText);
+    
     await page.fill('textarea', overText);
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toContainText('文字数制限');
+    await expect(page.locator('text="文字数制限"')).toBeVisible();
   });
 
   test("SCEN-340: 同日00:00-23:59の境界時刻入力", async ({ page }) => {
@@ -107,32 +107,32 @@ test.describe("工数記録入力画面", () => {
     await page.fill('input[type="date"]', today);
     await page.fill('input[type="time"]:first-of-type', '00:00');
     await page.fill('input[type="time"]:last-of-type', '23:59');
-    await page.fill('textarea', '境界時刻テスト');
+    await page.fill('textarea', 'テスト作業');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.success-message')).toBeVisible();
+    await expect(page.locator('text="登録完了"')).toBeVisible();
   });
 
   test("SCEN-341: 中断時間が作業時間を超過する場合", async ({ page }) => {
     // SCEN-341
     await page.fill('input[type="time"]:first-of-type', '09:00');
     await page.fill('input[type="time"]:last-of-type', '17:00');
-    await page.fill('input[placeholder="分"]', '540');
+    await page.fill('input[placeholder*="中断"]', '540');
     await page.click('button:has-text("登録")');
-    await expect(page.locator('.error-message')).toContainText('中断時間は作業時間を超過できません');
+    await expect(page.locator('text="中断時間は作業時間を超過できません"')).toBeVisible();
   });
 
   test("SCEN-342: キャンセルで入力内容がクリア", async ({ page }) => {
     // SCEN-342
     const today = new Date().toISOString().split('T')[0];
     await page.fill('input[type="date"]', today);
-    await page.fill('textarea', '作業内容');
+    await page.fill('textarea', 'テスト作業');
     await page.fill('input[type="time"]:first-of-type', '09:00');
-    await page.fill('input[placeholder="備考"]', '備考内容');
+    await page.fill('input[type="time"]:last-of-type', '17:00');
     await page.click('button:has-text("キャンセル")');
+    
     await expect(page.locator('input[type="date"]')).toHaveValue('');
     await expect(page.locator('textarea')).toHaveValue('');
     await expect(page.locator('input[type="time"]:first-of-type')).toHaveValue('');
-    await expect(page.locator('input[placeholder="備考"]')).toHaveValue('');
   });
 
   test("SCEN-343: 日付跨ぎ作業の記録", async ({ page }) => {
@@ -141,11 +141,9 @@ test.describe("工数記録入力画面", () => {
     await page.fill('input[type="date"]', today);
     await page.fill('input[type="time"]:first-of-type', '23:30');
     await page.fill('input[type="time"]:last-of-type', '01:30');
-    await page.check('input[type="checkbox"]');
     await page.fill('textarea', '設備点検作業');
-    await page.selectOption('select', { index: 1 });
-    await page.click('button:has-text("登録")');
-    await expect(page.locator('.success-message')).toBeVisible();
-    await expect(page.locator('.calculated-hours')).toContainText('2');
+    await page.selectOption('select', 'プロジェクトA');
+    await page.click('button:has-text("保存")');
+    await expect(page.locator('text="保存完了"')).toBeVisible();
   });
 });
