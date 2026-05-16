@@ -36,7 +36,13 @@ jobs:
         continue-on-error: true
       - name: Run Playwright E2E tests (shard ${{ matrix.shard }}/4)
         id: playwright
-        run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=junit
+        # reporter を line,junit の併用にする。
+        # - line: stdout に進捗（pass: . / fail: F / 末尾サマリ）を出して
+        #   GHA のライブログで進捗を観測できる（テストが何件目で詰まっているか分かる）
+        # - junit: PLAYWRIGHT_JUNIT_OUTPUT_FILE に XML を書く（qa-handler の解析用）
+        # junit のみの場合 stdout に何も出ず、長時間 run でハングしているか
+        # 進行中か区別できなかった。list より line が CI 向き（行ごとに flush）。
+        run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=line,junit
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: ./test-results/playwright-junit-${{ matrix.shard }}.xml
           PLAYWRIGHT_BASE_URL: https://dev.d10myke4nv5c9b.amplifyapp.com
