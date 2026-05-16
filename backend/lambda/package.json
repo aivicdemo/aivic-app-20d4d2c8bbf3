@@ -1,0 +1,10 @@
+{
+  "name": "aivic-backend-lambda",
+  "version": "1.0.0",
+  "description": "AIVIC Backend Lambda — 現場作業員向け工数記録アプリの開発",
+  "main": "handler.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  }
+}
