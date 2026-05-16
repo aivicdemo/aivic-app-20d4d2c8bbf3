@@ -7,8 +7,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # 800+ Playwright テストでも収まるように 60 分まで確保
-    timeout-minutes: 60
+    # 4 分割した shard 1 個分なので timeout-minutes は短くて済む。安全マージン込みで 30 分。
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,27 +24,28 @@ jobs:
         run: npx playwright install chromium --with-deps
       - name: Run Jest unit tests
         id: jest
+        # Jest は単体テストなので 1 shard でだけ実行（重複実行を避ける）。
         # --passWithNoTests: tests/unit/ が空のワークショップでは Jest 単体テストが
         # 一切無いことが正常状態（業務ロジック非依存の UI のみのアプリ等）。0 件で
         # exit 1 を返すのは「正常状態を異常扱い」する誤った挙動なのでフラグで修正する。
-        # （AI フォールバックや既定値挿入ではなく、CI コントラクトの定義変更）
+        if: ${{ matrix.shard == 1 }}
         run: npx jest --ci --passWithNoTests --reporters=default --reporters=jest-junit
         env:
           JEST_JUNIT_OUTPUT_DIR: ./test-results
           JEST_JUNIT_OUTPUT_NAME: jest-junit.xml
         continue-on-error: true
-      - name: Run Playwright E2E tests
+      - name: Run Playwright E2E tests (shard ${{ matrix.shard }}/4)
         id: playwright
-        run: npx playwright test --reporter=junit
+        run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=junit
         env:
-          PLAYWRIGHT_JUNIT_OUTPUT_FILE: ./test-results/playwright-junit.xml
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: ./test-results/playwright-junit-${{ matrix.shard }}.xml
           PLAYWRIGHT_BASE_URL: https://dev.d10myke4nv5c9b.amplifyapp.com
         continue-on-error: true
-      - name: Upload test results
+      - name: Upload test results (shard ${{ matrix.shard }})
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-shard-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
       - name: Determine overall status
@@ -48,8 +53,13 @@ jobs:
         run: |
           jest_outcome="${{ steps.jest.outcome }}"
           playwright_outcome="${{ steps.playwright.outcome }}"
-          echo "Jest: $jest_outcome / Playwright: $playwright_outcome"
-          if [ "$jest_outcome" != "success" ] || [ "$playwright_outcome" != "success" ]; then
-            echo "::error::Tests failed (jest=$jest_outcome, playwright=$playwright_outcome)"
+          echo "shard=${{ matrix.shard }} / Jest: $jest_outcome / Playwright: $playwright_outcome"
+          # Jest は shard 1 でしか動かない（他 shard は "skipped"）。skipped は許容する。
+          if [ "$jest_outcome" != "success" ] && [ "$jest_outcome" != "skipped" ]; then
+            echo "::error::Jest failed in shard ${{ matrix.shard }} (jest=$jest_outcome)"
+            exit 1
+          fi
+          if [ "$playwright_outcome" != "success" ]; then
+            echo "::error::Playwright failed in shard ${{ matrix.shard }} (playwright=$playwright_outcome)"
             exit 1
           fi
