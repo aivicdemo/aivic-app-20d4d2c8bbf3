@@ -1,58 +1,67 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand, UpdateCommand, DeleteCommand, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { hasPermission, extractUserFromEvent, User } from './rbac';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { checkPermission, User } from './rbac';
 import { randomUUID } from 'crypto';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.MAIN_TABLE!;
 
-interface APIGatewayEvent {
-  httpMethod: string;
-  path: string;
-  pathParameters?: { [key: string]: string };
-  queryStringParameters?: { [key: string]: string };
-  body?: string;
-  headers: { [key: string]: string };
+interface ResourceConfig {
+  name: string;
+  pkPrefix: string;
+  requiredFields: string[];
 }
 
-interface APIGatewayResponse {
-  statusCode: number;
-  headers: { [key: string]: string };
-  body: string;
-}
-
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+const RESOURCES: Record<string, ResourceConfig> = {
+  '0': { name: 'users', pkPrefix: 'USER#', requiredFields: ['username', 'passwordHash', 'fullName', 'permissionLevel', 'isActive', 'createdBy'] },
+  '1': { name: 'work-records', pkPrefix: 'WORK#', requiredFields: ['workerId', 'workDate', 'startTime', 'projectName', 'workLocation', 'workType', 'workContent', 'progressStatus', 'approvalStatus', 'createdById'] },
+  '2': { name: 'interruption-records', pkPrefix: 'INT#', requiredFields: ['workRecordId', 'startTime', 'reasonCategory', 'status', 'recorderId'] },
+  '3': { name: 'work-items', pkPrefix: 'ITEM#', requiredFields: ['itemCode', 'itemName', 'displayOrder', 'isActive', 'createdById', 'updatedById'] },
+  '4': { name: 'anomaly-logs', pkPrefix: 'ANOM#', requiredFields: ['targetTable', 'targetRecordId', 'userId', 'anomalyType', 'detectedField', 'detectedValue', 'threshold', 'severity', 'confirmationStatus', 'notificationSent', 'detectedAt'] }
 };
 
-function createResponse(statusCode: number, body: any): APIGatewayResponse {
+function createResponse(statusCode: number, body: any): APIGatewayProxyResult {
   return {
     statusCode,
-    headers: CORS_HEADERS,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    },
     body: JSON.stringify(body)
   };
 }
 
-function validateRequired(data: any, fields: string[]): string[] {
-  const errors: string[] = [];
-  for (const field of fields) {
-    if (!data[field]) {
-      errors.push(`${field} is required`);
-    }
+function getUserFromEvent(event: APIGatewayProxyEvent): User {
+  const authHeader = event.headers.Authorization || event.headers.authorization;
+  if (!authHeader) {
+    throw new Error('Authorization header required');
   }
-  return errors;
+  
+  try {
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    return {
+      id: payload.sub || payload.userId,
+      role: payload.role || 'viewer',
+      department: payload.department,
+      position: payload.position
+    };
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
 }
 
-async function createAuditLog(user: User, action: string, resource: string, details: any = {}) {
+async function createAuditLog(action: string, resource: string, userId: string, details: any): Promise<void> {
   const auditLog = {
     pk: 'AUDIT',
-    sk: `${Date.now()}_${randomUUID()}`,
-    userId: user.userId,
+    sk: `${Date.now()}#${randomUUID()}`,
     action,
     resource,
+    userId,
     details,
     timestamp: new Date().toISOString()
   };
@@ -63,190 +72,137 @@ async function createAuditLog(user: User, action: string, resource: string, deta
   }));
 }
 
-function getTablePrefix(tableIndex: string): string {
-  const tableMap: { [key: string]: string } = {
-    '1': 'USER',
-    '2': 'WORK_RECORD',
-    '3': 'INTERRUPTION',
-    '4': 'WORK_ITEM',
-    '5': 'ANOMALY_LOG'
-  };
-  return tableMap[tableIndex] || 'UNKNOWN';
+function validateRequiredFields(item: any, requiredFields: string[]): string[] {
+  const errors: string[] = [];
+  for (const field of requiredFields) {
+    if (item[field] === undefined || item[field] === null || item[field] === '') {
+      errors.push(`Field '${field}' is required`);
+    }
+  }
+  return errors;
 }
 
-function getRequiredFields(tableIndex: string): string[] {
-  const fieldMap: { [key: string]: string[] } = {
-    '1': ['userName', 'passwordHash', 'fullName', 'permissionLevel', 'isActive', 'createdBy'],
-    '2': ['workerId', 'workDate', 'startTime', 'projectName', 'workLocation', 'workType', 'workContent', 'progressStatus', 'approvalStatus', 'createdById'],
-    '3': ['workRecordId', 'interruptionStartTime', 'reasonCategory', 'responseStatus', 'recorderId'],
-    '4': ['workItemCode', 'workItemName', 'displayOrder', 'isActive', 'createdById', 'updatedById'],
-    '5': ['targetTable', 'targetRecordId', 'userId', 'anomalyType', 'detectionItem', 'detectionValue', 'threshold', 'severity', 'confirmationStatus', 'notificationSent']
-  };
-  return fieldMap[tableIndex] || [];
-}
-
-export const handler = async (event: APIGatewayEvent): Promise<APIGatewayResponse> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    if (event.httpMethod === 'OPTIONS') {
+    const path = event.path;
+    const method = event.httpMethod;
+    
+    if (method === 'OPTIONS') {
       return createResponse(200, {});
+    }
+
+    if (path === '/resources' && method === 'GET') {
+      return createResponse(200, {
+        resources: Object.entries(RESOURCES).map(([index, config]) => ({
+          index,
+          name: config.name,
+          requiredFields: config.requiredFields
+        }))
+      });
+    }
+
+    const pathMatch = path.match(/^\/api\/(\d+)(?:\/(bulk|[^/]+))?$/);
+    if (!pathMatch) {
+      return createResponse(404, { error: 'Endpoint not found' });
+    }
+
+    const [, tableIndex, pathParam] = pathMatch;
+    const resource = RESOURCES[tableIndex];
+    if (!resource) {
+      return createResponse(404, { error: 'Resource not found' });
     }
 
     let user: User;
     try {
-      user = extractUserFromEvent(event);
+      user = getUserFromEvent(event);
     } catch (error) {
       return createResponse(401, { error: 'Unauthorized' });
     }
 
-    const path = event.path;
-    const method = event.httpMethod;
-    
-    // GET /resources
-    if (method === 'GET' && path === '/resources') {
-      if (!hasPermission(user, 'resources', 'read')) {
-        return createResponse(403, { error: 'Forbidden' });
-      }
-
+    // Bulk import endpoint
+    if (pathParam === 'bulk' && method === 'POST') {
       try {
-        const resources = {
-          tables: [
-            { id: '1', name: 'ユーザー', prefix: 'USER' },
-            { id: '2', name: '作業記録', prefix: 'WORK_RECORD' },
-            { id: '3', name: '中断記録', prefix: 'INTERRUPTION' },
-            { id: '4', name: '作業項目マスタ', prefix: 'WORK_ITEM' },
-            { id: '5', name: '異常値検出ログ', prefix: 'ANOMALY_LOG' }
-          ],
-          permissions: {
-            canCreate: hasPermission(user, '*', 'create'),
-            canUpdate: hasPermission(user, '*', 'update'),
-            canDelete: hasPermission(user, '*', 'delete'),
-            canBulk: hasPermission(user, '*', 'bulk')
-          }
-        };
-        
-        return createResponse(200, resources);
+        checkPermission(user, resource.name, 'bulk');
       } catch (error) {
-        return createResponse(500, { error: 'Internal server error' });
-      }
-    }
-
-    // Bulk import endpoints: POST /api/{tableIndex}/bulk
-    const bulkMatch = path.match(/^\/api\/(\d+)\/bulk$/);
-    if (method === 'POST' && bulkMatch) {
-      const tableIndex = bulkMatch[1];
-      
-      if (!hasPermission(user, 'bulk', 'bulk')) {
-        return createResponse(403, { error: 'Forbidden' });
+        return createResponse(403, { error: error.message });
       }
 
-      try {
-        const body = JSON.parse(event.body || '{}');
-        const items = body.items || [];
-        
-        if (!Array.isArray(items)) {
-          return createResponse(400, { error: 'items must be an array' });
+      const body = JSON.parse(event.body || '{}');
+      if (!body.items || !Array.isArray(body.items)) {
+        return createResponse(400, { error: 'Request body must contain items array' });
+      }
+
+      let imported = 0;
+      let failed = 0;
+      const errors: string[] = [];
+      const now = new Date().toISOString();
+
+      // Process in batches of 25 (DynamoDB BatchWrite limit)
+      for (let i = 0; i < body.items.length; i += 25) {
+        const batch = body.items.slice(i, i + 25);
+        const writeRequests = [];
+
+        for (const item of batch) {
+          const validationErrors = validateRequiredFields(item, resource.requiredFields);
+          if (validationErrors.length > 0) {
+            failed++;
+            errors.push(`Item ${i + batch.indexOf(item)}: ${validationErrors.join(', ')}`);
+            continue;
+          }
+
+          const id = item.id || randomUUID();
+          const enrichedItem = {
+            ...item,
+            pk: `${resource.pkPrefix}${id}`,
+            sk: id,
+            id,
+            createdAt: now,
+            updatedAt: now
+          };
+
+          writeRequests.push({
+            PutRequest: {
+              Item: enrichedItem
+            }
+          });
         }
 
-        const tablePrefix = getTablePrefix(tableIndex);
-        const requiredFields = getRequiredFields(tableIndex);
-        const now = new Date().toISOString();
-        let imported = 0;
-        let failed = 0;
-        const errors: string[] = [];
-
-        // Process in batches of 25 (DynamoDB BatchWrite limit)
-        for (let i = 0; i < items.length; i += 25) {
-          const batch = items.slice(i, i + 25);
-          const writeRequests = [];
-
-          for (const item of batch) {
-            const validationErrors = validateRequired(item, requiredFields);
-            if (validationErrors.length > 0) {
-              failed++;
-              errors.push(`Item ${i + batch.indexOf(item)}: ${validationErrors.join(', ')}`);
-              continue;
-            }
-
-            const processedItem = {
-              ...item,
-              pk: tablePrefix,
-              sk: item.id || randomUUID(),
-              id: item.id || randomUUID(),
-              createdAt: now,
-              updatedAt: now
-            };
-
-            writeRequests.push({
-              PutRequest: {
-                Item: processedItem
+        if (writeRequests.length > 0) {
+          try {
+            await docClient.send(new BatchWriteCommand({
+              RequestItems: {
+                [TABLE_NAME]: writeRequests
               }
-            });
-          }
-
-          if (writeRequests.length > 0) {
-            try {
-              await docClient.send(new BatchWriteCommand({
-                RequestItems: {
-                  [TABLE_NAME]: writeRequests
-                }
-              }));
-              imported += writeRequests.length;
-            } catch (error) {
-              failed += writeRequests.length;
-              errors.push(`Batch write failed: ${error}`);
-            }
+            }));
+            imported += writeRequests.length;
+          } catch (error) {
+            failed += writeRequests.length;
+            errors.push(`Batch write failed: ${error.message}`);
           }
         }
-
-        await createAuditLog(user, 'BULK_IMPORT', tablePrefix, { imported, failed, total: items.length });
-
-        return createResponse(200, { imported, failed, errors });
-      } catch (error) {
-        return createResponse(400, { error: 'Invalid JSON body' });
       }
+
+      await createAuditLog('BULK_IMPORT', resource.name, user.id, { imported, failed, total: body.items.length });
+
+      return createResponse(200, { imported, failed, errors });
     }
 
-    // Table-specific CRUD operations: /api/{tableIndex}
-    const tableMatch = path.match(/^\/api\/(\d+)(?:\/(\w+))?$/);
-    if (tableMatch) {
-      const tableIndex = tableMatch[1];
-      const itemId = tableMatch[2];
-      const tablePrefix = getTablePrefix(tableIndex);
-      const requiredFields = getRequiredFields(tableIndex);
-
-      // GET /api/{tableIndex} - List items
-      if (method === 'GET' && !itemId) {
-        if (!hasPermission(user, tablePrefix, 'read')) {
-          return createResponse(403, { error: 'Forbidden' });
-        }
-
+    // CRUD operations
+    switch (method) {
+      case 'GET':
         try {
-          const result = await docClient.send(new ScanCommand({
-            TableName: TABLE_NAME,
-            FilterExpression: 'pk = :pk',
-            ExpressionAttributeValues: {
-              ':pk': tablePrefix
-            }
-          }));
-
-          return createResponse(200, { items: result.Items || [] });
+          checkPermission(user, resource.name, 'read');
         } catch (error) {
-          return createResponse(500, { error: 'Internal server error' });
-        }
-      }
-
-      // GET /api/{tableIndex}/{id} - Get item
-      if (method === 'GET' && itemId) {
-        if (!hasPermission(user, tablePrefix, 'read')) {
-          return createResponse(403, { error: 'Forbidden' });
+          return createResponse(403, { error: error.message });
         }
 
-        try {
+        if (pathParam && pathParam !== 'bulk') {
+          // Get single item
           const result = await docClient.send(new GetCommand({
             TableName: TABLE_NAME,
             Key: {
-              pk: tablePrefix,
-              sk: itemId
+              pk: `${resource.pkPrefix}${pathParam}`,
+              sk: pathParam
             }
           }));
 
@@ -255,107 +211,139 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayRespons
           }
 
           return createResponse(200, result.Item);
-        } catch (error) {
-          return createResponse(500, { error: 'Internal server error' });
-        }
-      }
-
-      // POST /api/{tableIndex} - Create item
-      if (method === 'POST' && !itemId) {
-        if (!hasPermission(user, tablePrefix, 'create')) {
-          return createResponse(403, { error: 'Forbidden' });
-        }
-
-        try {
-          const body = JSON.parse(event.body || '{}');
-          const validationErrors = validateRequired(body, requiredFields);
-          
-          if (validationErrors.length > 0) {
-            return createResponse(400, { error: 'Validation failed', details: validationErrors });
-          }
-
-          const now = new Date().toISOString();
-          const id = randomUUID();
-          const item = {
-            ...body,
-            pk: tablePrefix,
-            sk: id,
-            id,
-            createdAt: now,
-            updatedAt: now
-          };
-
-          await docClient.send(new PutCommand({
+        } else {
+          // List items
+          const result = await docClient.send(new ScanCommand({
             TableName: TABLE_NAME,
-            Item: item
-          }));
-
-          await createAuditLog(user, 'CREATE', tablePrefix, { id });
-
-          return createResponse(201, item);
-        } catch (error) {
-          return createResponse(400, { error: 'Invalid JSON body' });
-        }
-      }
-
-      // PUT /api/{tableIndex}/{id} - Update item
-      if (method === 'PUT' && itemId) {
-        if (!hasPermission(user, tablePrefix, 'update')) {
-          return createResponse(403, { error: 'Forbidden' });
-        }
-
-        try {
-          const body = JSON.parse(event.body || '{}');
-          const now = new Date().toISOString();
-
-          const item = {
-            ...body,
-            pk: tablePrefix,
-            sk: itemId,
-            id: itemId,
-            updatedAt: now
-          };
-
-          await docClient.send(new PutCommand({
-            TableName: TABLE_NAME,
-            Item: item
-          }));
-
-          await createAuditLog(user, 'UPDATE', tablePrefix, { id: itemId });
-
-          return createResponse(200, item);
-        } catch (error) {
-          return createResponse(400, { error: 'Invalid JSON body' });
-        }
-      }
-
-      // DELETE /api/{tableIndex}/{id} - Delete item
-      if (method === 'DELETE' && itemId) {
-        if (!hasPermission(user, tablePrefix, 'delete')) {
-          return createResponse(403, { error: 'Forbidden' });
-        }
-
-        try {
-          await docClient.send(new DeleteCommand({
-            TableName: TABLE_NAME,
-            Key: {
-              pk: tablePrefix,
-              sk: itemId
+            FilterExpression: 'begins_with(pk, :prefix)',
+            ExpressionAttributeValues: {
+              ':prefix': resource.pkPrefix
             }
           }));
 
-          await createAuditLog(user, 'DELETE', tablePrefix, { id: itemId });
-
-          return createResponse(200, { message: 'Item deleted successfully' });
-        } catch (error) {
-          return createResponse(500, { error: 'Internal server error' });
+          return createResponse(200, {
+            items: result.Items || [],
+            count: result.Count || 0
+          });
         }
-      }
-    }
 
-    return createResponse(404, { error: 'Endpoint not found' });
+      case 'POST':
+        try {
+          checkPermission(user, resource.name, 'create');
+        } catch (error) {
+          return createResponse(403, { error: error.message });
+        }
+
+        const createBody = JSON.parse(event.body || '{}');
+        const createValidationErrors = validateRequiredFields(createBody, resource.requiredFields);
+        if (createValidationErrors.length > 0) {
+          return createResponse(400, { error: 'Validation failed', details: createValidationErrors });
+        }
+
+        const newId = createBody.id || randomUUID();
+        const now = new Date().toISOString();
+        const newItem = {
+          ...createBody,
+          pk: `${resource.pkPrefix}${newId}`,
+          sk: newId,
+          id: newId,
+          createdAt: now,
+          updatedAt: now
+        };
+
+        await docClient.send(new PutCommand({
+          TableName: TABLE_NAME,
+          Item: newItem
+        }));
+
+        await createAuditLog('CREATE', resource.name, user.id, { id: newId });
+
+        return createResponse(201, newItem);
+
+      case 'PUT':
+        if (!pathParam || pathParam === 'bulk') {
+          return createResponse(400, { error: 'ID required for update' });
+        }
+
+        try {
+          checkPermission(user, resource.name, 'update');
+        } catch (error) {
+          return createResponse(403, { error: error.message });
+        }
+
+        const updateBody = JSON.parse(event.body || '{}');
+        const updateValidationErrors = validateRequiredFields(updateBody, resource.requiredFields);
+        if (updateValidationErrors.length > 0) {
+          return createResponse(400, { error: 'Validation failed', details: updateValidationErrors });
+        }
+
+        const existingItem = await docClient.send(new GetCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            pk: `${resource.pkPrefix}${pathParam}`,
+            sk: pathParam
+          }
+        }));
+
+        if (!existingItem.Item) {
+          return createResponse(404, { error: 'Item not found' });
+        }
+
+        const updatedItem = {
+          ...existingItem.Item,
+          ...updateBody,
+          updatedAt: new Date().toISOString()
+        };
+
+        await docClient.send(new PutCommand({
+          TableName: TABLE_NAME,
+          Item: updatedItem
+        }));
+
+        await createAuditLog('UPDATE', resource.name, user.id, { id: pathParam });
+
+        return createResponse(200, updatedItem);
+
+      case 'DELETE':
+        if (!pathParam || pathParam === 'bulk') {
+          return createResponse(400, { error: 'ID required for delete' });
+        }
+
+        try {
+          checkPermission(user, resource.name, 'delete');
+        } catch (error) {
+          return createResponse(403, { error: error.message });
+        }
+
+        const deleteItem = await docClient.send(new GetCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            pk: `${resource.pkPrefix}${pathParam}`,
+            sk: pathParam
+          }
+        }));
+
+        if (!deleteItem.Item) {
+          return createResponse(404, { error: 'Item not found' });
+        }
+
+        await docClient.send(new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            pk: `${resource.pkPrefix}${pathParam}`,
+            sk: pathParam
+          }
+        }));
+
+        await createAuditLog('DELETE', resource.name, user.id, { id: pathParam });
+
+        return createResponse(200, { message: 'Item deleted successfully' });
+
+      default:
+        return createResponse(405, { error: 'Method not allowed' });
+    }
   } catch (error) {
-    console.error('Handler error:', error);
-    return createResponse(500, { error: 'Internal server error' });
+    console.error('Error:', error);
+    return createResponse(500, { error: 'Internal server error', message: error.message });
   }
 };
