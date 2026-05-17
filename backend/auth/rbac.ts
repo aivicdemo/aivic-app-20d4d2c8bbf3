@@ -1,14 +1,8 @@
 export type Role = 'admin' | 'operator' | 'viewer';
 
 export interface User {
-  id: string;
   role: Role;
-  username: string;
-  name: string;
-  department?: string;
-  position?: string;
-  permissionLevel: string;
-  isActive: boolean;
+  userId: string;
 }
 
 export interface Permission {
@@ -16,7 +10,7 @@ export interface Permission {
   action: 'create' | 'read' | 'update' | 'delete' | 'bulk';
 }
 
-const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+const rolePermissions: Record<Role, Permission[]> = {
   admin: [
     { resource: '*', action: 'create' },
     { resource: '*', action: 'read' },
@@ -25,38 +19,40 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { resource: '*', action: 'bulk' }
   ],
   operator: [
-    { resource: 'users', action: 'read' },
-    { resource: 'work-records', action: 'create' },
-    { resource: 'work-records', action: 'read' },
-    { resource: 'work-records', action: 'update' },
-    { resource: 'work-records', action: 'delete' },
-    { resource: 'work-records', action: 'bulk' },
-    { resource: 'interruption-records', action: 'create' },
-    { resource: 'interruption-records', action: 'read' },
-    { resource: 'interruption-records', action: 'update' },
-    { resource: 'interruption-records', action: 'delete' },
-    { resource: 'interruption-records', action: 'bulk' },
-    { resource: 'work-items', action: 'read' },
-    { resource: 'anomaly-logs', action: 'read' }
+    { resource: '*', action: 'create' },
+    { resource: '*', action: 'read' },
+    { resource: '*', action: 'update' },
+    { resource: '*', action: 'bulk' }
   ],
   viewer: [
-    { resource: 'users', action: 'read' },
-    { resource: 'work-records', action: 'read' },
-    { resource: 'interruption-records', action: 'read' },
-    { resource: 'work-items', action: 'read' },
-    { resource: 'anomaly-logs', action: 'read' }
+    { resource: '*', action: 'read' }
   ]
 };
 
-export function hasPermission(user: User, resource: string, action: string): boolean {
-  const permissions = ROLE_PERMISSIONS[user.role];
+export function hasPermission(user: User, resource: string, action: Permission['action']): boolean {
+  const permissions = rolePermissions[user.role];
   return permissions.some(p => 
     (p.resource === '*' || p.resource === resource) && p.action === action
   );
 }
 
-export function checkPermission(user: User, resource: string, action: string): void {
-  if (!hasPermission(user, resource, action)) {
-    throw new Error(`Insufficient permissions for ${action} on ${resource}`);
+export function extractUserFromEvent(event: any): User {
+  const authHeader = event.headers?.Authorization || event.headers?.authorization;
+  if (!authHeader) {
+    throw new Error('No authorization header');
+  }
+  
+  try {
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    return {
+      role: payload.role || 'viewer',
+      userId: payload.sub || payload.userId || 'anonymous'
+    };
+  } catch (error) {
+    return {
+      role: 'viewer',
+      userId: 'anonymous'
+    };
   }
 }
