@@ -1,113 +1,20 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand, DeleteCommand, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand, UpdateCommand, DeleteCommand, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { hasPermission, validateRole, Role } from './rbac';
-import * as crypto from 'crypto';
+import { hasPermission, getResourceFromPath, getActionFromMethod, User } from './rbac';
+import { randomUUID } from 'crypto';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.MAIN_TABLE!;
 
-interface User {
-  userId: string;
-  username: string;
-  passwordHash: string;
-  fullName: string;
-  department?: string;
-  jobTitle?: string;
-  permissionLevel: string;
-  isActive: boolean;
-  lastLoginAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
+interface ApiResponse {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
 }
 
-interface WorkRecord {
-  workRecordId: string;
-  workerId: string;
-  workDate: string;
-  startTime: string;
-  endTime?: string;
-  workDuration?: number;
-  projectName: string;
-  workLocation: string;
-  workType: string;
-  workContent: string;
-  progressStatus: string;
-  notes?: string;
-  approvalStatus: string;
-  approverId?: string;
-  approvedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-}
-
-interface InterruptionRecord {
-  interruptionRecordId: string;
-  workRecordId: string;
-  interruptionStartAt: string;
-  interruptionEndAt?: string;
-  interruptionReasonCategory: string;
-  interruptionReasonDetail?: string;
-  interruptionDuration?: number;
-  impactLevel?: string;
-  responseStatus: string;
-  recorderId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface WorkItemMaster {
-  workItemId: string;
-  workItemCode: string;
-  workItemName: string;
-  workItemDescription?: string;
-  category?: string;
-  standardWorkHours?: number;
-  displayOrder: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-  updatedById: string;
-}
-
-interface AnomalyDetectionLog {
-  anomalyDetectionLogId: string;
-  targetTable: string;
-  targetRecordId: string;
-  userId: string;
-  anomalyType: string;
-  detectionItem: string;
-  detectionValue: string;
-  threshold: string;
-  severity: string;
-  confirmationStatus: string;
-  notificationSent: boolean;
-  confirmerId?: string;
-  confirmedAt?: string;
-  responseNotes?: string;
-  detectedAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-type ResourceType = 'users' | 'work-records' | 'interruption-records' | 'work-item-masters' | 'anomaly-detection-logs';
-
-function getPartitionKey(resourceType: ResourceType): string {
-  switch (resourceType) {
-    case 'users': return 'USER';
-    case 'work-records': return 'WORK_RECORD';
-    case 'interruption-records': return 'INTERRUPTION_RECORD';
-    case 'work-item-masters': return 'WORK_ITEM_MASTER';
-    case 'anomaly-detection-logs': return 'ANOMALY_DETECTION_LOG';
-    default: throw new Error(`Unknown resource type: ${resourceType}`);
-  }
-}
-
-function createResponse(statusCode: number, body: any): APIGatewayProxyResult {
+function createResponse(statusCode: number, body: any): ApiResponse {
   return {
     statusCode,
     headers: {
@@ -120,15 +27,30 @@ function createResponse(statusCode: number, body: any): APIGatewayProxyResult {
   };
 }
 
-function getUserRole(event: APIGatewayProxyEvent): Role {
-  const role = event.headers.Authorization?.replace('Bearer ', '') || event.headers.authorization?.replace('Bearer ', '') || 'viewer';
-  return validateRole(role) ? role as Role : 'viewer';
+function getUserFromEvent(event: APIGatewayProxyEvent): User {
+  const authHeader = event.headers.Authorization || event.headers.authorization;
+  if (!authHeader) {
+    throw new Error('Unauthorized');
+  }
+  
+  try {
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    return {
+      id: payload.sub || payload.userId,
+      role: payload.role || 'viewer',
+      department: payload.department,
+      position: payload.position
+    };
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
 }
 
 async function createAuditLog(action: string, resourceType: string, resourceId: string, userId: string, details?: any): Promise<void> {
   const auditLog = {
     pk: 'AUDIT',
-    sk: `${Date.now()}-${crypto.randomUUID()}`,
+    sk: `${Date.now()}_${randomUUID()}`,
     action,
     resourceType,
     resourceId,
@@ -136,160 +58,292 @@ async function createAuditLog(action: string, resourceType: string, resourceId: 
     details,
     timestamp: new Date().toISOString()
   };
-
+  
   await docClient.send(new PutCommand({
     TableName: TABLE_NAME,
     Item: auditLog
   }));
 }
 
-function validateUser(user: Partial<User>): string[] {
+function validateUser(item: any): string[] {
   const errors: string[] = [];
-  if (!user.username) errors.push('username is required');
-  if (!user.passwordHash) errors.push('passwordHash is required');
-  if (!user.fullName) errors.push('fullName is required');
-  if (!user.permissionLevel) errors.push('permissionLevel is required');
-  if (user.isActive === undefined) errors.push('isActive is required');
-  if (!user.createdBy) errors.push('createdBy is required');
+  
+  if (!item.username || typeof item.username !== 'string' || item.username.length > 100) {
+    errors.push('ユーザー名は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.passwordHash || typeof item.passwordHash !== 'string' || item.passwordHash.length > 100) {
+    errors.push('パスワードハッシュは必須で100文字以内である必要があります');
+  }
+  
+  if (!item.fullName || typeof item.fullName !== 'string' || item.fullName.length > 100) {
+    errors.push('氏名は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.permissionLevel || typeof item.permissionLevel !== 'string' || item.permissionLevel.length > 100) {
+    errors.push('権限レベルは必須で100文字以内である必要があります');
+  }
+  
+  if (typeof item.isActive !== 'boolean') {
+    errors.push('有効フラグは必須でboolean型である必要があります');
+  }
+  
+  if (!item.createdBy || typeof item.createdBy !== 'string' || item.createdBy.length > 100) {
+    errors.push('作成者は必須で100文字以内である必要があります');
+  }
+  
   return errors;
 }
 
-function validateWorkRecord(record: Partial<WorkRecord>): string[] {
+function validateWorkRecord(item: any): string[] {
   const errors: string[] = [];
-  if (!record.workerId) errors.push('workerId is required');
-  if (!record.workDate) errors.push('workDate is required');
-  if (!record.startTime) errors.push('startTime is required');
-  if (!record.projectName) errors.push('projectName is required');
-  if (!record.workLocation) errors.push('workLocation is required');
-  if (!record.workType) errors.push('workType is required');
-  if (!record.workContent) errors.push('workContent is required');
-  if (!record.progressStatus) errors.push('progressStatus is required');
-  if (!record.approvalStatus) errors.push('approvalStatus is required');
-  if (!record.createdById) errors.push('createdById is required');
+  
+  if (!item.workerId || typeof item.workerId !== 'string') {
+    errors.push('作業員IDは必須です');
+  }
+  
+  if (!item.workDate) {
+    errors.push('作業日は必須です');
+  }
+  
+  if (!item.startTime) {
+    errors.push('作業開始時刻は必須です');
+  }
+  
+  if (!item.projectName || typeof item.projectName !== 'string' || item.projectName.length > 100) {
+    errors.push('プロジェクト名は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.workLocation || typeof item.workLocation !== 'string' || item.workLocation.length > 100) {
+    errors.push('作業場所は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.workType || typeof item.workType !== 'string' || item.workType.length > 100) {
+    errors.push('作業種別は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.workContent || typeof item.workContent !== 'string') {
+    errors.push('作業内容は必須です');
+  }
+  
+  if (!item.progressStatus || typeof item.progressStatus !== 'string' || item.progressStatus.length > 100) {
+    errors.push('進捗状況は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.approvalStatus || typeof item.approvalStatus !== 'string' || item.approvalStatus.length > 100) {
+    errors.push('承認状態は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.createdById || typeof item.createdById !== 'string') {
+    errors.push('作成者IDは必須です');
+  }
+  
   return errors;
 }
 
-function validateInterruptionRecord(record: Partial<InterruptionRecord>): string[] {
+function validateInterruptionRecord(item: any): string[] {
   const errors: string[] = [];
-  if (!record.workRecordId) errors.push('workRecordId is required');
-  if (!record.interruptionStartAt) errors.push('interruptionStartAt is required');
-  if (!record.interruptionReasonCategory) errors.push('interruptionReasonCategory is required');
-  if (!record.responseStatus) errors.push('responseStatus is required');
-  if (!record.recorderId) errors.push('recorderId is required');
+  
+  if (!item.workRecordId || typeof item.workRecordId !== 'string') {
+    errors.push('作業記録IDは必須です');
+  }
+  
+  if (!item.interruptionStartTime) {
+    errors.push('中断開始日時は必須です');
+  }
+  
+  if (!item.reasonCategory || typeof item.reasonCategory !== 'string' || item.reasonCategory.length > 100) {
+    errors.push('中断理由区分は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.responseStatus || typeof item.responseStatus !== 'string' || item.responseStatus.length > 100) {
+    errors.push('対応状況は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.recorderId || typeof item.recorderId !== 'string') {
+    errors.push('記録者IDは必須です');
+  }
+  
   return errors;
 }
 
-function validateWorkItemMaster(item: Partial<WorkItemMaster>): string[] {
+function validateWorkItem(item: any): string[] {
   const errors: string[] = [];
-  if (!item.workItemCode) errors.push('workItemCode is required');
-  if (!item.workItemName) errors.push('workItemName is required');
-  if (item.displayOrder === undefined) errors.push('displayOrder is required');
-  if (item.isActive === undefined) errors.push('isActive is required');
-  if (!item.createdById) errors.push('createdById is required');
-  if (!item.updatedById) errors.push('updatedById is required');
+  
+  if (!item.workItemCode || typeof item.workItemCode !== 'string' || item.workItemCode.length > 100) {
+    errors.push('作業項目コードは必須で100文字以内である必要があります');
+  }
+  
+  if (!item.workItemName || typeof item.workItemName !== 'string' || item.workItemName.length > 100) {
+    errors.push('作業項目名は必須で100文字以内である必要があります');
+  }
+  
+  if (typeof item.displayOrder !== 'number') {
+    errors.push('表示順序は必須で数値である必要があります');
+  }
+  
+  if (typeof item.isActive !== 'boolean') {
+    errors.push('有効フラグは必須でboolean型である必要があります');
+  }
+  
+  if (!item.createdById || typeof item.createdById !== 'string') {
+    errors.push('作成者IDは必須です');
+  }
+  
+  if (!item.updatedById || typeof item.updatedById !== 'string') {
+    errors.push('更新者IDは必須です');
+  }
+  
   return errors;
 }
 
-function validateAnomalyDetectionLog(log: Partial<AnomalyDetectionLog>): string[] {
+function validateAnomalyLog(item: any): string[] {
   const errors: string[] = [];
-  if (!log.targetTable) errors.push('targetTable is required');
-  if (!log.targetRecordId) errors.push('targetRecordId is required');
-  if (!log.userId) errors.push('userId is required');
-  if (!log.anomalyType) errors.push('anomalyType is required');
-  if (!log.detectionItem) errors.push('detectionItem is required');
-  if (!log.detectionValue) errors.push('detectionValue is required');
-  if (!log.threshold) errors.push('threshold is required');
-  if (!log.severity) errors.push('severity is required');
-  if (!log.confirmationStatus) errors.push('confirmationStatus is required');
-  if (log.notificationSent === undefined) errors.push('notificationSent is required');
-  if (!log.detectedAt) errors.push('detectedAt is required');
+  
+  if (!item.targetTable || typeof item.targetTable !== 'string' || item.targetTable.length > 100) {
+    errors.push('検出対象テーブルは必須で100文字以内である必要があります');
+  }
+  
+  if (!item.targetRecordId || typeof item.targetRecordId !== 'string') {
+    errors.push('検出対象レコードIDは必須です');
+  }
+  
+  if (!item.userId || typeof item.userId !== 'string') {
+    errors.push('ユーザーIDは必須です');
+  }
+  
+  if (!item.anomalyType || typeof item.anomalyType !== 'string' || item.anomalyType.length > 100) {
+    errors.push('異常値種別は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.detectedField || typeof item.detectedField !== 'string' || item.detectedField.length > 100) {
+    errors.push('検出項目は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.detectedValue || typeof item.detectedValue !== 'string' || item.detectedValue.length > 100) {
+    errors.push('検出値は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.threshold || typeof item.threshold !== 'string' || item.threshold.length > 100) {
+    errors.push('閾値は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.severity || typeof item.severity !== 'string' || item.severity.length > 100) {
+    errors.push('重要度は必須で100文字以内である必要があります');
+  }
+  
+  if (!item.confirmationStatus || typeof item.confirmationStatus !== 'string' || item.confirmationStatus.length > 100) {
+    errors.push('確認状況は必須で100文字以内である必要があります');
+  }
+  
+  if (typeof item.notificationSent !== 'boolean') {
+    errors.push('通知送信フラグは必須でboolean型である必要があります');
+  }
+  
   return errors;
 }
 
-function getValidator(resourceType: ResourceType): (item: any) => string[] {
-  switch (resourceType) {
-    case 'users': return validateUser;
-    case 'work-records': return validateWorkRecord;
-    case 'interruption-records': return validateInterruptionRecord;
-    case 'work-item-masters': return validateWorkItemMaster;
-    case 'anomaly-detection-logs': return validateAnomalyDetectionLog;
+function getValidatorByTableIndex(tableIndex: string): (item: any) => string[] {
+  switch (tableIndex) {
+    case '0': return validateUser;
+    case '1': return validateWorkRecord;
+    case '2': return validateInterruptionRecord;
+    case '3': return validateWorkItem;
+    case '4': return validateAnomalyLog;
     default: return () => [];
   }
 }
 
+function getTableTypeByIndex(tableIndex: string): string {
+  const types = {
+    '0': 'USER',
+    '1': 'WORK_RECORD',
+    '2': 'INTERRUPTION_RECORD',
+    '3': 'WORK_ITEM',
+    '4': 'ANOMALY_LOG'
+  };
+  return types[tableIndex as keyof typeof types] || 'UNKNOWN';
+}
+
+function addTimestamps(item: any, isUpdate: boolean = false): any {
+  const now = new Date().toISOString();
+  
+  if (!isUpdate) {
+    item.id = item.id || randomUUID();
+    item.createdAt = now;
+  }
+  
+  item.updatedAt = now;
+  return item;
+}
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const { httpMethod, pathParameters, body } = event;
-    const role = getUserRole(event);
-    const userId = event.requestContext.authorizer?.userId || 'system';
-
-    if (httpMethod === 'OPTIONS') {
+    const method = event.httpMethod;
+    const path = event.path;
+    const pathParameters = event.pathParameters || {};
+    
+    if (method === 'OPTIONS') {
       return createResponse(200, {});
     }
-
-    if (httpMethod === 'GET' && event.path === '/resources') {
-      if (!hasPermission(role, 'read')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
-      }
-
-      const resources = {
-        users: 'User management',
-        'work-records': 'Work record management',
-        'interruption-records': 'Interruption record management',
-        'work-item-masters': 'Work item master management',
-        'anomaly-detection-logs': 'Anomaly detection log management'
-      };
-
-      return createResponse(200, { resources });
-    }
-
-    const pathParts = event.path.split('/').filter(p => p);
-    if (pathParts.length < 2 || pathParts[0] !== 'api') {
-      return createResponse(404, { error: 'Not found' });
-    }
-
-    const resourceIndex = pathParts[1];
-    const resourceTypes: ResourceType[] = ['users', 'work-records', 'interruption-records', 'work-item-masters', 'anomaly-detection-logs'];
-    const resourceType = resourceTypes[parseInt(resourceIndex)] || resourceIndex as ResourceType;
     
-    if (!resourceTypes.includes(resourceType)) {
-      return createResponse(404, { error: 'Resource not found' });
+    let user: User;
+    try {
+      user = getUserFromEvent(event);
+    } catch (error) {
+      return createResponse(401, { error: 'Unauthorized' });
     }
-
-    const pk = getPartitionKey(resourceType);
-
+    
+    const resource = getResourceFromPath(path);
+    const action = getActionFromMethod(method, path);
+    
+    if (!hasPermission(user, resource, action)) {
+      return createResponse(403, { error: 'Forbidden' });
+    }
+    
+    // GET /resources
+    if (method === 'GET' && path === '/resources') {
+      const command = new ScanCommand({
+        TableName: TABLE_NAME,
+        FilterExpression: 'attribute_exists(username)'
+      });
+      
+      const result = await docClient.send(command);
+      return createResponse(200, { items: result.Items || [] });
+    }
+    
+    // API routes
+    const apiMatch = path.match(/^\/api\/(\d+)(?:\/(\w+))?(?:\/(\w+))?/);
+    if (!apiMatch) {
+      return createResponse(404, { error: 'Not Found' });
+    }
+    
+    const [, tableIndex, operation, id] = apiMatch;
+    const tableType = getTableTypeByIndex(tableIndex);
+    
     // Bulk import endpoint
-    if (httpMethod === 'POST' && pathParts[2] === 'bulk') {
-      if (!hasPermission(role, 'write')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
+    if (method === 'POST' && operation === 'bulk') {
+      if (!hasPermission(user, resource, 'bulk')) {
+        return createResponse(403, { error: 'Forbidden' });
       }
-
-      if (!body) {
-        return createResponse(400, { error: 'Request body is required' });
+      
+      const body = JSON.parse(event.body || '{}');
+      const items = body.items || [];
+      
+      if (!Array.isArray(items)) {
+        return createResponse(400, { error: 'items must be an array' });
       }
-
-      let requestData;
-      try {
-        requestData = JSON.parse(body);
-      } catch {
-        return createResponse(400, { error: 'Invalid JSON in request body' });
-      }
-
-      if (!requestData.items || !Array.isArray(requestData.items)) {
-        return createResponse(400, { error: 'items array is required' });
-      }
-
-      const validator = getValidator(resourceType);
+      
+      const validator = getValidatorByTableIndex(tableIndex);
       let imported = 0;
       let failed = 0;
       const errors: string[] = [];
-      const now = new Date().toISOString();
-
+      
       // Process in batches of 25 (DynamoDB BatchWrite limit)
-      for (let i = 0; i < requestData.items.length; i += 25) {
-        const batch = requestData.items.slice(i, i + 25);
+      for (let i = 0; i < items.length; i += 25) {
+        const batch = items.slice(i, i + 25);
         const writeRequests = [];
-
+        
         for (const item of batch) {
           const validationErrors = validator(item);
           if (validationErrors.length > 0) {
@@ -297,42 +351,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             errors.push(`Item ${i + batch.indexOf(item)}: ${validationErrors.join(', ')}`);
             continue;
           }
-
-          const id = item.id || crypto.randomUUID();
-          const enrichedItem = {
-            ...item,
-            pk,
-            sk: id,
-            createdAt: now,
-            updatedAt: now
-          };
-
-          // Add resource-specific ID field
-          switch (resourceType) {
-            case 'users':
-              enrichedItem.userId = id;
-              break;
-            case 'work-records':
-              enrichedItem.workRecordId = id;
-              break;
-            case 'interruption-records':
-              enrichedItem.interruptionRecordId = id;
-              break;
-            case 'work-item-masters':
-              enrichedItem.workItemId = id;
-              break;
-            case 'anomaly-detection-logs':
-              enrichedItem.anomalyDetectionLogId = id;
-              break;
-          }
-
+          
+          const processedItem = addTimestamps({ ...item });
           writeRequests.push({
             PutRequest: {
-              Item: enrichedItem
+              Item: processedItem
             }
           });
         }
-
+        
         if (writeRequests.length > 0) {
           try {
             await docClient.send(new BatchWriteCommand({
@@ -347,153 +374,128 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           }
         }
       }
-
-      await createAuditLog('BULK_IMPORT', resourceType, 'multiple', userId, { imported, failed });
-
+      
+      await createAuditLog('BULK_IMPORT', tableType, tableIndex, user.id, { imported, failed });
+      
       return createResponse(200, { imported, failed, errors });
     }
-
-    // List resources
-    if (httpMethod === 'GET' && !pathParameters?.id) {
-      if (!hasPermission(role, 'read')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
-      }
-
-      const result = await docClient.send(new ScanCommand({
-        TableName: TABLE_NAME,
-        FilterExpression: 'pk = :pk',
-        ExpressionAttributeValues: {
-          ':pk': pk
-        }
-      }));
-
+    
+    // List items
+    if (method === 'GET' && !operation) {
+      const command = new ScanCommand({
+        TableName: TABLE_NAME
+      });
+      
+      const result = await docClient.send(command);
       return createResponse(200, { items: result.Items || [] });
     }
-
-    // Get single resource
-    if (httpMethod === 'GET' && pathParameters?.id) {
-      if (!hasPermission(role, 'read')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
-      }
-
-      const result = await docClient.send(new GetCommand({
+    
+    // Get item by ID
+    if (method === 'GET' && operation && !id) {
+      const itemId = operation;
+      
+      const command = new GetCommand({
         TableName: TABLE_NAME,
-        Key: {
-          pk,
-          sk: pathParameters.id
-        }
-      }));
-
+        Key: { id: itemId }
+      });
+      
+      const result = await docClient.send(command);
+      
       if (!result.Item) {
-        return createResponse(404, { error: 'Resource not found' });
+        return createResponse(404, { error: 'Item not found' });
       }
-
+      
       return createResponse(200, result.Item);
     }
-
-    // Create or update resource
-    if (httpMethod === 'POST' || httpMethod === 'PUT') {
-      if (!hasPermission(role, 'write')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
-      }
-
-      if (!body) {
-        return createResponse(400, { error: 'Request body is required' });
-      }
-
-      let requestData;
-      try {
-        requestData = JSON.parse(body);
-      } catch {
-        return createResponse(400, { error: 'Invalid JSON in request body' });
-      }
-
-      const validator = getValidator(resourceType);
-      const validationErrors = validator(requestData);
+    
+    // Create item
+    if (method === 'POST' && !operation) {
+      const body = JSON.parse(event.body || '{}');
+      const validator = getValidatorByTableIndex(tableIndex);
+      
+      const validationErrors = validator(body);
       if (validationErrors.length > 0) {
         return createResponse(400, { error: 'Validation failed', details: validationErrors });
       }
-
-      const id = pathParameters?.id || crypto.randomUUID();
-      const now = new Date().toISOString();
-      const isUpdate = httpMethod === 'PUT' && pathParameters?.id;
-
-      const item = {
-        ...requestData,
-        pk,
-        sk: id,
-        updatedAt: now
-      };
-
-      if (!isUpdate) {
-        item.createdAt = now;
-      }
-
-      // Add resource-specific ID field
-      switch (resourceType) {
-        case 'users':
-          item.userId = id;
-          break;
-        case 'work-records':
-          item.workRecordId = id;
-          break;
-        case 'interruption-records':
-          item.interruptionRecordId = id;
-          break;
-        case 'work-item-masters':
-          item.workItemId = id;
-          break;
-        case 'anomaly-detection-logs':
-          item.anomalyDetectionLogId = id;
-          break;
-      }
-
-      await docClient.send(new PutCommand({
+      
+      const item = addTimestamps({ ...body });
+      
+      const command = new PutCommand({
         TableName: TABLE_NAME,
         Item: item
-      }));
-
-      await createAuditLog(isUpdate ? 'UPDATE' : 'CREATE', resourceType, id, userId, requestData);
-
-      return createResponse(isUpdate ? 200 : 201, item);
+      });
+      
+      await docClient.send(command);
+      await createAuditLog('CREATE', tableType, item.id, user.id, item);
+      
+      return createResponse(201, item);
     }
-
-    // Delete resource
-    if (httpMethod === 'DELETE' && pathParameters?.id) {
-      if (!hasPermission(role, 'delete')) {
-        return createResponse(403, { error: 'Insufficient permissions' });
+    
+    // Update item
+    if (method === 'PUT' && operation && !id) {
+      const itemId = operation;
+      const body = JSON.parse(event.body || '{}');
+      const validator = getValidatorByTableIndex(tableIndex);
+      
+      const validationErrors = validator(body);
+      if (validationErrors.length > 0) {
+        return createResponse(400, { error: 'Validation failed', details: validationErrors });
       }
-
-      // Check if resource exists
-      const existing = await docClient.send(new GetCommand({
+      
+      // Check if item exists
+      const getCommand = new GetCommand({
         TableName: TABLE_NAME,
-        Key: {
-          pk,
-          sk: pathParameters.id
-        }
-      }));
-
-      if (!existing.Item) {
-        return createResponse(404, { error: 'Resource not found' });
+        Key: { id: itemId }
+      });
+      
+      const existingItem = await docClient.send(getCommand);
+      if (!existingItem.Item) {
+        return createResponse(404, { error: 'Item not found' });
       }
-
-      await docClient.send(new DeleteCommand({
+      
+      const updatedItem = addTimestamps({ ...body, id: itemId }, true);
+      
+      const putCommand = new PutCommand({
         TableName: TABLE_NAME,
-        Key: {
-          pk,
-          sk: pathParameters.id
-        }
-      }));
-
-      await createAuditLog('DELETE', resourceType, pathParameters.id, userId);
-
-      return createResponse(204, {});
+        Item: updatedItem
+      });
+      
+      await docClient.send(putCommand);
+      await createAuditLog('UPDATE', tableType, itemId, user.id, updatedItem);
+      
+      return createResponse(200, updatedItem);
     }
-
-    return createResponse(405, { error: 'Method not allowed' });
-
+    
+    // Delete item
+    if (method === 'DELETE' && operation && !id) {
+      const itemId = operation;
+      
+      // Check if item exists
+      const getCommand = new GetCommand({
+        TableName: TABLE_NAME,
+        Key: { id: itemId }
+      });
+      
+      const existingItem = await docClient.send(getCommand);
+      if (!existingItem.Item) {
+        return createResponse(404, { error: 'Item not found' });
+      }
+      
+      const deleteCommand = new DeleteCommand({
+        TableName: TABLE_NAME,
+        Key: { id: itemId }
+      });
+      
+      await docClient.send(deleteCommand);
+      await createAuditLog('DELETE', tableType, itemId, user.id, existingItem.Item);
+      
+      return createResponse(200, { message: 'Item deleted successfully' });
+    }
+    
+    return createResponse(404, { error: 'Not Found' });
+    
   } catch (error) {
     console.error('Error:', error);
-    return createResponse(500, { error: 'Internal server error' });
+    return createResponse(500, { error: 'Internal Server Error' });
   }
 };
