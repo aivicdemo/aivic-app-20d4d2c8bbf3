@@ -1,545 +1,544 @@
 <!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工数記録システム</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現場工数記録システム</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
     <script>
-        <script>
 window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1778899721360";
 window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907330826";
-window.AIVIC_PAGE_INIT_JS = "js\nfunction(container, apiUrl, tables) {\n  // 業務ロジックのインポート\n  const { validateRequiredFields, validateTimeSequence } = window.aivicLogic?.validationCheck || {};\n  const { determineNotificationMethod, calculateAlertPriority, shouldEscalateAlert, generateAlertMessage } = window.aivicLogic?.notificationLogic || {};\n  const { classifyFailureSeverity, calculateImpactScore, estimateRecoveryTime } = window.aivicLogic?.systemHealth || {};\n  const { detectSystemFailure, calculateImpactScope, selectNotificationMethod } = window.aivicLogic?.systemMonitoring || {};\n  const { detectAnomalousValues, validateDataCompleteness } = window.aivicLogic?.qualityControl || {};\n\n  let selectedPriority = '';\n  let attachedFiles = [];\n\n  // 現在のユーザー情報を設定\n  const currentUser = {\n    name: '田中太郎',\n    phone: '090-1234-5678'\n  };\n\n  // DOM要素の取得\n  const emergencyForm = container.querySelector('#emergency-form');\n  const titleInput = container.querySelector('input[name=\"title\"]');\n  const urgencySelect = container.querySelector('select[name=\"urgency\"]');\n  const typeSelect = container.querySelector('select[name=\"type\"]');\n  const datetimeInput = container.querySelector('input[name=\"datetime\"]');\n  const locationInput = container.querySelector('input[name=\"location\"]');\n  const contentTextarea = container.querySelector('textarea[name=\"content\"]');\n  const injurySelect = container.querySelector('select[name=\"injury\"]');\n  const reporterInput = container.querySelector('input[name=\"reporter\"]');\n  const contactInput = container.querySelector('input[name=\"contact\"]');\n  const photoInput = container.querySelector('input[type=\"file\"]');\n  const submitButton = container.querySelector('button[type=\"submit\"]');\n  const draftButton = container.querySelector('button[name=\"draft\"]');\n\n  // 報告者名と連絡先を自動設定\n  if (reporterInput) reporterInput.value = currentUser.name;\n  if (contactInput) contactInput.value = currentUser.phone;\n\n  // 現在日時を自動設定\n  if (datetimeInput) {\n    const now = new Date();\n    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);\n    datetimeInput.value = localDateTime.toISOString().slice(0, 16);\n  }\n\n  // 下書きデータの復元\n  function loadDraftData() {\n    const draftData = localStorage.getItem('emergency-report-draft');\n    if (draftData) {\n      try {\n        const data = JSON.parse(draftData);\n        if (titleInput && data.title) titleInput.value = data.title;\n        if (urgencySelect && data.urgency) urgencySelect.value = data.urgency;\n        if (typeSelect && data.type) typeSelect.value = data.type;\n        if (locationInput && data.location) locationInput.value = data.location;\n        if (contentTextarea && data.content) contentTextarea.value = data.content;\n        if (injurySelect && data.injury) injurySelect.value = data.injury;\n        if (data.files) {\n          attachedFiles = data.files;\n          updateFilePreview();\n        }\n      } catch (e) {\n        console.error('下書きデータの復元に失敗:', e);\n      }\n    }\n  }\n\n  // ファイルプレビューの更新\n  function updateFilePreview() {\n    let previewContainer = container.querySelector('.file-preview');\n    if (!previewContainer) {\n      previewContainer = document.createElement('div');\n      previewContainer.className = 'file-preview';\n      previewContainer.style.cssText = 'margin-top: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-secondary);';\n      if (photoInput && photoInput.parentNode) {\n        photoInput.parentNode.appendChild(previewContainer);\n      }\n    }\n\n    if (attachedFiles.length === 0) {\n      previewContainer.style.display = 'none';\n      return;\n    }\n\n    previewContainer.style.display = 'block';\n    previewContainer.innerHTML = attachedFiles.map((file, index) => `\n      <div style=\"display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;\">\n        <span style=\"font-size: 12px; color: var(--text);\">${file.name}</span>\n        <button type=\"button\" onclick=\"removeFile(${index})\" style=\"background: var(--danger); color: white; border: none; border-radius: 2px; padding: 2px 6px; font-size: 10px; cursor: pointer;\">削除</button>\n      </div>\n    `).join('');\n  }\n\n  // ファイル削除\n  window.removeFile = function(index) {\n    attachedFiles.splice(index, 1);\n    updateFilePreview();\n  };\n\n  // フォームデータの収集\n  function collectFormData() {\n    return {\n      title: titleInput?.value || '',\n      urgency: urgencySelect?.value || '',\n      type: typeSelect?.value || '',\n      datetime: datetimeInput?.value || '',\n      location: locationInput?.value || '',\n      content: contentTextarea?.value || '',\n      injury: injurySelect?.value || '',\n      reporter: reporterInput?.value || '',\n      contact: contactInput?.value || '',\n      files: attachedFiles\n    };\n  }\n\n  // 必須項目のバリデーション\n  function validateForm(data) {\n    const requiredFields = [\n      { field: 'title', name: 'タイトル' },\n      { field: 'urgency', name: '緊急度' },\n      { field: 'type', name: '報告種別' },\n      { field: 'datetime', name: '発生日時' },\n      { field: 'location', name: '発生場所' },\n      { field: 'content', name: '内容' },\n      { field: 'reporter', name: '報告者' },\n      { field: 'contact', name: '連絡先' }\n    ];\n\n    // 業務ロジックを使用したバリデーション\n    if (validateRequiredFields) {\n      const validationResult = validateRequiredFields(data, requiredFields.map(f => f.field));\n      if (!validationResult.isValid) {\n        return { isValid: false, message: `必須項目が入力されていません: ${validationResult.missingFields.join(', ')}` };\n      }\n    } else {\n      // フォールバック\n      for (const field of requiredFields) {\n        if (!data[field.field] || data[field.field].trim() === '') {\n          return { isValid: false, message: `${field.name}は必須項目です` };\n        }\n      }\n    }\n\n    return { isValid: true };\n  }\n\n  // 緊急報告の送信\n  async function submitEmergencyReport(data) {\n    try {\n      // 業務ロジックによる影響度計算\n      let impactScore = 1;\n      if (calculateImpactScope) {\n        impactScore = calculateImpactScope({\n          urgency: data.urgency,\n          type: data.type,\n          hasInjury: data.injury === 'あり',\n          location: data.location\n        });\n      }\n\n      // 通知方法の決定\n      let notificationMethod = 'email';\n      if (selectNotificationMethod) {\n        notificationMethod = selectNotificationMethod({\n          urgency: data.urgency,\n          impactScore: impactScore,\n          hasInjury: data.injury === 'あり'\n        });\n      }\n\n      const reportData = {\n        ...data,\n        impactScore: impactScore,\n        notificationMethod: notificationMethod,\n        timestamp: new Date().toISOString(),\n        status: '送信済み'\n      };\n\n      // APIを使用してデータを保存\n      const result = await window.aivicApi.save('emergency_reports', reportData);\n      \n      if (result.success) {\n        // 成功メッセージの表示\n        showMessage('緊急報告を送信しました', 'success');\n        \n        // 下書きデータをクリア\n        localStorage.removeItem('emergency-report-draft');\n        \n        // フォームをリセット\n        if (emergencyForm) {\n          emergencyForm.reset();\n        }\n        attachedFiles = [];\n        updateFilePreview();\n        \n        // 報告者情報を再設定\n        if (reporterInput) reporterInput.value = currentUser.name;\n        if (contactInput) contactInput.value = currentUser.phone;\n        \n        return true;\n      } else {\n        throw new Error(result.message || '送信に失敗しました');\n      }\n    } catch (error) {\n      console.error('緊急報告送信エラー:', error);\n      showMessage(`送信エラー: ${error.message}`, 'error');\n      return false;\n    }\n  }\n\n  // 下書き保存\n  function saveDraft(data) {\n    try {\n      localStorage.setItem('emergency-report-draft', JSON.stringify(data));\n      showMessage('下書きを保存しました', 'save');\n      return true;\n    } catch (error) {\n      console.error('下書き保存エラー:', error);\n      showMessage('下書きの保存に失敗しました', 'error');\n      return false;\n    }\n  }\n\n  // メッセージ表示\n  function showMessage(message, type) {\n    // 既存のメッセージを削除\n    const existingMessage = container.querySelector('.success-message, .error-message, .save-message');\n    if (existingMessage) {\n      existingMessage.remove();\n    }\n\n    const messageDiv = document.createElement('div');\n    messageDiv.className = `${type}-message`;\n    messageDiv.textContent = message;\n    messageDiv.style.cssText = `\n      padding: 12px;\n      margin: 16px 0;\n      border-radius: 4px;\n      font-size: 14px;\n      ${type === 'success' ? 'background: var(--success-bg); color: var(--success); border: 1px solid var(--success);' : ''}\n      ${type === 'error' ? 'background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger);' : ''}\n      ${type === 'save' ? 'background: var(--info-bg); color: var(--info); border: 1px solid var(--info);' : ''}\n    `;\n\n    if (emergencyForm) {\n      emergencyForm.parentNode.insertBefore(messageDiv, emergencyForm);\n    }\n\n    // 3秒後に自動削除\n    setTimeout(() => {\n      if (messageDiv.parentNode) {\n        messageDiv.remove();\n      }\n    }, 3000);\n  }\n\n  // イベントハンドラーの設定\n  \n  // ファイル選択\n  if (photoInput) {\n    photoInput.addEventListener('change', function(e) {\n      const files = Array.from(e.target.files);\n      files.forEach(file => {\n        if (file.size > 10 * 1024 * 1024) { // 10MB制限\n          showMessage('ファイルサイズは10MB以下にしてください', 'error');\n          return;\n        }\n        attachedFiles.push({\n          name: file.name,\n          size: file.size,\n          type: file.type,\n          file: file\n        });\n      });\n      updateFilePreview();\n      e.target.value = ''; // 同じファイルを再選択可能にする\n    });\n  }\n\n  // 送信ボタン\n  if (submitButton) {\n    submitButton.addEventListener('click', async function(e) {\n      e.preventDefault();\n      \n      const formData = collectFormData();\n      const validation = validateForm(formData);\n      \n      if (!validation.isValid) {\n        showMessage(validation.message, 'error');\n        return;\n      }\n\n      // 送信中の状態表示\n      submitButton.disabled = true;\n      submitButton.textContent = '送信中...';\n      \n      const success = await submitEmergencyReport(formData);\n      \n      // ボタンを元に戻す\n      submitButton.disabled = false;\n      submitButton.textContent = '緊急報告を送信';\n    });\n  }\n\n  // 下書き保存ボタン\n  if (draftButton) {\n    draftButton.addEventListener('click', function(e) {\n      e.preventDefault();\n      \n      const formData = collectFormData();\n      saveDraft(formData);\n    });\n  }\n\n  // 緊急度変更時の処理\n  if (urgencySelect) {\n    urgencySelect.addEventListener('change', function(e) {\n      selectedPriority = e.target.value;\n      \n      // 緊急度に応じた視覚的フィードバック\n      const urgencyContainer = e.target.parentNode;\n      if (urgencyContainer) {\n        urgencyContainer.style.borderLeft = selectedPriority === '高' ? '4px solid var(--danger)' : \n                                          selectedPriority === '中' ? '4px solid var(--warning)' : \n                                          selectedPriority === '低' ? '4px solid var(--info)' : 'none';\n      }\n    });\n  }\n\n  // 初期化処理\n  loadDraftData();\n  updateFilePreview();\n\n  // 定期的な下書き自動保存（30秒間隔）\n  setInterval(() => {\n    const formData = collectFormData();\n    if (formData.title || formData.content || formData.location) {\n      saveDraft(formData);\n    }\n  }, 30000);\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let selectedUrgency = '';\n  let uploadedPhotos = [];\n  let currentUser = null;\n\n  // 現在のユーザー情報を取得\n  async function loadCurrentUser() {\n    try {\n      const users = await window.aivicApi.list(0); // ユーザーテーブル\n      if (users && users.length > 0) {\n        currentUser = users[0]; // 最初のユーザーを現在のユーザーとする\n        const reporterNameInput = container.querySelector('#reporter-name');\n        if (reporterNameInput && currentUser) {\n          reporterNameInput.value = currentUser.氏名 || '';\n        }\n      }\n    } catch (error) {\n      console.error('ユーザー情報の取得に失敗:', error);\n    }\n  }\n\n  // 作業項目マスタを読み込み\n  async function loadWorkItems() {\n    try {\n      const workItems = await window.aivicApi.list(3); // 作業項目マスタテーブル\n      const workItemSelect = container.querySelector('#work-item');\n      if (workItems && workItems.length > 0) {\n        workItems\n          .filter(item => item.有効フラグ)\n          .sort((a, b) => (a.表示順序 || 0) - (b.表示順序 || 0))\n          .forEach(item => {\n            const option = document.createElement('option');\n            option.value = item.作業項目ID;\n            option.textContent = item.作業項目名;\n            workItemSelect.appendChild(option);\n          });\n      }\n    } catch (error) {\n      console.error('作業項目の取得に失敗:', error);\n    }\n  }\n\n  // エラーメッセージ表示\n  function showError(message) {\n    const errorDiv = container.querySelector('#error-message');\n    errorDiv.textContent = message;\n    errorDiv.style.display = 'block';\n    setTimeout(() => {\n      errorDiv.style.display = 'none';\n    }, 5000);\n  }\n\n  // 成功メッセージ表示\n  function showSuccess() {\n    const successDiv = container.querySelector('#success-message');\n    const formCard = container.querySelector('.card');\n    const headerButtons = container.querySelector('.emergency-report-container > div:first-child');\n    \n    formCard.style.display = 'none';\n    headerButtons.style.display = 'none';\n    successDiv.style.display = 'block';\n  }\n\n  // バリデーション\n  function validateForm() {\n    const errors = [];\n    \n    if (!selectedUrgency) {\n      errors.push('緊急度を選択してください');\n    }\n    \n    const reportType = container.querySelector('#report-type').value;\n    if (!reportType) {\n      errors.push('報告種別を選択してください');\n    }\n    \n    const occurrenceDateTime = container.querySelector('#occurrence-datetime').value;\n    if (!occurrenceDateTime) {\n      errors.push('発生日時を入力してください');\n    } else {\n      const selectedDate = new Date(occurrenceDateTime);\n      const now = new Date();\n      if (selectedDate > now) {\n        errors.push('発生日時に未来の日付は入力できません');\n      }\n    }\n    \n    const occurrenceLocation = container.querySelector('#occurrence-location').value.trim();\n    if (!occurrenceLocation) {\n      errors.push('発生場所を入力してください');\n    }\n    \n    const emergencyContent = container.querySelector('#emergency-content').value.trim();\n    if (!emergencyContent) {\n      errors.push('緊急事態内容を入力してください');\n    } else if (emergencyContent.length > 1000) {\n      errors.push('緊急事態内容は1000文字以内で入力してください');\n    }\n    \n    const contactPhone = container.querySelector('#contact-phone').value.trim();\n    if (!contactPhone) {\n      errors.push('連絡先電話番号を入力してください');\n    } else {\n      const phonePattern = /^(\\d{2,4}-\\d{2,4}-\\d{4}|\\d{10,11})$/;\n      if (!phonePattern.test(contactPhone)) {\n        errors.push('正しい電話番号の形式で入力してください');\n      }\n    }\n    \n    return errors;\n  }\n\n  // フォームデータ収集\n  function collectFormData() {\n    return {\n      緊急度: selectedUrgency,\n      報告種別: container.querySelector('#report-type').value,\n      発生日時: container.querySelector('#occurrence-datetime').value,\n      発生場所: container.querySelector('#occurrence-location').value.trim(),\n      作業項目ID: container.querySelector('#work-item').value || null,\n      緊急事態内容: container.querySelector('#emergency-content').value.trim(),\n      添付写真: uploadedPhotos,\n      報告者ID: currentUser ? currentUser.ユーザーID : null,\n      報告者名: container.querySelector('#reporter-name').value,\n      連絡先電話番号: container.querySelector('#contact-phone').value.trim(),\n      報告日時: new Date().toISOString(),\n      対応状況: '未対応',\n      確認状況: '未確認'\n    };\n  }\n\n  // 緊急度ボタンのイベント\n  container.querySelectorAll('.urgency-btn').forEach(btn => {\n    btn.addEventListener('click', () => {\n      // 全ボタンのスタイルをリセット\n      container.querySelectorAll('.urgency-btn').forEach(b => {\n        b.style.background = 'transparent';\n        b.style.color = 'var(--text)';\n        b.style.borderColor = 'rgba(255,255,255,0.18)';\n      });\n      \n      // 選択されたボタンのスタイル\n      btn.style.background = 'var(--primary)';\n      btn.style.color = '#fff';\n      btn.style.borderColor = 'var(--primary)';\n      \n      selectedUrgency = btn.dataset.value;\n    });\n  });\n\n  // 文字数カウント\n  const emergencyContentTextarea = container.querySelector('#emergency-content');\n  const charCountSpan = container.querySelector('#char-count');\n  \n  emergencyContentTextarea.addEventListener('input', () => {\n    const length = emergencyContentTextarea.value.length;\n    charCountSpan.textContent = `(${length}/1000)`;\n    \n    if (length > 1000) {\n      charCountSpan.style.color = '#dc2626';\n    } else {\n      charCountSpan.style.color = 'var(--text-muted)';\n    }\n  });\n\n  // 写真アップロード処理\n  const photoUploadArea = container.querySelector('#photo-upload-area');\n  const photoInput = container.querySelector('#photo-input');\n  const photoPreview = container.querySelector('#photo-preview');\n\n  photoUploadArea.addEventListener('click', () => {\n    photoInput.click();\n  });\n\n  photoUploadArea.addEventListener('dragover', (e) => {\n    e.preventDefault();\n    photoUploadArea.style.borderColor = 'var(--primary)';\n    photoUploadArea.style.background = 'rgba(0,0,0,0.2)';\n  });\n\n  photoUploadArea.addEventListener('dragleave', () => {\n    photoUploadArea.style.borderColor = 'rgba(255,255,255,0.18)';\n    photoUploadArea.style.background = 'rgba(0,0,0,0.1)';\n  });\n\n  photoUploadArea.addEventListener('drop', (e) => {\n    e.preventDefault();\n    photoUploadArea.style.borderColor = 'rgba(255,255,255,0.18)';\n    photoUploadArea.style.background = 'rgba(0,0,0,0.1)';\n    \n    const files = Array.from(e.dataTransfer.files);\n    handlePhotoFiles(files);\n  });\n\n  photoInput.addEventListener('change', (e) => {\n    const files = Array.from(e.target.files);\n    handlePhotoFiles(files);\n  });\n\n  function handlePhotoFiles(files) {\n    const imageFiles = files.filter(file => file.type.startsWith('image/'));\n    \n    if (imageFiles.length === 0) {\n      showError('サポートされていないファイル形式です。jpg、png形式のファイルをアップロードしてください。');\n      return;\n    }\n    \n    if (uploadedPhotos.length + imageFiles.length > 5) {\n      showError('写真は最大5枚まで添付できます。');\n      return;\n    }\n    \n    imageFiles.forEach(file => {\n      if (file.size > 5 * 1024 * 1024) { // 5MB\n        showError(`ファイル「${file.name}」のサイズが上限を超えています。5MB以下のファイルを選択してください。`);\n        return;\n      }\n      \n      const reader = new FileReader();\n      reader.onload = (e) => {\n        const photoData = {\n          name: file.name,\n          data: e.target.result,\n          size: file.size\n        };\n        \n        uploadedPhotos.push(photoData);\n        renderPhotoPreview();\n      };\n      reader.readAsDataURL(file);\n    });\n  }\n\n  function renderPhotoPreview() {\n    photoPreview.innerHTML = uploadedPhotos.map((photo, index) => `\n      <div style=\"position: relative; display: inline-block;\">\n        <img src=\"${photo.data}\" alt=\"${photo.name}\" style=\"width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(255,255,255,0.18);\">\n        <button type=\"button\" class=\"remove-photo-btn\" data-index=\"${index}\" style=\"position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #dc2626; color: #fff; border: none; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center;\">×</button>\n      </div>\n    `).join('');\n  }\n\n  // 写真削除\n  container.addEventListener('click', (e) => {\n    if (e.target.classList.contains('remove-photo-btn')) {\n      const index = parseInt(e.target.dataset.index);\n      uploadedPhotos.splice(index, 1);\n      renderPhotoPreview();\n    }\n  });\n\n  // 下書き保存\n  container.querySelector('#btn-draft-save').addEventListener('click', async () => {\n    const formData = collectFormData();\n    formData.下書きフラグ = true;\n    \n    try {\n      // 異常値検出ログテーブルに下書きとして保存\n      const saved = await window.aivicApi.save(4, {\n        検出対象テーブル: '緊急報告',\n        検出対象レコードID: 'draft-' + Date.now(),\n        ユーザーID: currentUser ? currentUser.ユーザーID : null,\n        異常値種別: '下書き保存',\n        検出項目: '緊急報告内容',\n        検出値: JSON.stringify(formData),\n        閾値: 'N/A',\n        重要度: '低',\n        確認状況: '下書き',\n        通知送信フラグ: false,\n        検出日時: new Date().toISOString()\n      });\n      \n      if (saved) {\n        const successDiv = container.querySelector('#success-message');\n        successDiv.innerHTML = `\n          <div style=\"font-weight: 600; margin-bottom: 8px;\">下書きが保存されました</div>\n          <div style=\"font-size: 12px; color: var(--text-muted);\">後で編集を続けることができます。</div>\n        `;\n        successDiv.style.display = 'block';\n        setTimeout(() => {\n          successDiv.style.display = 'none';\n        }, 3000);\n      }\n    } catch (error) {\n      showError('下書きの保存に失敗しました。');\n    }\n  });\n\n  // 緊急報告送信\n  container.querySelector('#btn-submit').addEventListener('click', async () => {\n    const errors = validateForm();\n    if (errors.length > 0) {\n      showError(errors.join('\\n'));\n      return;\n    }\n    \n    const formData = collectFormData();\n    \n    try {\n      // 異常値検出ログテーブルに緊急報告として保存\n      const saved = await window.aivicApi.save(4, {\n        検出対象テーブル: '緊急報告',\n        検出対象レコードID: 'emergency-' + Date.now(),\n        ユーザーID: currentUser ? currentUser.ユーザーID : null,\n        異常値種別: '緊急報告',\n        検出項目: '緊急事態',\n        検出値: JSON.stringify(formData),\n        閾値: selectedUrgency,\n        重要度: selectedUrgency,\n        確認状況: '未確認',\n        通知送信フラグ: true,\n        検出日時: new Date().toISOString()\n      });\n      \n      if (saved) {\n        showSuccess();\n      }\n    } catch (error) {\n      showError('緊急報告の送信に失敗しました。');\n    }\n  });\n\n  // 報告完了ボタン\n  container.addEventListener('click', (e) => {\n    if (e.target.id === 'btn-complete') {\n      window.showScreen(\"scr-1778907133295\");\n    }\n  });\n\n  // 初期化処理\n  loadCurrentUser();\n  loadWorkItems();\n  \n  // 現在日時を発生日時のデフォルト値に設定\n  const now = new Date();\n  const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);\n  container.querySelector('#occurrence-datetime').value = localDateTime;\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </script>
-    <style>
-        :root {
-            --primary: #c41e3a;
-            --primary-hover: #a01729;
-            --primary-light: #f8e6ea;
-            --bg-main: #fafafa;
-            --bg-card: #ffffff;
-            --bg-sidebar: #f5f5f5;
-            --border: #e0e0e0;
-            --border-light: #f0f0f0;
-            --text: #1a1a1a;
-            --text-muted: #4a4a4a;
-            --text-light: #666666;
-            --top-bar-bg: #f8f8f8;
-            --top-bar-border: #d0d0d0;
-            --success: #059669;
-            --warning: #d97706;
-            --danger: #dc2626;
-        }
+  </script>
+  <style>
+    :root {
+      --primary: #8b0000;
+      --primary-hover: #660000;
+      --bg-main: #0d0d0d;
+      --bg-card: #1a1a1a;
+      --bg-sidebar: #141414;
+      --border: #2d2d2d;
+      --text: #e0e0e0;
+      --text-muted: #999999;
+      --top-bar-bg: #111111;
+      --top-bar-border: #333333;
+      --accent-red: #ff4444;
+      --accent-orange: #ff8800;
+      --accent-green: #00aa44;
+      --shadow-subtle: 0 1px 3px rgba(0,0,0,0.3);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-main);
-            color: var(--text);
-            font-size: 13px;
-            line-height: 1.4;
-            overflow-x: hidden;
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
 
-        .app-container {
-            display: flex;
-            height: 100vh;
-        }
+    .app-shell {
+      display: flex;
+      height: 100vh;
+    }
 
-        .sidebar {
-            width: 220px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
+    .sidebar {
+      width: 220px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
 
-        .sidebar-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
-        }
+    .sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--top-bar-bg);
+    }
 
-        .logo {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .logo::before {
-            content: "⏱";
-            font-size: 18px;
-        }
+    .logo::before {
+      content: "⚡";
+      font-size: 18px;
+    }
 
-        .nav-section {
-            padding: 8px 0;
-        }
+    .nav-section {
+      padding: 16px 0 8px 0;
+    }
 
-        .nav-section-title {
-            padding: 6px 16px;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 16px 8px 16px;
+    }
 
-        .nav-item {
-            display: block;
-            padding: 8px 16px;
-            color: var(--text);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 400;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            border-left: 3px solid transparent;
-        }
+    .nav-item {
+      display: block;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border-radius: 0;
+      position: relative;
+    }
 
-        .nav-item:hover {
-            background: rgba(196, 30, 58, 0.08);
-            color: var(--primary);
-        }
+    .nav-item:hover {
+      background: rgba(139, 0, 0, 0.1);
+      color: var(--text);
+    }
 
-        .nav-item.aivic-active {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-left-color: var(--primary);
-            font-weight: 500;
-        }
+    .nav-item.aivic-active {
+      background: rgba(139, 0, 0, 0.15);
+      color: var(--primary);
+      font-weight: 500;
+    }
 
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+    .nav-item.aivic-active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--primary);
+    }
 
-        .top-bar {
-            height: 52px;
-            background: var(--top-bar-bg);
-            border-bottom: 1px solid var(--top-bar-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            flex-shrink: 0;
-        }
+    .main-content {
+      flex: 1;
+      margin-left: 220px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+    .top-bar {
+      height: 52px;
+      background: var(--top-bar-bg);
+      border-bottom: 1px solid var(--top-bar-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
 
-        .breadcrumb {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
-        }
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-        }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(0, 170, 68, 0.1);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 170, 68, 0.2);
+    }
 
-        .top-bar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .status-indicator::before {
+      content: "●";
+      font-size: 8px;
+    }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        .logout-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.15s ease;
-        }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
 
-        .logout-link:hover {
-            background: var(--border-light);
-            color: var(--text);
-        }
+    .logout-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: all 0.15s ease;
+    }
 
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 20px;
-        }
+    .logout-link:hover {
+      background: var(--bg-card);
+      color: var(--text);
+    }
 
-        .panel-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .content-area {
+      flex: 1;
+      padding: 16px 20px;
+      overflow-y: auto;
+    }
 
-        .quick-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+    .panel-container {
+      min-height: calc(100vh - 52px - 32px);
+    }
 
-        .quick-action-btn {
-            padding: 10px 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .emergency-alert {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
 
-        .quick-action-btn:hover {
-            background: var(--primary-hover);
-        }
+    .emergency-alert.active {
+      display: block;
+    }
 
-        .quick-action-btn.secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
+    .emergency-alert-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-red);
+      margin-bottom: 4px;
+    }
 
-        .quick-action-btn.secondary:hover {
-            background: var(--border-light);
-        }
+    .emergency-alert-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
 
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px;
-        }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
 
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
+      .main-content {
+        margin-left: 0;
+      }
 
-        .stat-value {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text);
-        }
+      .top-bar {
+        padding: 0 16px;
+      }
 
-        .stat-change {
-            font-size: 11px;
-            margin-top: 4px;
-        }
+      .content-area {
+        padding: 12px 16px;
+      }
+    }
 
-        .stat-change.positive {
-            color: var(--success);
-        }
+    .loading-skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(139, 0, 0, 0.1) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 6px;
+    }
 
-        .stat-change.negative {
-            color: var(--danger);
-        }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-            }
+    .quick-actions {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 200;
+    }
 
-            .sidebar-header {
-                padding: 12px 8px;
-            }
+    .quick-action-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-subtle);
+    }
 
-            .logo {
-                justify-content: center;
-                font-size: 0;
-            }
+    .quick-action-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
 
-            .nav-section-title {
-                display: none;
-            }
-
-            .nav-item {
-                padding: 12px 8px;
-                text-align: center;
-                font-size: 0;
-                position: relative;
-            }
-
-            .nav-item::before {
-                font-size: 16px;
-            }
-
-            .content-area {
-                padding: 12px 16px;
-            }
-
-            .quick-actions {
-                flex-direction: column;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .nav-item[data-aivic-nav="scr-1778907133295"]::before { content: "⏱"; }
-        .nav-item[data-aivic-nav="scr-1778907145716"]::before { content: "📋"; }
-        .nav-item[data-aivic-nav="scr-1778907170814"]::before { content: "⚠️"; }
-        .nav-item[data-aivic-nav="scr-1778907187615"]::before { content: "▶️"; }
-        .nav-item[data-aivic-nav="scr-1778907199709"]::before { content: "⏹"; }
-        .nav-item[data-aivic-nav="scr-1778907212862"]::before { content: "💾"; }
-        .nav-item[data-aivic-nav="scr-1778907226171"]::before { content: "👁"; }
-        .nav-item[data-aivic-nav="scr-1778907238439"]::before { content: "⏸"; }
-        .nav-item[data-aivic-nav="scr-1778907251446"]::before { content: "🔄"; }
-        .nav-item[data-aivic-nav="scr-1778907263518"]::before { content: "✓"; }
-        .nav-item[data-aivic-nav="scr-1778907278416"]::before { content: "❌"; }
-        .nav-item[data-aivic-nav="scr-1778907287126"]::before { content: "🔍"; }
-        .nav-item[data-aivic-nav="scr-1778907296658"]::before { content: "⌨️"; }
-        .nav-item[data-aivic-nav="scr-1778907309324"]::before { content: "🚨"; }
-        .nav-item[data-aivic-nav="scr-1778907319067"]::before { content: "✏️"; }
-        .nav-item[data-aivic-nav="scr-1778907330826"]::before { content: "🚨"; }
-        .nav-item[data-aivic-nav="scr-1778907343735"]::before { content: "🔧"; }
-        .nav-item[data-aivic-nav="scr-1778907353387"]::before { content: "📊"; }
-        .nav-item[data-aivic-nav="scr-1778907367889"]::before { content: "✅"; }
-        .nav-item[data-aivic-nav="scr-1778907380182"]::before { content: "📝"; }
-
-        @media (min-width: 769px) {
-            .nav-item::before {
-                margin-right: 8px;
-            }
-        }
-    </style>
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">工数記録システム</div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">記録管理</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907296658" onclick="showScreen('scr-1778907296658')">工数入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907380182" onclick="showScreen('scr-1778907380182')">工数記録入力</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">中断・再開</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">確認・修正</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">履歴・分析</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
-            </div>
-        </nav>
-
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="top-bar-left">
-                    <div class="breadcrumb">工数記録システム</div>
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
-                    </div>
-                </div>
-                <div class="top-bar-right">
-                    <div class="user-info">
-                        <span>現場作業員</span>
-                    </div>
-                    <a href="./login.html" class="logout-link">ログアウト</a>
-                </div>
-            </header>
-
-            <div class="content-area">
-                <div class="panel-container">
-                    <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907309324" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907330826"><div class="card" style="padding: 14px; margin-bottom: 12px;">
-  <h2 style="font-size: 18px; font-weight: 600; margin: 0 0 16px 0; color: var(--text);">緊急報告</h2>
-  
-  <form id="emergency-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px;">
-    <!-- 緊急度選択 -->
-    <div style="grid-column: span 2;">
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">緊急度 *</label>
-      <div style="display: flex; gap: 8px;">
-        <button type="button" class="priority-btn" data-priority="高" data-testid="priority-high" style="padding: 6px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">高</button>
-        <button type="button" class="priority-btn" data-priority="中" data-testid="priority-medium" style="padding: 6px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">中</button>
-        <button type="button" class="priority-btn" data-priority="低" data-testid="priority-low" style="padding: 6px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">低</button>
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">現場工数記録システム</div>
       </div>
-      <div id="priority-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">工数記録</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907296658" onclick="showScreen('scr-1778907296658')">工数入力</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907380182" onclick="showScreen('scr-1778907380182')">工数記録入力</button>
+      </div>
 
-    <!-- 報告種別 -->
-    <div>
-      <label for="report-type" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">報告種別 *</label>
-      <select id="report-type" data-testid="report-type" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-        <option value="">選択してください</option>
-        <option value="事故">事故</option>
-        <option value="故障">故障</option>
-        <option value="品質異常">品質異常</option>
-        <option value="安全問題">安全問題</option>
-        <option value="その他">その他</option>
-      </select>
-      <div id="report-type-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
+      <div class="nav-section">
+        <div class="nav-section-title">作業管理</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
+      </div>
 
-    <!-- 発生日時 -->
-    <div>
-      <label for="occurrence-datetime" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">発生日時 *</label>
-      <input type="datetime-local" id="occurrence-datetime" data-testid="occurrence-datetime" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-      <div id="occurrence-datetime-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
+      <div class="nav-section">
+        <div class="nav-section-title">履歴・分析</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴一覧</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+      </div>
 
-    <!-- 発生場所 -->
-    <div>
-      <label for="occurrence-location" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">発生場所 *</label>
-      <input type="text" id="occurrence-location" data-testid="occurrence-location" placeholder="例：A棟2階機械室" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-      <div id="occurrence-location-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
+      <div class="nav-section">
+        <div class="nav-section-title">修正・管理</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
+      </div>
 
-    <!-- 作業項目 -->
-    <div>
-      <label for="work-item" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業項目</label>
-      <select id="work-item" data-testid="work-item" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-        <option value="">選択してください</option>
-      </select>
-    </div>
+      <div class="nav-section">
+        <div class="nav-section-title">システム</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+      </div>
 
-    <!-- 緊急事態内容 -->
-    <div style="grid-column: span 2;">
-      <label for="emergency-content" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">緊急事態内容 * <span id="char-count" style="color: var(--text-muted);">(0/1000)</span></label>
-      <textarea id="emergency-content" data-testid="emergency-content" placeholder="緊急事態の詳細を入力してください" rows="4" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
-      <div id="emergency-content-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
+      <div class="sidebar-footer">
+        システム稼働中<br>
+        データ同期: 正常
+      </div>
+    </nav>
 
-    <!-- 写真添付 -->
-    <div style="grid-column: span 2;">
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">写真添付</label>
-      <div id="photo-upload-area" style="border: 2px dashed rgba(255,255,255,0.18); border-radius: 6px; padding: 20px; text-align: center; background: rgba(0,0,0,0.1); cursor: pointer; transition: border-color 0.15s;">
-        <input type="file" id="photo-input" data-testid="photo-input" accept="image/*" multiple style="display: none;">
-        <div style="color: var(--text-muted); font-size: 13px;">
-          <div>クリックまたはドラッグ&ドロップで画像を追加</div>
-          <div style="font-size: 11px; margin-top: 4px;">JPG, PNG形式 / 最大5MB / 最大5枚</div>
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <div class="breadcrumb">現場工数記録システム</div>
+          <div class="status-indicator">
+            システム正常
+          </div>
+        </div>
+        <div class="top-bar-right">
+          <div class="user-menu">
+            <span>作業員</span>
+          </div>
+          <a href="./login.html" class="logout-link">ログアウト</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="emergency-alert" id="emergency-alert">
+          <div class="emergency-alert-title">緊急通知</div>
+          <div class="emergency-alert-text">システムからの重要な通知があります</div>
+        </div>
+
+        <div class="panel-container">
+          <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907309324" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907330826"><div class="emergency-report-container">
+  <!-- ヘッダー -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h1 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0;">緊急報告</h1>
+    <div style="display: flex; gap: 8px;">
+      <button id="btn-draft-save" data-testid="draft-save-button" class="action-btn secondary" style="font-size: 13px; padding: 6px 14px;">下書き保存</button>
+      <button id="btn-submit" data-testid="submit-button" class="action-btn" style="font-size: 13px; padding: 6px 14px;">即座に報告</button>
+    </div>
+  </div>
+
+  <!-- エラーメッセージ表示エリア -->
+  <div id="error-message" data-testid="error-message" style="display: none; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; color: #dc2626; font-size: 13px;"></div>
+
+  <!-- メインフォーム -->
+  <div class="card" style="padding: 16px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <!-- 左列 -->
+      <div>
+        <!-- 緊急度選択 -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">緊急度 *</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="urgency-btn" data-value="高" data-testid="urgency-high" style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">高</button>
+            <button type="button" class="urgency-btn" data-value="中" data-testid="urgency-medium" style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">中</button>
+            <button type="button" class="urgency-btn" data-value="低" data-testid="urgency-low" style="padding: 6px 12px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; transition: all 0.15s;">低</button>
+          </div>
+        </div>
+
+        <!-- 報告種別 -->
+        <div style="margin-bottom: 12px;">
+          <label for="report-type" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">報告種別 *</label>
+          <select id="report-type" data-testid="report-type" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+            <option value="">選択してください</option>
+            <option value="事故">事故</option>
+            <option value="故障">故障</option>
+            <option value="品質異常">品質異常</option>
+            <option value="安全問題">安全問題</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <!-- 発生日時 -->
+        <div style="margin-bottom: 12px;">
+          <label for="occurrence-datetime" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">発生日時 *</label>
+          <input type="datetime-local" id="occurrence-datetime" data-testid="occurrence-datetime" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+        </div>
+
+        <!-- 発生場所 -->
+        <div style="margin-bottom: 12px;">
+          <label for="occurrence-location" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">発生場所 *</label>
+          <input type="text" id="occurrence-location" data-testid="occurrence-location" placeholder="例：A棟2階機械室" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+        </div>
+
+        <!-- 作業項目 -->
+        <div style="margin-bottom: 12px;">
+          <label for="work-item" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">作業項目</label>
+          <select id="work-item" data-testid="work-item" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+            <option value="">選択してください</option>
+          </select>
         </div>
       </div>
-      <div id="photo-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-      <div id="photo-preview" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
-    </div>
 
-    <!-- 報告者名 -->
-    <div>
-      <label for="reporter-name" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">報告者名 *</label>
-      <input type="text" id="reporter-name" data-testid="reporter-name" readonly style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; line-height: 1.4;">
-    </div>
+      <!-- 右列 -->
+      <div>
+        <!-- 緊急事態内容 -->
+        <div style="margin-bottom: 12px;">
+          <label for="emergency-content" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">緊急事態内容 * <span id="char-count" style="color: var(--text-muted);">(0/1000)</span></label>
+          <textarea id="emergency-content" data-testid="emergency-content" placeholder="緊急事態の詳細を記入してください" maxlength="1000" style="width: 100%; height: 120px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
+        </div>
 
-    <!-- 連絡先電話番号 -->
-    <div>
-      <label for="contact-phone" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">連絡先電話番号 *</label>
-      <input type="tel" id="contact-phone" data-testid="contact-phone" placeholder="090-1234-5678" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-      <div id="contact-phone-error" class="error-message" style="display: none; color: #dc2626; font-size: 11px; margin-top: 4px;"></div>
-    </div>
-  </form>
+        <!-- 写真添付 -->
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">写真添付</label>
+          <div id="photo-upload-area" data-testid="photo-upload-area" style="border: 2px dashed rgba(255,255,255,0.18); border-radius: 6px; padding: 16px; text-align: center; background: rgba(0,0,0,0.1); cursor: pointer; transition: all 0.15s;">
+            <input type="file" id="photo-input" data-testid="photo-input" accept="image/*" multiple style="display: none;">
+            <div style="color: var(--text-muted); font-size: 13px;">
+              <div>📷 クリックまたはドラッグ&ドロップで画像を追加</div>
+              <div style="font-size: 11px; margin-top: 4px;">JPG, PNG形式 / 最大5MB / 最大5枚まで</div>
+            </div>
+          </div>
+          <div id="photo-preview" data-testid="photo-preview" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
 
-  <!-- ボタンエリア -->
-  <div style="display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end;">
-    <button type="button" id="btn-draft" data-testid="draft-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: background 0.15s;">下書き保存</button>
-    <button type="button" id="btn-submit" data-testid="submit-button" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">即座に報告</button>
-    <button type="button" id="btn-complete" data-testid="complete-button" style="background: #10b981; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">報告完了</button>
+        <!-- 報告者情報 -->
+        <div style="margin-bottom: 12px;">
+          <label for="reporter-name" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">報告者名</label>
+          <input type="text" id="reporter-name" data-testid="reporter-name" readonly style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; line-height: 1.4;">
+        </div>
+
+        <!-- 連絡先電話番号 -->
+        <div style="margin-bottom: 12px;">
+          <label for="contact-phone" style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">連絡先電話番号 *</label>
+          <input type="tel" id="contact-phone" data-testid="contact-phone" placeholder="090-1234-5678" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 送信完了メッセージ -->
+  <div id="success-message" data-testid="success-message" style="display: none; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px; padding: 12px; margin-top: 16px; color: #22c55e; font-size: 13px; text-align: center;">
+    <div style="font-weight: 600; margin-bottom: 8px;">緊急報告が正常に送信されました</div>
+    <div style="font-size: 12px; color: var(--text-muted);">関係者に通知が送信され、対応が開始されます。</div>
+    <button id="btn-complete" data-testid="complete-button" class="action-btn" style="margin-top: 12px; font-size: 13px; padding: 6px 14px;">報告完了</button>
   </div>
 </div></div>
-                    <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
-                </div>
-            </div>
-        </main>
-    </div>
+          <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
+        </div>
+      </div>
+    </main>
 
-    <script>
+    <div class="quick-actions">
+      <button class="quick-action-btn" onclick="showScreen('scr-1778907187615')" title="記録開始">▶</button>
+      <button class="quick-action-btn" onclick="showScreen('scr-1778907330826')" title="緊急報告">⚠</button>
+    </div>
+  </div>
+
+  <script>
 (function() {
   var TABLE_DEFS = window.AIVIC_TABLES || [];
   var PRESET_SEED = window.AIVIC_PRESET_SEED || {};

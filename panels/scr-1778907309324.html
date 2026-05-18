@@ -1,589 +1,592 @@
 <!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工数記録システム</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現場工数記録システム</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
     <script>
-        <script>
 window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1778899721360";
 window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907309324";
-window.AIVIC_PAGE_INIT_JS = "javascript\nfunction(container, tables) {\n  // 業務ロジックモジュールのインポート\n  const { detectWorkTimeAnomaly, detectBreakTimeAnomaly, detectFrequentBreaks, calculateAnomalyScore, isEmergencyWorkTime, detectTimeSequenceAnomaly, detectShortWorkTime, calculateAnomalySeverity, calculateCorrectionValue, isOutlier, detectSignificantVariation, validateRequiredFields, calculateDataQualityScore, performComprehensiveAnomalyDetection } = window.aivicLogic.anomalyDetection;\n  const { calculateEfficiencyRate, detectBottleneck, analyzeBreakReasons, calculateProductivityIndex, isEfficiencyAlert } = window.aivicLogic.productivityAnalysis;\n  const { validateRequiredFields: validateFields, validateTimeSequence, validateDuplicateRecord, isDataIntegrityValid, detectAnomalousValues, validateInterruptionTime, validateWorkRecordComprehensive, validateMonthlyWorkData } = window.aivicLogic.workValidation;\n  const { aggregateMonthlyHours, aggregateByCategory, calculateSeasonalVariation, aggregateRealTimeData, detectAnomalies, calculateProgressAndDeviation, analyzeWorkEfficiency } = window.aivicLogic.dataAggregation;\n\n  // DOM要素の取得\n  const startDateInput = container.querySelector('input[type=\"date\"]:first-of-type');\n  const endDateInput = container.querySelector('input[type=\"date\"]:nth-of-type(2)');\n  const detectButton = container.querySelector('button:has-text(\"異常値検出実行\")') || \n                      Array.from(container.querySelectorAll('button')).find(btn => btn.textContent.includes('異常値検出実行'));\n  const startButton = container.querySelector('button:has-text(\"検出開始\")') || \n                     Array.from(container.querySelectorAll('button')).find(btn => btn.textContent.includes('検出開始'));\n  const cancelButton = container.querySelector('button:has-text(\"キャンセル\")') || \n                      Array.from(container.querySelectorAll('button')).find(btn => btn.textContent.includes('キャンセル'));\n  const listButton = container.querySelector('button:has-text(\"検出された異常値一覧\")') || \n                    Array.from(container.querySelectorAll('button')).find(btn => btn.textContent.includes('検出された異常値一覧'));\n  const progressBar = container.querySelector('.progress-bar');\n  const progressText = container.querySelector('.progress-text');\n  const resultsContainer = container.querySelector('.results-container');\n  const anomalyTable = container.querySelector('table');\n\n  let detectionInProgress = false;\n  let detectionCancelled = false;\n  let currentAnomalies = [];\n\n  // 進捗表示の更新\n  function updateProgress(percentage, text) {\n    if (progressBar) {\n      progressBar.style.width = `${percentage}%`;\n    }\n    if (progressText) {\n      progressText.textContent = text || `${percentage}%`;\n    }\n  }\n\n  // 結果表示の更新\n  function displayResults(anomalies) {\n    if (resultsContainer) {\n      resultsContainer.style.display = 'block';\n      const resultText = document.createElement('div');\n      resultText.textContent = '処理完了';\n      resultText.style.marginBottom = '10px';\n      resultsContainer.appendChild(resultText);\n\n      const detectionResult = document.createElement('div');\n      detectionResult.textContent = '検出結果';\n      detectionResult.style.fontWeight = 'bold';\n      resultsContainer.appendChild(detectionResult);\n    }\n  }\n\n  // 異常値テーブルの表示\n  function displayAnomalyTable(anomalies) {\n    if (!anomalyTable) return;\n\n    // テーブルヘッダーの確認・作成\n    let thead = anomalyTable.querySelector('thead');\n    if (!thead) {\n      thead = document.createElement('thead');\n      const headerRow = document.createElement('tr');\n      ['作業日時', '作業員名', '工数値', '異常種類', '重要度'].forEach(text => {\n        const th = document.createElement('th');\n        th.textContent = text;\n        headerRow.appendChild(th);\n      });\n      thead.appendChild(headerRow);\n      anomalyTable.appendChild(thead);\n    }\n\n    // テーブルボディの更新\n    let tbody = anomalyTable.querySelector('tbody');\n    if (!tbody) {\n      tbody = document.createElement('tbody');\n      anomalyTable.appendChild(tbody);\n    }\n    tbody.innerHTML = '';\n\n    anomalies.forEach((anomaly, index) => {\n      const row = document.createElement('tr');\n      row.className = 'work-record-row';\n      row.style.cursor = 'pointer';\n      \n      const cells = [\n        anomaly.record?.work_date || '-',\n        anomaly.record?.worker_name || '-',\n        anomaly.record?.work_hours || '-',\n        anomaly.type || '-',\n        anomaly.severity || 'medium'\n      ];\n\n      cells.forEach(cellText => {\n        const td = document.createElement('td');\n        td.textContent = cellText;\n        row.appendChild(td);\n      });\n\n      // 異常値アイコンの追加\n      const iconCell = document.createElement('td');\n      const icon = document.createElement('span');\n      icon.className = 'anomaly-icon';\n      icon.textContent = '⚠️';\n      icon.style.cursor = 'pointer';\n      iconCell.appendChild(icon);\n      row.appendChild(iconCell);\n\n      // 行クリックイベント\n      row.addEventListener('click', () => {\n        showAnomalyDetails(anomaly);\n      });\n\n      tbody.appendChild(row);\n    });\n\n    anomalyTable.style.display = 'table';\n  }\n\n  // 異常値詳細表示\n  function showAnomalyDetails(anomaly) {\n    let detailsContainer = container.querySelector('.anomaly-details');\n    if (!detailsContainer) {\n      detailsContainer = document.createElement('div');\n      detailsContainer.className = 'anomaly-details';\n      detailsContainer.style.cssText = 'border: 1px solid #ccc; padding: 15px; margin: 10px 0; background: #f9f9f9;';\n      container.appendChild(detailsContainer);\n    }\n\n    detailsContainer.innerHTML = `\n      <h3>異常値詳細情報</h3>\n      <p><strong>異常値の種類:</strong> ${anomaly.type}</p>\n      <p><strong>検出理由:</strong> ${anomaly.reason || '基準値を超過'}</p>\n      <p><strong>修正推奨値:</strong> ${anomaly.correctionValue || calculateCorrectionValue(anomaly.record) || '要確認'}</p>\n      <p><strong>重要度:</strong> ${anomaly.severity}</p>\n    `;\n    detailsContainer.style.display = 'block';\n  }\n\n  // 異常値検出実行ボタンのイベントハンドラ\n  if (detectButton) {\n    detectButton.addEventListener('click', async () => {\n      try {\n        const startDate = startDateInput?.value;\n        const endDate = endDateInput?.value;\n\n        if (!startDate || !endDate) {\n          window.aivicNotify.error('検出対象期間を選択してください');\n          return;\n        }\n\n        if (new Date(startDate) > new Date(endDate)) {\n          window.aivicNotify.error('開始日は終了日より前の日付を選択してください');\n          return;\n        }\n\n        detectionInProgress = true;\n        updateProgress(0, '処理開始');\n\n        // 工数データの取得\n        const workRecords = await window.aivicApi.list('work_records', {\n          start_date: startDate,\n          end_date: endDate\n        });\n\n        if (!workRecords || workRecords.length === 0) {\n          window.aivicNotify.error('指定期間にデータが見つかりません');\n          return;\n        }\n\n        updateProgress(25, 'データ検証中');\n\n        // 包括的異常検出の実行\n        const comprehensiveResult = performComprehensiveAnomalyDetection(workRecords);\n        currentAnomalies = comprehensiveResult.anomalies || [];\n\n        updateProgress(50, '異常値検出中');\n\n        // 追加の個別検出処理\n        for (let i = 0; i < workRecords.length; i++) {\n          const record = workRecords[i];\n          \n          // 作業時間異常検出\n          const timeAnomaly = detectWorkTimeAnomaly(record);\n          if (timeAnomaly.isAnomaly) {\n            currentAnomalies.push({\n              type: '作業時間異常',\n              record: record,\n              reason: timeAnomaly.reason,\n              severity: calculateAnomalySeverity(record),\n              correctionValue: calculateCorrectionValue(record)\n            });\n          }\n\n          // 休憩時間異常検出\n          const breakAnomaly = detectBreakTimeAnomaly(record);\n          if (breakAnomaly.isAnomaly) {\n            currentAnomalies.push({\n              type: '休憩時間異常',\n              record: record,\n              reason: breakAnomaly.reason,\n              severity: 'medium'\n            });\n          }\n\n          // 短時間作業検出\n          if (detectShortWorkTime(record)) {\n            currentAnomalies.push({\n              type: '短時間作業',\n              record: record,\n              reason: '作業時間が短すぎます',\n              severity: 'low'\n            });\n          }\n\n          // 効率性チェック\n          const efficiency = calculateEfficiencyRate(record);\n          if (isEfficiencyAlert(efficiency)) {\n            currentAnomalies.push({\n              type: '効率性低下',\n              record: record,\n              reason: '作業効率が基準を下回っています',\n              severity: 'medium'\n            });\n          }\n\n          updateProgress(50 + (i / workRecords.length) * 40, '検出処理中');\n        }\n\n        updateProgress(100, '検出処理完了');\n        displayResults(currentAnomalies);\n        \n        detectionInProgress = false;\n        window.aivicNotify.success(`異常値検出が完了しました。${currentAnomalies.length}件の異常を検出しました。`);\n\n      } catch (error) {\n        console.error('異常値検出エラー:', error);\n        window.aivicNotify.error('異常値検出処理中にエラーが発生しました');\n        detectionInProgress = false;\n      }\n    });\n  }\n\n  // 検出開始ボタンのイベントハンドラ\n  if (startButton) {\n    startButton.addEventListener('click', async () => {\n      if (detectionInProgress) return;\n\n      detectionInProgress = true;\n      detectionCancelled = false;\n      \n      updateProgress(0, '0%');\n      if (progressBar) progressBar.parentElement.style.display = 'block';\n      if (cancelButton) cancelButton.style.display = 'inline-block';\n\n      // 段階的な進捗表示\n      for (let i = 0; i <= 100; i += 10) {\n        if (detectionCancelled) break;\n        \n        updateProgress(i, `${i}%`);\n        await new Promise(resolve => setTimeout(resolve, 200));\n      }\n\n      if (!detectionCancelled) {\n        updateProgress(100, '100%');\n        displayResults(currentAnomalies);\n        \n        // 完了メッセージの表示\n        setTimeout(() => {\n          const completionMsg = document.createElement('div');\n          completionMsg.textContent = '検出処理完了';\n          completionMsg.style.cssText = 'color: green; font-weight: bold; margin: 10px 0;';\n          if (resultsContainer) {\n            resultsContainer.appendChild(completionMsg);\n          }\n        }, 500);\n      }\n\n      detectionInProgress = false;\n      if (cancelButton) cancelButton.style.display = 'none';\n    });\n  }\n\n  // キャンセルボタンのイベントハンドラ\n  if (cancelButton) {\n    cancelButton.addEventListener('click', () => {\n      detectionCancelled = true;\n      detectionInProgress = false;\n      updateProgress(0, 'キャンセルされました');\n      cancelButton.style.display = 'none';\n      window.aivicNotify.info('検出処理をキャンセルしました');\n    });\n  }\n\n  // 異常値一覧表示ボタンのイベントハンドラ\n  if (listButton) {\n    listButton.addEventListener('click', () => {\n      if (currentAnomalies.length === 0) {\n        window.aivicNotify.info('検出された異常値がありません');\n        return;\n      }\n      displayAnomalyTable(currentAnomalies);\n    });\n  }\n\n  // 初期化時の日付設定\n  if (startDateInput && endDateInput) {\n    const today = new Date();\n    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);\n    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);\n    \n    startDateInput.value = firstDay.toISOString().split('T')[0];\n    endDateInput.value = lastDay.toISOString().split('T')[0];\n  }\n\n  // 初期状態の設定\n  if (progressBar && progressBar.parentElement) {\n    progressBar.parentElement.style.display = 'none';\n  }\n  if (cancelButton) {\n    cancelButton.style.display = 'none';\n  }\n  if (resultsContainer) {\n    resultsContainer.style.display = 'none';\n  }\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </script>
-    <style>
-        :root {
-            --primary: #c41e3a;
-            --primary-hover: #a01729;
-            --primary-light: #f8e6ea;
-            --bg-main: #fafafa;
-            --bg-card: #ffffff;
-            --bg-sidebar: #f5f5f5;
-            --border: #e0e0e0;
-            --border-light: #f0f0f0;
-            --text: #1a1a1a;
-            --text-muted: #4a4a4a;
-            --text-light: #666666;
-            --top-bar-bg: #f8f8f8;
-            --top-bar-border: #d0d0d0;
-            --success: #059669;
-            --warning: #d97706;
-            --danger: #dc2626;
-        }
+  </script>
+  <style>
+    :root {
+      --primary: #8b0000;
+      --primary-hover: #660000;
+      --bg-main: #0d0d0d;
+      --bg-card: #1a1a1a;
+      --bg-sidebar: #141414;
+      --border: #2d2d2d;
+      --text: #e0e0e0;
+      --text-muted: #999999;
+      --top-bar-bg: #111111;
+      --top-bar-border: #333333;
+      --accent-red: #ff4444;
+      --accent-orange: #ff8800;
+      --accent-green: #00aa44;
+      --shadow-subtle: 0 1px 3px rgba(0,0,0,0.3);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-main);
-            color: var(--text);
-            font-size: 13px;
-            line-height: 1.4;
-            overflow-x: hidden;
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
 
-        .app-container {
-            display: flex;
-            height: 100vh;
-        }
+    .app-shell {
+      display: flex;
+      height: 100vh;
+    }
 
-        .sidebar {
-            width: 220px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-        }
+    .sidebar {
+      width: 220px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
 
-        .sidebar-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
-        }
+    .sidebar-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--top-bar-bg);
+    }
 
-        .logo {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .logo::before {
-            content: "⏱";
-            font-size: 18px;
-        }
+    .logo::before {
+      content: "⚡";
+      font-size: 18px;
+    }
 
-        .nav-section {
-            padding: 8px 0;
-        }
+    .nav-section {
+      padding: 16px 0 8px 0;
+    }
 
-        .nav-section-title {
-            padding: 6px 16px;
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 16px 8px 16px;
+    }
 
-        .nav-item {
-            display: block;
-            padding: 8px 16px;
-            color: var(--text);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 400;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            border-left: 3px solid transparent;
-        }
+    .nav-item {
+      display: block;
+      padding: 8px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border-radius: 0;
+      position: relative;
+    }
 
-        .nav-item:hover {
-            background: rgba(196, 30, 58, 0.08);
-            color: var(--primary);
-        }
+    .nav-item:hover {
+      background: rgba(139, 0, 0, 0.1);
+      color: var(--text);
+    }
 
-        .nav-item.aivic-active {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-left-color: var(--primary);
-            font-weight: 500;
-        }
+    .nav-item.aivic-active {
+      background: rgba(139, 0, 0, 0.15);
+      color: var(--primary);
+      font-weight: 500;
+    }
 
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+    .nav-item.aivic-active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--primary);
+    }
 
-        .top-bar {
-            height: 52px;
-            background: var(--top-bar-bg);
-            border-bottom: 1px solid var(--top-bar-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            flex-shrink: 0;
-        }
+    .main-content {
+      flex: 1;
+      margin-left: 220px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        .top-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+    .top-bar {
+      height: 52px;
+      background: var(--top-bar-bg);
+      border-bottom: 1px solid var(--top-bar-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
 
-        .breadcrumb {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
-        }
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
 
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-        }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(0, 170, 68, 0.1);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 170, 68, 0.2);
+    }
 
-        .top-bar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .status-indicator::before {
+      content: "●";
+      font-size: 8px;
+    }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        .logout-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.15s ease;
-        }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
 
-        .logout-link:hover {
-            background: var(--border-light);
-            color: var(--text);
-        }
+    .logout-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      transition: all 0.15s ease;
+    }
 
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 20px;
-        }
+    .logout-link:hover {
+      background: var(--bg-card);
+      color: var(--text);
+    }
 
-        .panel-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .content-area {
+      flex: 1;
+      padding: 16px 20px;
+      overflow-y: auto;
+    }
 
-        .quick-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+    .panel-container {
+      min-height: calc(100vh - 52px - 32px);
+    }
 
-        .quick-action-btn {
-            padding: 10px 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+    .emergency-alert {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
 
-        .quick-action-btn:hover {
-            background: var(--primary-hover);
-        }
+    .emergency-alert.active {
+      display: block;
+    }
 
-        .quick-action-btn.secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
+    .emergency-alert-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-red);
+      margin-bottom: 4px;
+    }
 
-        .quick-action-btn.secondary:hover {
-            background: var(--border-light);
-        }
+    .emergency-alert-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
 
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px;
-        }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
 
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
+      .main-content {
+        margin-left: 0;
+      }
 
-        .stat-value {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text);
-        }
+      .top-bar {
+        padding: 0 16px;
+      }
 
-        .stat-change {
-            font-size: 11px;
-            margin-top: 4px;
-        }
+      .content-area {
+        padding: 12px 16px;
+      }
+    }
 
-        .stat-change.positive {
-            color: var(--success);
-        }
+    .loading-skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(139, 0, 0, 0.1) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 6px;
+    }
 
-        .stat-change.negative {
-            color: var(--danger);
-        }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-            }
+    .quick-actions {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 200;
+    }
 
-            .sidebar-header {
-                padding: 12px 8px;
-            }
+    .quick-action-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-subtle);
+    }
 
-            .logo {
-                justify-content: center;
-                font-size: 0;
-            }
+    .quick-action-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
 
-            .nav-section-title {
-                display: none;
-            }
-
-            .nav-item {
-                padding: 12px 8px;
-                text-align: center;
-                font-size: 0;
-                position: relative;
-            }
-
-            .nav-item::before {
-                font-size: 16px;
-            }
-
-            .content-area {
-                padding: 12px 16px;
-            }
-
-            .quick-actions {
-                flex-direction: column;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .nav-item[data-aivic-nav="scr-1778907133295"]::before { content: "⏱"; }
-        .nav-item[data-aivic-nav="scr-1778907145716"]::before { content: "📋"; }
-        .nav-item[data-aivic-nav="scr-1778907170814"]::before { content: "⚠️"; }
-        .nav-item[data-aivic-nav="scr-1778907187615"]::before { content: "▶️"; }
-        .nav-item[data-aivic-nav="scr-1778907199709"]::before { content: "⏹"; }
-        .nav-item[data-aivic-nav="scr-1778907212862"]::before { content: "💾"; }
-        .nav-item[data-aivic-nav="scr-1778907226171"]::before { content: "👁"; }
-        .nav-item[data-aivic-nav="scr-1778907238439"]::before { content: "⏸"; }
-        .nav-item[data-aivic-nav="scr-1778907251446"]::before { content: "🔄"; }
-        .nav-item[data-aivic-nav="scr-1778907263518"]::before { content: "✓"; }
-        .nav-item[data-aivic-nav="scr-1778907278416"]::before { content: "❌"; }
-        .nav-item[data-aivic-nav="scr-1778907287126"]::before { content: "🔍"; }
-        .nav-item[data-aivic-nav="scr-1778907296658"]::before { content: "⌨️"; }
-        .nav-item[data-aivic-nav="scr-1778907309324"]::before { content: "🚨"; }
-        .nav-item[data-aivic-nav="scr-1778907319067"]::before { content: "✏️"; }
-        .nav-item[data-aivic-nav="scr-1778907330826"]::before { content: "🚨"; }
-        .nav-item[data-aivic-nav="scr-1778907343735"]::before { content: "🔧"; }
-        .nav-item[data-aivic-nav="scr-1778907353387"]::before { content: "📊"; }
-        .nav-item[data-aivic-nav="scr-1778907367889"]::before { content: "✅"; }
-        .nav-item[data-aivic-nav="scr-1778907380182"]::before { content: "📝"; }
-
-        @media (min-width: 769px) {
-            .nav-item::before {
-                margin-right: 8px;
-            }
-        }
-    </style>
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">工数記録システム</div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">記録管理</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907296658" onclick="showScreen('scr-1778907296658')">工数入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907380182" onclick="showScreen('scr-1778907380182')">工数記録入力</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">中断・再開</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">確認・修正</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">履歴・分析</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
-            </div>
-        </nav>
-
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="top-bar-left">
-                    <div class="breadcrumb">工数記録システム</div>
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
-                    </div>
-                </div>
-                <div class="top-bar-right">
-                    <div class="user-info">
-                        <span>現場作業員</span>
-                    </div>
-                    <a href="./login.html" class="logout-link">ログアウト</a>
-                </div>
-            </header>
-
-            <div class="content-area">
-                <div class="panel-container">
-                    <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907309324"><div class="card" style="padding: 14px; margin-bottom: 12px;">
-  <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">異常値検出処理</h2>
-  
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 14px;">
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">検出対象期間（開始）</label>
-      <input type="date" id="start-date" data-testid="start-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-    </div>
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">検出対象期間（終了）</label>
-      <input type="date" id="end-date" data-testid="end-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-    </div>
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">検出対象作業員</label>
-      <select id="target-user" data-testid="target-user" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-        <option value="">全作業員</option>
-      </select>
-    </div>
-    <button id="btn-detect" data-testid="detect-button" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">検出実行</button>
-  </div>
-
-  <div id="progress-area" class="hidden" style="margin-bottom: 14px;">
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <div style="flex: 1; background: rgba(255,255,255,0.08); border-radius: 6px; height: 6px; overflow: hidden;">
-        <div id="progress-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.3s;"></div>
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">現場工数記録システム</div>
       </div>
-      <span id="progress-text" style="font-size: 12px; color: var(--text-muted);">0%</span>
-      <button id="btn-cancel" data-testid="cancel-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">キャンセル</button>
-    </div>
-  </div>
-</div>
-
-<div class="card" style="padding: 14px; margin-bottom: 12px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">検出ルール設定</h3>
-    <button id="btn-save-rules" data-testid="save-rules-button" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">設定保存</button>
-  </div>
-  
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">作業時間上限（時間）</label>
-      <input type="number" id="max-hours" data-testid="max-hours" value="12" step="0.5" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-    </div>
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">作業時間下限（時間）</label>
-      <input type="number" id="min-hours" data-testid="min-hours" value="0.5" step="0.1" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-    </div>
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">中断回数上限（回/日）</label>
-      <input type="number" id="max-interrupts" data-testid="max-interrupts" value="5" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-    </div>
-  </div>
-
-  <div style="margin-top: 12px;">
-    <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">除外条件</label>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="exclude-breaks" data-testid="exclude-breaks" style="accent-color: var(--primary);">
-        <label for="exclude-breaks" style="font-size: 13px; color: var(--text);">休憩時間を除外</label>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">工数記録</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907296658" onclick="showScreen('scr-1778907296658')">工数入力</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907380182" onclick="showScreen('scr-1778907380182')">工数記録入力</button>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="exclude-travel" data-testid="exclude-travel" style="accent-color: var(--primary);">
-        <label for="exclude-travel" style="font-size: 13px; color: var(--text);">移動時間を除外</label>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="card" style="padding: 14px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">検出結果 <span id="result-count" style="color: var(--text-muted); font-weight: 400;">(0件)</span></h3>
+      <div class="nav-section">
+        <div class="nav-section-title">作業管理</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">履歴・分析</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴一覧</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">修正・管理</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">システム</div>
+        <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
+        <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+      </div>
+
+      <div class="sidebar-footer">
+        システム稼働中<br>
+        データ同期: 正常
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <div class="breadcrumb">現場工数記録システム</div>
+          <div class="status-indicator">
+            システム正常
+          </div>
+        </div>
+        <div class="top-bar-right">
+          <div class="user-menu">
+            <span>作業員</span>
+          </div>
+          <a href="./login.html" class="logout-link">ログアウト</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="emergency-alert" id="emergency-alert">
+          <div class="emergency-alert-title">緊急通知</div>
+          <div class="emergency-alert-text">システムからの重要な通知があります</div>
+        </div>
+
+        <div class="panel-container">
+          <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907309324"><div style="padding: 12px; background: var(--bg-main); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <!-- ヘッダー -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+    <h1 style="font-size: 18px; font-weight: 600; margin: 0; color: var(--text);">異常値検出処理</h1>
     <div style="display: flex; gap: 8px;">
-      <select id="filter-severity" data-testid="filter-severity" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
-        <option value="">全ての重要度</option>
-        <option value="高">高</option>
-        <option value="中">中</option>
-        <option value="低">低</option>
-      </select>
-      <select id="filter-status" data-testid="filter-status" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
-        <option value="">全ての状態</option>
-        <option value="未確認">未確認</option>
-        <option value="確認済み">確認済み</option>
-        <option value="対応済み">対応済み</option>
-      </select>
-      <button id="btn-filter" data-testid="filter-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">フィルター適用</button>
-      <button id="btn-clear-filter" data-testid="clear-filter-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">クリア</button>
+      <button class="action-btn secondary" data-testid="detection-log-btn" onclick="window.showScreen('scr-1778907170814')">検出ログ</button>
+      <button class="action-btn secondary" data-testid="work-history-btn" onclick="window.showScreen('scr-1778907145716')">作業履歴</button>
     </div>
   </div>
 
-  <div style="margin-bottom: 12px;">
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <input type="checkbox" id="select-all" data-testid="select-all" style="accent-color: var(--primary);">
-      <label for="select-all" style="font-size: 13px; color: var(--text);">全選択</label>
-      <button id="btn-bulk-approve" data-testid="bulk-approve-button" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; margin-left: 12px;">一括承認</button>
-      <button id="btn-bulk-reject" data-testid="bulk-reject-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">一括却下</button>
-      <button id="btn-view-logs" data-testid="view-logs-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; margin-left: auto;" onclick="window.showScreen('scr-1778907170814')">検出ログ表示</button>
+  <!-- 検出設定エリア -->
+  <div class="card" style="margin-bottom: 16px; padding: 14px;">
+    <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">検出設定</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始日</label>
+        <input type="date" id="start-date" data-testid="start-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了日</label>
+        <input type="date" id="end-date" data-testid="end-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">検出対象</label>
+        <select id="detection-target" data-testid="detection-target" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+          <option value="all">全作業員</option>
+          <option value="department">部署別</option>
+          <option value="individual">個人指定</option>
+        </select>
+      </div>
+      <button id="btn-execute" data-testid="execute-detection-btn" class="action-btn" style="padding: 8px 16px;">検出実行</button>
     </div>
   </div>
 
-  <div class="table-wrap">
-    <table data-testid="anomaly-list">
-      <thead>
-        <tr>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text); width: 40px;">選択</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">検出日時</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">作業員</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">異常種別</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">検出項目</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">検出値</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">閾値</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">重要度</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">確認状況</th>
-          <th style="padding: 6px 10px; font-size: 13px; font-weight: 600; color: var(--text);">操作</th>
-        </tr>
-      </thead>
-      <tbody id="anomaly-tbody">
-        <tr>
-          <td colspan="10" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">検出実行ボタンをクリックして異常値検出を開始してください</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div id="detail-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-  <div class="card" style="padding: 16px; max-width: 600px; width: 90%; max-height: 80%; overflow-y: auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">異常値詳細情報</h3>
-      <button id="btn-close-modal" style="background: transparent; border: none; color: var(--text); font-size: 18px; cursor: pointer;">×</button>
+  <!-- 進捗表示 -->
+  <div id="progress-area" class="card hidden" style="margin-bottom: 16px; padding: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+      <span style="font-size: 13px; font-weight: 500; color: var(--text);">検出処理中...</span>
+      <span id="progress-text" style="font-size: 12px; color: var(--text-muted);">0%</span>
     </div>
-    <div id="detail-content" style="font-size: 13px; color: var(--text); line-height: 1.5;"></div>
-    <div style="display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end;">
-      <button id="btn-approve-detail" data-testid="approve-button" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">承認</button>
-      <button id="btn-reject-detail" data-testid="reject-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">却下</button>
+    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
+      <div id="progress-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.3s;"></div>
+    </div>
+    <div style="margin-top: 8px; display: flex; gap: 8px;">
+      <button id="btn-cancel" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 検出ルール設定 -->
+  <div class="card" style="margin-bottom: 16px; padding: 14px;">
+    <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">検出ルール設定</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">工数上限 (時間)</label>
+        <input type="number" id="max-hours" data-testid="max-hours-threshold" value="12" step="0.5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">工数下限 (時間)</label>
+        <input type="number" id="min-hours" data-testid="min-hours-threshold" value="0.5" step="0.1" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断回数上限</label>
+        <input type="number" id="max-interruptions" data-testid="max-interruptions" value="5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+    </div>
+    <div style="margin-top: 12px;">
+      <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text);">除外条件</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
+            <input type="checkbox" id="exclude-breaks" data-testid="exclude-breaks" checked style="accent-color: var(--primary);">
+            休憩時間を除外 (30分以上)
+          </label>
+        </div>
+        <div>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
+            <input type="checkbox" id="exclude-travel" data-testid="exclude-travel" checked style="accent-color: var(--primary);">
+            移動時間を除外 (60分以上)
+          </label>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; display: flex; gap: 8px;">
+      <button id="btn-save-rules" data-testid="save-rules-btn" class="action-btn">ルール保存</button>
+      <button id="btn-reset-rules" class="action-btn secondary">リセット</button>
+    </div>
+  </div>
+
+  <!-- 検出結果エリア -->
+  <div class="card" style="padding: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+      <h2 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">検出結果</h2>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <select id="severity-filter" data-testid="severity-filter" style="padding: 4px 8px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 12px;">
+          <option value="">全ての重要度</option>
+          <option value="高">高</option>
+          <option value="中">中</option>
+          <option value="低">低</option>
+        </select>
+        <select id="status-filter" data-testid="status-filter" style="padding: 4px 8px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 12px;">
+          <option value="">全ての状態</option>
+          <option value="未確認">未確認</option>
+          <option value="確認済み">確認済み</option>
+          <option value="対応済み">対応済み</option>
+        </select>
+        <button id="btn-filter" data-testid="apply-filter-btn" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">フィルター適用</button>
+        <button id="btn-clear-filter" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">クリア</button>
+      </div>
+    </div>
+
+    <!-- 一括操作 -->
+    <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+      <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
+        <input type="checkbox" id="select-all" data-testid="select-all-checkbox" style="accent-color: var(--primary);">
+        全選択
+      </label>
+      <button id="btn-bulk-approve" data-testid="bulk-approve-btn" class="action-btn" style="padding: 4px 12px; font-size: 12px;" disabled>一括承認</button>
+      <button id="btn-bulk-reject" data-testid="bulk-reject-btn" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;" disabled>一括却下</button>
+    </div>
+
+    <!-- 結果テーブル -->
+    <div class="table-wrap">
+      <table data-testid="anomaly-results-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th style="width: 40px; padding: 6px 10px; font-size: 12px; color: var(--text);">選択</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出日時</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">作業員</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">異常種別</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出値</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">閾値</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">重要度</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">状態</th>
+            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">操作</th>
+          </tr>
+        </thead>
+        <tbody id="results-tbody">
+          <tr>
+            <td colspan="9" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
+              検出処理を実行してください
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 詳細表示エリア -->
+    <div id="detail-area" class="hidden" style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+      <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text);">異常値詳細</h3>
+      <div id="detail-content" style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"></div>
     </div>
   </div>
 </div></div>
-                    <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907330826" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
-                </div>
-            </div>
-        </main>
-    </div>
+          <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907330826" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
+          <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
+        </div>
+      </div>
+    </main>
 
-    <script>
+    <div class="quick-actions">
+      <button class="quick-action-btn" onclick="showScreen('scr-1778907187615')" title="記録開始">▶</button>
+      <button class="quick-action-btn" onclick="showScreen('scr-1778907330826')" title="緊急報告">⚠</button>
+    </div>
+  </div>
+
+  <script>
 (function() {
   var TABLE_DEFS = window.AIVIC_TABLES || [];
   var PRESET_SEED = window.AIVIC_PRESET_SEED || {};
