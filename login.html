@@ -1,194 +1,193 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>現場作業員向け工数記録アプリの開発 - ログイン画面</title>
-  <style>
-    :root {
-      --primary: #c41e3a;
-      --primary-hover: #a01729;
-      --bg-main: #fafafa;
-      --bg-card: #ffffff;
-      --bg-sidebar: #f5f5f5;
-      --border: #e0e0e0;
-      --text: #1a1a1a;
-      --text-muted: #4a4a4a;
-      --top-bar-bg: #ffffff;
-      --top-bar-border: #d0d0d0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>現場作業員向け工数記録アプリの開発 - ログイン画面</title>
+    <style>
+        :root {
+            --primary: #c41e3a;
+            --primary-hover: #a01729;
+            --bg-main: #fafafa;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f5f5f5;
+            --border: #e0e0e0;
+            --text: #1a1a1a;
+            --text-muted: #4a4a4a;
+            --top-bar-bg: #f8f8f8;
+            --top-bar-border: #d0d0d0;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-    .login-container {
-      width: 100%;
-      max-width: 400px;
-      background: var(--bg-card);
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border);
-      padding: 40px 32px;
-    }
+        .login-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
 
-    .login-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
 
-    .login-title {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
+        .login-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
 
-    .login-subtitle {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    .form-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
 
-    .form-input {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg-card);
-      color: var(--text);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-card);
+            color: var(--text);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
 
-    .form-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-    }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+        }
 
-    .login-button {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      font-weight: 500;
-      color: white;
-      background: var(--primary);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-      margin-top: 8px;
-    }
+        .login-button {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 8px;
+        }
 
-    .login-button:hover {
-      background: var(--primary-hover);
-    }
+        .login-button:hover {
+            background: var(--primary-hover);
+        }
 
-    .login-button:active {
-      transform: translateY(1px);
-    }
+        .login-button:active {
+            transform: translateY(1px);
+        }
 
-    .login-footer {
-      margin-top: 32px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
+        .login-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
 
-    .sample-notice {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-style: italic;
-    }
+        .sample-notice {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+        }
 
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 32px 24px;
-        margin: 0 16px;
-      }
-
-      .login-title {
-        font-size: 20px;
-      }
-    }
-  </style>
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-header">
-      <h1 class="login-title" data-testid="login-title">ログイン</h1>
-      <p class="login-subtitle">現場作業員向け工数記録アプリの開発</p>
+    <div class="login-container">
+        <div class="login-header">
+            <h1 class="login-title" data-testid="login-title">ログイン</h1>
+            <p class="login-subtitle">現場作業員向け工数記録アプリの開発</p>
+        </div>
+
+        <form data-testid="login-form">
+            <div class="form-group">
+                <label for="username" class="form-label">ユーザー名</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-input"
+                    data-testid="username"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">パスワード</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    data-testid="password"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-button" data-testid="login-button">
+                ログイン
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <div class="sample-notice">
+                サンプル実装ではどの入力でもログインできます
+            </div>
+        </div>
     </div>
 
-    <form data-testid="login-form">
-      <div class="form-group">
-        <label for="username" class="form-label">ユーザー名</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          class="form-input"
-          data-testid="username"
-          required
-          autocomplete="username"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="password" class="form-label">パスワード</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="form-input"
-          data-testid="password"
-          required
-          autocomplete="current-password"
-        >
-      </div>
-
-      <button type="submit" class="login-button" data-testid="login-button">
-        ログイン
-      </button>
-    </form>
-
-    <div class="login-footer">
-      <p class="sample-notice">サンプル実装ではどの入力でもログインできます</p>
-    </div>
-  </div>
-
-  <script>
-    document.querySelector('[data-testid="login-form"]').addEventListener('submit', function(e) {
-      e.preventDefault();
-      window.location.href = './index.html';
-    });
-  </script>
+    <script>
+        document.querySelector('[data-testid="login-form"]').addEventListener('submit', function(e) {
+            e.preventDefault();
+            window.location.href = './index.html';
+        });
+    </script>
 </body>
 </html>
