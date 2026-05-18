@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -6,19 +6,22 @@
     <title>工数記録システム</title>
     <style>
         :root {
-            --primary: #4a9eff;
-            --primary-hover: #3a8eef;
-            --bg-main: #0f0f0f;
-            --bg-card: #1a1a1a;
-            --bg-sidebar: #141414;
-            --border: #2a2a2a;
-            --text: #e8e8e8;
-            --text-muted: #9a9a9a;
-            --top-bar-bg: #161616;
-            --top-bar-border: #252525;
-            --success: #22c55e;
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-light: #e0f2fe;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f1f5f9;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --success: #10b981;
             --warning: #f59e0b;
-            --error: #ef4444;
+            --danger: #ef4444;
+            --header-bg: #ffffff;
+            --header-border: #e2e8f0;
         }
 
         * {
@@ -31,14 +34,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-main);
             color: var(--text);
-            font-size: 13px;
             line-height: 1.4;
-            overflow-x: hidden;
+            font-size: 13px;
         }
 
         .app-container {
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
         .sidebar {
@@ -51,44 +54,36 @@
         }
 
         .sidebar-header {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            height: 52px;
+            background: var(--header-bg);
         }
 
         .logo {
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 12px;
-            color: white;
+            gap: 8px;
         }
 
-        .app-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
+        .logo::before {
+            content: "⏱";
+            font-size: 18px;
         }
 
         .nav-section {
-            padding: 16px 12px 8px;
+            padding: 12px 8px 8px 8px;
         }
 
         .nav-section-title {
             font-size: 11px;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             padding: 0 8px;
         }
 
@@ -98,11 +93,11 @@
             color: var(--text-muted);
             text-decoration: none;
             border-radius: 6px;
+            margin-bottom: 2px;
             font-size: 13px;
             font-weight: 400;
-            margin-bottom: 2px;
-            cursor: pointer;
             transition: all 0.15s ease;
+            cursor: pointer;
             border: none;
             background: none;
             width: 100%;
@@ -110,8 +105,8 @@
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
@@ -129,8 +124,8 @@
 
         .top-bar {
             height: 52px;
-            background: var(--top-bar-bg);
-            border-bottom: 1px solid var(--top-bar-border);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--header-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -138,17 +133,10 @@
             flex-shrink: 0;
         }
 
-        .breadcrumb {
-            font-size: 13px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .breadcrumb-current {
+        .page-title {
+            font-size: 15px;
+            font-weight: 600;
             color: var(--text);
-            font-weight: 500;
         }
 
         .top-bar-actions {
@@ -157,32 +145,42 @@
             gap: 12px;
         }
 
-        .status-indicator {
-            display: flex;
+        .status-badge {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--success);
+            color: white;
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+        .status-badge::before {
+            content: "●";
+            font-size: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
         }
 
         .logout-link {
             color: var(--text-muted);
             text-decoration: none;
             font-size: 12px;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 4px;
             transition: color 0.15s ease;
         }
 
         .logout-link:hover {
-            color: var(--text);
+            color: var(--primary);
         }
 
         .content-area {
@@ -191,49 +189,68 @@
             padding: 16px 20px;
         }
 
+        .panel-container {
+            height: 100%;
+        }
+
         .quick-actions {
             display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-btn {
+            padding: 8px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .quick-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .quick-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
 
-        .quick-action-btn {
-            padding: 10px 16px;
+        .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
+            padding: 14px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-light);
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 4px;
         }
 
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            background: rgba(74, 158, 255, 0.1);
-        }
-
-        .quick-action-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .quick-action-btn.primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .panel-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            min-height: 400px;
-            padding: 0;
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
         }
 
         .loading-state {
@@ -242,30 +259,7 @@
             justify-content: center;
             height: 200px;
             color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .nav-emergency {
-            margin-top: auto;
-            padding: 12px;
-            border-top: 1px solid var(--border);
-        }
-
-        .emergency-btn {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--error);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.15s ease;
-        }
-
-        .emergency-btn:hover {
-            opacity: 0.9;
+            font-size: 12px;
         }
 
         @media (max-width: 768px) {
@@ -277,31 +271,54 @@
                 padding: 12px 16px;
             }
             
-            .quick-actions {
-                flex-direction: column;
-                gap: 8px;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
+        }
+
+        .emergency-section {
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            padding-top: 12px;
+        }
+
+        .emergency-btn {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .emergency-btn:hover {
+            opacity: 0.9;
         }
     </style>
     <script>
+        <script>
 window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1778899721360";
 window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907187615";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let currentUser = { id: 'user-001', name: '田中太郎' };\n  let activeWorks = [];\n  let pausedWorks = [];\n  let workItems = [];\n  let confirmCallback = null;\n\n  // 現在日時更新\n  function updateDateTime() {\n    const now = new Date();\n    const formatted = now.getFullYear() + '/' + \n      String(now.getMonth() + 1).padStart(2, '0') + '/' + \n      String(now.getDate()).padStart(2, '0') + ' ' +\n      String(now.getHours()).padStart(2, '0') + ':' + \n      String(now.getMinutes()).padStart(2, '0');\n    container.querySelector('#current-datetime').textContent = formatted;\n  }\n\n  // 作業項目一覧を描画\n  function renderWorkItems() {\n    const select = container.querySelector('#work-item-select');\n    select.innerHTML = '<option value=\"\">作業項目を選択してください</option>';\n    workItems.forEach(item => {\n      if (item.有効フラグ) {\n        select.innerHTML += `<option value=\"${item.作業項目ID}\">${item.作業項目名}</option>`;\n      }\n    });\n  }\n\n  // 進行中作業一覧を描画\n  function renderActiveWorks() {\n    const container_el = container.querySelector('#active-works-list');\n    if (activeWorks.length === 0) {\n      container_el.innerHTML = '<div style=\"font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;\">進行中の作業はありません</div>';\n      return;\n    }\n\n    container_el.innerHTML = activeWorks.map(work => {\n      const startTime = new Date(work.作業開始時刻);\n      const elapsed = Math.floor((Date.now() - startTime.getTime()) / 60000);\n      const hours = Math.floor(elapsed / 60);\n      const minutes = elapsed % 60;\n      \n      return `\n        <div style=\"display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 6px;\">\n          <div>\n            <div style=\"font-size: 13px; color: var(--text); font-weight: 500;\">${work.作業項目名 || '不明な作業'}</div>\n            <div style=\"font-size: 11px; color: var(--text-muted);\">開始: ${startTime.getHours().toString().padStart(2,'0')}:${startTime.getMinutes().toString().padStart(2,'0')} | 経過: ${hours}時間${minutes}分</div>\n            ${work.作業場所 ? `<div style=\"font-size: 11px; color: var(--text-muted);\">場所: ${work.作業場所}</div>` : ''}\n          </div>\n          <button class=\"action-btn secondary pause-work-btn\" data-id=\"${work.作業記録ID}\" style=\"padding: 4px 8px; font-size: 11px;\">中断</button>\n        </div>\n      `;\n    }).join('');\n  }\n\n  // 中断中作業一覧を描画\n  function renderPausedWorks() {\n    const container_el = container.querySelector('#paused-works-list');\n    if (pausedWorks.length === 0) {\n      container_el.innerHTML = '<div style=\"font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;\">中断中の作業はありません</div>';\n      return;\n    }\n\n    container_el.innerHTML = pausedWorks.map(work => {\n      const startTime = new Date(work.作業開始時刻);\n      \n      return `\n        <div style=\"display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 6px;\">\n          <div>\n            <div style=\"font-size: 13px; color: var(--text); font-weight: 500;\">${work.作業項目名 || '不明な作業'}</div>\n            <div style=\"font-size: 11px; color: var(--text-muted);\">開始: ${startTime.getHours().toString().padStart(2,'0')}:${startTime.getMinutes().toString().padStart(2,'0')}</div>\n            ${work.作業場所 ? `<div style=\"font-size: 11px; color: var(--text-muted);\">場所: ${work.作業場所}</div>` : ''}\n          </div>\n          <button class=\"action-btn resume-work-btn\" data-id=\"${work.作業記録ID}\" style=\"padding: 4px 8px; font-size: 11px;\">再開</button>\n        </div>\n      `;\n    }).join('');\n  }\n\n  // エラーメッセージ表示\n  function showError(message) {\n    const errorEl = container.querySelector('#error-message');\n    errorEl.textContent = message;\n    errorEl.style.display = 'block';\n    setTimeout(() => {\n      errorEl.style.display = 'none';\n    }, 5000);\n  }\n\n  // 確認ダイアログ表示\n  function showConfirmDialog(title, message, callback) {\n    const dialog = container.querySelector('#confirm-dialog');\n    container.querySelector('#dialog-title').textContent = title;\n    container.querySelector('#dialog-message').textContent = message;\n    dialog.classList.remove('hidden');\n    confirmCallback = callback;\n  }\n\n  // データ読み込み\n  async function loadData() {\n    try {\n      // 作業項目マスタ読み込み\n      const workItemsData = await window.aivicApi.list(3);\n      if (workItemsData) {\n        workItems = workItemsData;\n        renderWorkItems();\n      }\n\n      // 作業記録読み込み\n      const workRecords = await window.aivicApi.list(1);\n      if (workRecords) {\n        activeWorks = workRecords.filter(w => w.作業員ID === currentUser.id && w.進捗状況 === '作業中');\n        pausedWorks = workRecords.filter(w => w.作業員ID === currentUser.id && w.進捗状況 === '中断');\n        \n        // 作業項目名を補完\n        activeWorks.forEach(work => {\n          const item = workItems.find(i => i.作業項目ID === work.作業項目ID);\n          if (item) work.作業項目名 = item.作業項目名;\n        });\n        pausedWorks.forEach(work => {\n          const item = workItems.find(i => i.作業項目ID === work.作業項目ID);\n          if (item) work.作業項目名 = item.作業項目名;\n        });\n\n        renderActiveWorks();\n        renderPausedWorks();\n      }\n    } catch (error) {\n      console.error('データ読み込みエラー:', error);\n    }\n  }\n\n  // 初期データ設定\n  if (tables && tables.length > 0) {\n    if (tables[3] && tables[3].records) {\n      workItems = tables[3].records;\n      renderWorkItems();\n    }\n    if (tables[1] && tables[1].records) {\n      const workRecords = tables[1].records;\n      activeWorks = workRecords.filter(w => w.作業員ID === currentUser.id && w.進捗状況 === '作業中');\n      pausedWorks = workRecords.filter(w => w.作業員ID === currentUser.id && w.進捗状況 === '中断');\n      \n      activeWorks.forEach(work => {\n        const item = workItems.find(i => i.作業項目ID === work.作業項目ID);\n        if (item) work.作業項目名 = item.作業項目名;\n      });\n      pausedWorks.forEach(work => {\n        const item = workItems.find(i => i.作業項目ID === work.作業項目ID);\n        if (item) work.作業項目名 = item.作業項目名;\n      });\n\n      renderActiveWorks();\n      renderPausedWorks();\n    }\n  }\n\n  // 最新データ読み込み\n  loadData();\n\n  // 現在日時更新開始\n  updateDateTime();\n  setInterval(updateDateTime, 60000);\n\n  // 備考文字数カウント\n  const memoTextarea = container.querySelector('#work-memo');\n  const memoCount = container.querySelector('#memo-count');\n  memoTextarea.addEventListener('input', () => {\n    memoCount.textContent = memoTextarea.value.length;\n  });\n\n  // 記録開始ボタン\n  container.querySelector('#btn-start-work').addEventListener('click', async () => {\n    const workItemId = container.querySelector('#work-item-select').value;\n    const location = container.querySelector('#work-location').value.trim();\n    const memo = container.querySelector('#work-memo').value.trim();\n\n    // バリデーション\n    if (!workItemId) {\n      showError('作業項目を選択してください');\n      return;\n    }\n\n    // 複数作業同時開始制御\n    if (activeWorks.length > 0) {\n      showError('既に実行中の作業があります。同時に複数の作業を開始することはできません。');\n      return;\n    }\n\n    // 作業場所の不正文字チェック\n    if (location && /<script|javascript:|on\\w+=/i.test(location)) {\n      showError('作業場所に不正な文字が含まれています');\n      return;\n    }\n\n    const selectedItem = workItems.find(item => item.作業項目ID === workItemId);\n    if (!selectedItem) {\n      showError('選択された作業項目が見つかりません');\n      return;\n    }\n\n    try {\n      const newWork = {\n        作業員ID: currentUser.id,\n        作業日: new Date().toISOString(),\n        作業開始時刻: new Date().toISOString(),\n        作業終了時刻: null,\n        作業時間: null,\n        プロジェクト名: selectedItem.作業項目名,\n        作業場所: location || '',\n        作業種別: selectedItem.カテゴリ || '一般作業',\n        作業内容: memo || '',\n        進捗状況: '作業中',\n        備考: memo || '',\n        承認状態: '未承認',\n        承認者ID: null,\n        承認日時: null,\n        作成者ID: currentUser.id,\n        作業項目ID: workItemId\n      };\n\n      const saved = await window.aivicApi.save(1, newWork);\n      if (saved) {\n        // フォームクリア\n        container.querySelector('#work-item-select').value = '';\n        container.querySelector('#work-location').value = '';\n        container.querySelector('#work-memo').value = '';\n        memoCount.textContent = '0';\n\n        // データ再読み込み\n        await loadData();\n        \n        // 工数入力画面に遷移\n        window.showScreen(\"scr-1778907296658\");\n      }\n    } catch (error) {\n      showError('工数記録の開始に失敗しました');\n    }\n  });\n\n  // フォームクリアボタン\n  container.querySelector('#btn-clear-form').addEventListener('click', () => {\n    container.querySelector('#work-item-select').value = '';\n    container.querySelector('#work-location').value = '';\n    container.querySelector('#work-memo').value = '';\n    memoCount.textContent = '0';\n  });\n\n  // 中断作業再開\n  container.addEventListener('click', async (e) => {\n    const resumeBtn = e.target.closest('.resume-work-btn');\n    if (resumeBtn) {\n      const workId = resumeBtn.dataset.id;\n      const work = pausedWorks.find(w => w.作業記録ID === workId);\n      \n      if (!work) {\n        showError('指定された作業が見つかりません');\n        return;\n      }\n\n      // 複数作業同時開始制御\n      if (activeWorks.length > 0) {\n        showError('既に実行中の作業があります。同時に複数の作業を開始することはできません。');\n        return;\n      }\n\n      showConfirmDialog('作業再開確認', `「${work.作業項目名 || work.プロジェクト名}」の作業を再開しますか？`, async () => {\n        try {\n          const updated = await window.aivicApi.update(1, workId, {\n            進捗状況: '作業中',\n            作業開始時刻: new Date().toISOString()\n          });\n          \n          if (updated) {\n            await loadData();\n          }\n        } catch (error) {\n          showError('作業の再開に失敗しました');\n        }\n      });\n    }\n\n    // 作業中断\n    const pauseBtn = e.target.closest('.pause-work-btn');\n    if (pauseBtn) {\n      const workId = pauseBtn.dataset.id;\n      const work = activeWorks.find(w => w.作業記録ID === workId);\n      \n      if (!work) {\n        showError('指定された作業が見つかりません');\n        return;\n      }\n\n      showConfirmDialog('作業中断確認', `「${work.作業項目名 || work.プロジェクト名}」の作業を中断しますか？`, async () => {\n        try {\n          const updated = await window.aivicApi.update(1, workId, {\n            進捗状況: '中断'\n          });\n          \n          if (updated) {\n            await loadData();\n          }\n        } catch (error) {\n          showError('作業の中断に失敗しました');\n        }\n      });\n    }\n  });\n\n  // 確認ダイアログのイベント\n  container.querySelector('#dialog-confirm').addEventListener('click', () => {\n    container.querySelector('#confirm-dialog').classList.add('hidden');\n    if (confirmCallback) {\n      confirmCallback();\n      confirmCallback = null;\n    }\n  });\n\n  container.querySelector('#dialog-cancel').addEventListener('click', () => {\n    container.querySelector('#confirm-dialog').classList.add('hidden');\n    confirmCallback = null;\n  });\n\n  // ログアウトボタン\n  container.querySelector('#btn-logout').addEventListener('click', () => {\n    showConfirmDialog('ログアウト確認', 'ログアウトしますか？', () => {\n      window.location.href = './login.html';\n    });\n  });\n\n  // 設定メニューボタン\n  container.querySelector('#btn-settings').addEventListener('click', () => {\n    // 設定画面への遷移（実装時に適切な画面IDに変更）\n    alert('設定画面は未実装です');\n  });\n\n  // 工数入力画面遷移\n  container.querySelector('#btn-work-input').addEventListener('click', () => {\n    window.showScreen(\"scr-1778907296658\");\n  });\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let currentUser = { id: 'user-001', name: '田中太郎' };\n  let activeWorks = [];\n  let pausedWorks = [];\n  let workItems = [];\n\n  // 現在日時を更新する関数\n  function updateCurrentDateTime() {\n    const now = new Date();\n    const dateStr = now.getFullYear() + '/' + \n                   String(now.getMonth() + 1).padStart(2, '0') + '/' + \n                   String(now.getDate()).padStart(2, '0') + ' ' +\n                   String(now.getHours()).padStart(2, '0') + ':' + \n                   String(now.getMinutes()).padStart(2, '0');\n    container.querySelector('#current-datetime').textContent = dateStr;\n  }\n\n  // 経過時間を計算する関数\n  function calculateElapsedTime(startTime) {\n    const now = new Date();\n    const start = new Date(startTime);\n    const diffMs = now - start;\n    const hours = Math.floor(diffMs / (1000 * 60 * 60));\n    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));\n    return `${hours}時間${minutes}分`;\n  }\n\n  // 進行中作業一覧を描画する関数\n  function renderActiveWorks() {\n    const container_elem = container.querySelector('#active-works-container');\n    const noActiveWorks = container.querySelector('#no-active-works');\n    const activeWorksList = container.querySelector('#active-works-list');\n    const tbody = container.querySelector('#active-works-tbody');\n\n    if (activeWorks.length === 0) {\n      noActiveWorks.style.display = 'block';\n      activeWorksList.style.display = 'none';\n    } else {\n      noActiveWorks.style.display = 'none';\n      activeWorksList.style.display = 'block';\n      \n      tbody.innerHTML = activeWorks.map(work => {\n        const workItem = workItems.find(item => item.id === work.workItemId);\n        const workItemName = workItem ? workItem.name : '不明な作業項目';\n        const startTime = new Date(work.startTime).toLocaleString('ja-JP');\n        const elapsedTime = calculateElapsedTime(work.startTime);\n        \n        return `\n          <tr data-id=\"${work.id}\">\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${workItemName}</td>\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${startTime}</td>\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${elapsedTime}</td>\n            <td style=\"padding: 6px 10px;\">\n              <button class=\"action-btn\" data-testid=\"work-detail-button\" onclick=\"window.showScreen('scr-1778907296658')\" style=\"background: var(--primary); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;\">\n                工数入力\n              </button>\n            </td>\n          </tr>\n        `;\n      }).join('');\n    }\n  }\n\n  // 中断中作業一覧を描画する関数\n  function renderPausedWorks() {\n    const container_elem = container.querySelector('#paused-works-container');\n    const noPausedWorks = container.querySelector('#no-paused-works');\n    const pausedWorksList = container.querySelector('#paused-works-list');\n    const tbody = container.querySelector('#paused-works-tbody');\n\n    if (pausedWorks.length === 0) {\n      noPausedWorks.style.display = 'block';\n      pausedWorksList.style.display = 'none';\n    } else {\n      noPausedWorks.style.display = 'none';\n      pausedWorksList.style.display = 'block';\n      \n      tbody.innerHTML = pausedWorks.map(work => {\n        const workItem = workItems.find(item => item.id === work.workItemId);\n        const workItemName = workItem ? workItem.name : '不明な作業項目';\n        const pauseTime = new Date(work.pauseTime).toLocaleString('ja-JP');\n        \n        return `\n          <tr data-id=\"${work.id}\">\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${workItemName}</td>\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${pauseTime}</td>\n            <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${work.pauseReason || '未入力'}</td>\n            <td style=\"padding: 6px 10px;\">\n              <button class=\"resume-work-btn action-btn\" data-id=\"${work.id}\" data-testid=\"resume-work-button\" style=\"background: var(--primary); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;\">\n                再開\n              </button>\n            </td>\n          </tr>\n        `;\n      }).join('');\n    }\n  }\n\n  // 作業項目選択肢を描画する関数\n  function renderWorkItems() {\n    const select = container.querySelector('#work-item-select');\n    select.innerHTML = '<option value=\"\">選択してください</option>' + \n      workItems.map(item => `<option value=\"${item.id}\">${item.name}</option>`).join('');\n  }\n\n  // 確認ダイアログを表示する関数\n  function showConfirmDialog(title, message, onConfirm) {\n    const dialog = container.querySelector('#confirm-dialog');\n    const titleElem = container.querySelector('#confirm-title');\n    const messageElem = container.querySelector('#confirm-message');\n    const okBtn = container.querySelector('#confirm-ok');\n    const cancelBtn = container.querySelector('#confirm-cancel');\n\n    titleElem.textContent = title;\n    messageElem.textContent = message;\n    dialog.style.display = 'flex';\n\n    const handleOk = () => {\n      dialog.style.display = 'none';\n      okBtn.removeEventListener('click', handleOk);\n      cancelBtn.removeEventListener('click', handleCancel);\n      onConfirm();\n    };\n\n    const handleCancel = () => {\n      dialog.style.display = 'none';\n      okBtn.removeEventListener('click', handleOk);\n      cancelBtn.removeEventListener('click', handleCancel);\n    };\n\n    okBtn.addEventListener('click', handleOk);\n    cancelBtn.addEventListener('click', handleCancel);\n  }\n\n  // エラーメッセージを表示する関数\n  function showError(message) {\n    const errorElem = container.querySelector('#error-message');\n    errorElem.textContent = message;\n    errorElem.style.display = 'block';\n    setTimeout(() => {\n      errorElem.style.display = 'none';\n    }, 5000);\n  }\n\n  // 初期データの読み込み\n  async function loadInitialData() {\n    try {\n      // 作業項目マスタを読み込み (tableIndex: 3)\n      const workItemsData = await window.aivicApi.list(3);\n      if (workItemsData) {\n        workItems = workItemsData.filter(item => item.有効フラグ === true)\n                                .sort((a, b) => (a.表示順序 || 0) - (b.表示順序 || 0))\n                                .map(item => ({\n          id: item.作業項目ID,\n          name: item.作業項目名,\n          code: item.作業項目コード,\n          category: item.カテゴリ,\n          standardHours: item.標準工数時間\n        }));\n      }\n\n      // 作業記録から進行中・中断中の作業を読み込み (tableIndex: 1)\n      const workRecords = await window.aivicApi.list(1);\n      if (workRecords) {\n        activeWorks = workRecords.filter(record => \n          record.作業員ID === currentUser.id && record.進捗状況 === '作業中'\n        ).map(record => ({\n          id: record.作業記録ID,\n          workItemId: record.作業項目ID,\n          startTime: record.作業開始時刻,\n          location: record.作業場所,\n          content: record.作業内容\n        }));\n\n        // 中断記録から中断中作業を取得 (tableIndex: 2)\n        const pauseRecords = await window.aivicApi.list(2);\n        if (pauseRecords) {\n          pausedWorks = pauseRecords.filter(record => \n            record.対応状況 === '対応中' && !record.中断終了日時\n          ).map(record => {\n            const workRecord = workRecords.find(wr => wr.作業記録ID === record.作業記録ID);\n            return {\n              id: record.中断記録ID,\n              workRecordId: record.作業記録ID,\n              workItemId: workRecord ? workRecord.作業項目ID : null,\n              pauseTime: record.中断開始日時,\n              pauseReason: record.中断理由詳細\n            };\n          });\n        }\n      }\n\n      renderWorkItems();\n      renderActiveWorks();\n      renderPausedWorks();\n    } catch (error) {\n      console.error('初期データの読み込みに失敗しました:', error);\n    }\n  }\n\n  // 備考文字数カウンター\n  const notesInput = container.querySelector('#work-notes-input');\n  const notesCounter = container.querySelector('#notes-counter');\n  notesInput.addEventListener('input', () => {\n    notesCounter.textContent = notesInput.value.length;\n  });\n\n  // 記録開始ボタンのイベントリスナー\n  container.querySelector('#btn-start-work').addEventListener('click', async () => {\n    const workItemId = container.querySelector('#work-item-select').value;\n    const location = container.querySelector('#work-location-input').value.trim();\n    const notes = container.querySelector('#work-notes-input').value.trim();\n\n    // バリデーション\n    if (!workItemId) {\n      showError('作業項目を選択してください');\n      return;\n    }\n\n    // 既に進行中の作業があるかチェック\n    if (activeWorks.length > 0) {\n      showError('既に実行中の作業があります。同時に複数の作業を開始することはできません。');\n      return;\n    }\n\n    // 作業場所の文字数チェック\n    if (location.length > 100) {\n      showError('作業場所は100文字以内で入力してください');\n      return;\n    }\n\n    // 備考の文字数チェック\n    if (notes.length > 500) {\n      showError('備考は500文字以内で入力してください');\n      return;\n    }\n\n    // XSS対策: 不正文字チェック\n    if (location.includes('<script>') || location.includes('</script>')) {\n      showError('作業場所に不正な文字が含まれています');\n      return;\n    }\n\n    try {\n      const now = new Date().toISOString();\n      const workRecord = {\n        作業員ID: currentUser.id,\n        作業日: now,\n        作業開始時刻: now,\n        作業終了時刻: null,\n        作業時間: null,\n        プロジェクト名: 'デフォルトプロジェクト',\n        作業場所: location || '',\n        作業種別: '一般作業',\n        作業内容: notes || '',\n        進捗状況: '作業中',\n        備考: notes || '',\n        承認状態: '未承認',\n        作成者ID: currentUser.id,\n        作業項目ID: workItemId\n      };\n\n      const savedRecord = await window.aivicApi.save(1, workRecord);\n      if (savedRecord) {\n        // フォームをクリア\n        container.querySelector('#work-item-select').value = '';\n        container.querySelector('#work-location-input').value = '';\n        container.querySelector('#work-notes-input').value = '';\n        notesCounter.textContent = '0';\n\n        // データを再読み込み\n        await loadInitialData();\n        \n        // 工数入力画面に遷移\n        window.showScreen('scr-1778907296658');\n      } else {\n        showError('工数記録の開始に失敗しました');\n      }\n    } catch (error) {\n      console.error('工数記録開始エラー:', error);\n      showError('工数記録の開始に失敗しました');\n    }\n  });\n\n  // 中断作業再開のイベントデリゲーション\n  container.addEventListener('click', async (e) => {\n    const resumeBtn = e.target.closest('.resume-work-btn');\n    if (resumeBtn) {\n      const pauseRecordId = resumeBtn.dataset.id;\n      const pausedWork = pausedWorks.find(work => work.id === pauseRecordId);\n      \n      if (!pausedWork) {\n        showError('指定された作業が見つかりません');\n        return;\n      }\n\n      showConfirmDialog(\n        '作業再開確認',\n        '中断中の作業を再開しますか？',\n        async () => {\n          try {\n            // 中断記録を終了\n            const now = new Date().toISOString();\n            await window.aivicApi.update(2, pauseRecordId, {\n              中断終了日時: now,\n              対応状況: '解決済み'\n            });\n\n            // 作業記録を作業中に戻す\n            await window.aivicApi.update(1, pausedWork.workRecordId, {\n              進捗状況: '作業中'\n            });\n\n            // データを再読み込み\n            await loadInitialData();\n          } catch (error) {\n            console.error('作業再開エラー:', error);\n            showError('作業の再開に失敗しました');\n          }\n        }\n      );\n    }\n  });\n\n  // ログアウトボタンのイベントリスナー\n  container.querySelector('#btn-logout').addEventListener('click', () => {\n    showConfirmDialog(\n      'ログアウト確認',\n      'ログアウトしますか？',\n      () => {\n        window.location.href = './login.html';\n      }\n    );\n  });\n\n  // 設定ボタンのイベントリスナー\n  container.querySelector('#btn-settings').addEventListener('click', () => {\n    // 設定画面への遷移（画面IDは仮）\n    alert('設定画面は未実装です');\n  });\n\n  // 現在日時の定期更新\n  updateCurrentDateTime();\n  setInterval(updateCurrentDateTime, 60000); // 1分ごとに更新\n\n  // 経過時間の定期更新\n  setInterval(() => {\n    if (activeWorks.length > 0) {\n      renderActiveWorks();\n    }\n  }, 60000); // 1分ごとに更新\n\n  // 初期データ読み込み\n  loadInitialData();\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
 </head>
 <body>
     <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">工</div>
-                <div class="app-title">工数記録システム</div>
+                <div class="logo">工数記録システム</div>
             </div>
-
+            
             <div class="nav-section">
                 <div class="nav-section-title">記録・入力</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
@@ -322,206 +339,182 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
                 <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">修正・管理</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値ログ</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出</button>
             </div>
 
-            <div class="nav-emergency">
-                <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
+            <div class="nav-section emergency-section">
+                <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">🚨 緊急報告</button>
             </div>
         </nav>
 
         <main class="main-content">
-            <div class="top-bar">
-                <div class="breadcrumb">
-                    <span class="breadcrumb-current" id="current-screen-title">工数記録</span>
-                </div>
+            <header class="top-bar">
+                <h1 class="page-title">工数記録システム</h1>
                 <div class="top-bar-actions">
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
+                    <div class="status-badge">システム正常</div>
+                    <div class="user-menu">
+                        <span>作業員</span>
+                        <a href="./login.html" class="logout-link">ログアウト</a>
                     </div>
-                    <a href="./login.html" class="logout-link">ログアウト</a>
                 </div>
-            </div>
+            </header>
 
             <div class="content-area">
-                <div class="quick-actions">
-                    <button class="quick-action-btn primary" onclick="showScreen('scr-1778907187615')">
-                        ▶ 記録開始
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907199709')">
-                        ⏹ 記録終了
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907238439')">
-                        ⏸ 中断記録
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907145716')">
-                        📊 履歴確認
-                    </button>
-                </div>
-
-                <div class="panel-container">
-                    <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
-                    </div>
-                    <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907187615"><div class="work-start-screen">
-  <!-- ヘッダー情報 -->
-  <div class="header-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px; background: var(--bg-card); border-radius: 6px;">
+                <div data-aivic-panel="scr-1778907133295" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907145716" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907170814" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907187615" class="panel-container"><div class="card" style="margin: 12px; padding: 16px;">
+  <!-- ヘッダー部分 -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
     <div>
-      <div style="font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px;">作業員: <span id="worker-name">田中太郎</span></div>
-      <div style="font-size: 12px; color: var(--text-muted);" id="current-datetime">2024/01/15 14:30</div>
+      <h1 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0;">工数記録開始</h1>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+        <span id="current-worker-name">田中太郎</span> | 
+        <span id="current-datetime">2024/01/15 14:30</span>
+      </div>
     </div>
     <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" id="btn-settings" style="padding: 6px 10px; font-size: 12px;">
-        <span style="margin-right: 4px;">⚙</span>設定
+      <button id="btn-settings" class="action-btn secondary" data-testid="settings-button" style="padding: 6px 10px;">
+        ⚙️ 設定
       </button>
-      <button class="action-btn secondary" id="btn-logout" style="padding: 6px 10px; font-size: 12px;">ログアウト</button>
+      <button id="btn-logout" class="action-btn secondary" data-testid="logout-button" style="padding: 6px 10px;">
+        ログアウト
+      </button>
     </div>
   </div>
 
   <!-- 工数記録開始フォーム -->
-  <div class="card" style="margin-bottom: 12px; padding: 14px;">
-    <h2 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">新規工数記録開始</h2>
+  <div class="card" style="margin-bottom: 16px; padding: 14px;">
+    <h2 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">新規作業開始</h2>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
       <div>
         <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業項目</label>
-        <select id="work-item-select" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-          <option value="">作業項目を選択してください</option>
+        <select id="work-item-select" data-testid="work-item-select" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+          <option value="">選択してください</option>
         </select>
       </div>
       <div>
         <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業場所</label>
-        <input type="text" id="work-location" placeholder="例: A棟3階301号室" maxlength="100" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+        <input type="text" id="work-location-input" data-testid="work-location-input" placeholder="例: A棟3階301号室" maxlength="100" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
       </div>
     </div>
 
     <div style="margin-bottom: 12px;">
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">備考</label>
-      <textarea id="work-memo" placeholder="作業内容の詳細や注意事項を入力" maxlength="500" rows="3" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
+      <textarea id="work-notes-input" data-testid="work-notes-input" placeholder="作業内容の詳細や注意事項など" maxlength="500" rows="3" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
       <div style="font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px;">
-        <span id="memo-count">0</span>/500文字
+        <span id="notes-counter">0</span>/500文字
       </div>
     </div>
 
-    <div style="display: flex; gap: 8px;">
-      <button class="action-btn" id="btn-start-work" style="padding: 8px 16px; font-size: 13px; font-weight: 500;">記録開始</button>
-      <button class="action-btn secondary" id="btn-clear-form" style="padding: 8px 16px; font-size: 13px;">クリア</button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button id="btn-start-work" class="action-btn" data-testid="start-work-button" style="background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+        記録開始
+      </button>
+      <div id="error-message" style="color: #ff6b6b; font-size: 12px; display: none;"></div>
     </div>
-
-    <div id="error-message" style="display: none; margin-top: 8px; padding: 8px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 4px; color: #fca5a5; font-size: 12px;"></div>
   </div>
 
   <!-- 進行中作業一覧 -->
-  <div class="card" style="margin-bottom: 12px; padding: 14px;">
-    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 10px 0;">進行中作業</h3>
-    <div id="active-works-list">
-      <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;">進行中の作業はありません</div>
+  <div class="card" style="margin-bottom: 16px; padding: 14px;">
+    <h2 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">進行中作業</h2>
+    <div id="active-works-container">
+      <div id="no-active-works" style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 16px;">
+        現在進行中の作業はありません
+      </div>
+      <div id="active-works-list" style="display: none;">
+        <table data-testid="active-works-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">作業項目</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">開始時刻</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">経過時間</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">操作</th>
+            </tr>
+          </thead>
+          <tbody id="active-works-tbody">
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <!-- 中断中作業一覧 -->
-  <div class="card" style="margin-bottom: 12px; padding: 14px;">
-    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 10px 0;">中断中作業</h3>
-    <div id="paused-works-list">
-      <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;">中断中の作業はありません</div>
-    </div>
-  </div>
-
-  <!-- ナビゲーション -->
-  <div style="margin-top: 16px;">
-    <button class="action-btn secondary" id="btn-work-input" style="padding: 8px 16px; font-size: 13px;">工数入力</button>
-  </div>
-
-  <!-- 確認ダイアログ -->
-  <div id="confirm-dialog" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-    <div style="background: var(--bg-card); padding: 20px; border-radius: 8px; max-width: 400px; width: 90%;">
-      <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: var(--text);" id="dialog-title">確認</h4>
-      <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--text);" id="dialog-message"></p>
-      <div style="display: flex; gap: 8px; justify-content: flex-end;">
-        <button class="action-btn secondary" id="dialog-cancel" style="padding: 6px 14px; font-size: 13px;">キャンセル</button>
-        <button class="action-btn" id="dialog-confirm" style="padding: 6px 14px; font-size: 13px;">確認</button>
+  <div class="card" style="padding: 14px;">
+    <h2 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">中断中作業</h2>
+    <div id="paused-works-container">
+      <div id="no-paused-works" style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 16px;">
+        中断中の作業はありません
+      </div>
+      <div id="paused-works-list" style="display: none;">
+        <table data-testid="paused-works-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">作業項目</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">中断時刻</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">中断理由</th>
+              <th style="padding: 6px 10px; text-align: left; font-size: 12px; color: var(--text); border-bottom: 1px solid var(--border);">操作</th>
+            </tr>
+          </thead>
+          <tbody id="paused-works-tbody">
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
+
+<!-- 確認ダイアログ -->
+<div id="confirm-dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="card" style="padding: 20px; max-width: 400px; margin: 20px;">
+    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;" id="confirm-title">確認</h3>
+    <p style="font-size: 13px; color: var(--text); margin: 0 0 16px 0;" id="confirm-message"></p>
+    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button id="confirm-cancel" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+        キャンセル
+      </button>
+      <button id="confirm-ok" class="action-btn" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+        OK
+      </button>
+    </div>
+  </div>
 </div></div>
-                    <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907309324" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907330826" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
-                </div>
+                <div data-aivic-panel="scr-1778907199709" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907212862" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907226171" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907238439" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907251446" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907263518" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907278416" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907287126" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907296658" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907309324" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907319067" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907330826" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907343735" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907353387" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907367889" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907380182" class="panel-container" style="display:none"></div>
             </div>
         </main>
     </div>
-
-    <script>
-        // 画面タイトル更新
-        const screenTitles = {
-            'scr-1778907133295': '工数記録',
-            'scr-1778907145716': '作業履歴一覧',
-            'scr-1778907170814': '異常値検出ログ',
-            'scr-1778907187615': '工数記録開始',
-            'scr-1778907199709': '工数記録終了',
-            'scr-1778907212862': 'データ自動保存処理',
-            'scr-1778907226171': '記録確認',
-            'scr-1778907238439': '中断記録入力',
-            'scr-1778907251446': '作業再開記録',
-            'scr-1778907263518': '入力チェック機能',
-            'scr-1778907278416': 'エラー表示',
-            'scr-1778907287126': 'データ検証処理',
-            'scr-1778907296658': '工数入力',
-            'scr-1778907309324': '異常値検出処理',
-            'scr-1778907319067': '修正入力',
-            'scr-1778907330826': '緊急報告',
-            'scr-1778907343735': '工数修正',
-            'scr-1778907353387': '工数記録データ抽出',
-            'scr-1778907367889': '工数記録確認',
-            'scr-1778907380182': '工数記録入力'
-        };
-
-        window.addEventListener('aivic:screen-changed', function(e) {
-            const title = screenTitles[e.detail.screenId];
-            if (title) {
-                document.getElementById('current-screen-title').textContent = title;
-            }
-        });
-
-        // 初期画面表示
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof window.showScreen === 'function') {
-                window.showScreen('scr-1778907133295');
-            }
-        });
-    </script>
 
     <script>
 (function() {
@@ -599,8 +592,14 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
   // showScreen はマルチページ構成ではページ遷移として動く。
   // パネル切替 (旧 SPA 動作) ではなく ./<id>.html への navigate に再定義する。
   // 既存の AI 生成 shell が onclick="showScreen('x')" の形で書いていても透過的に動く。
+  //
+  // 重要: 「同じ画面 ID」なら no-op にする。
+  // AI シェルが旧 SPA runtime の習慣で load 時に showScreen(firstScreenId) を呼ぶケースが
+  // あり、マルチページ版ではこれが「自分のページへ navigate」= 無限リロードループになる。
+  // window.AIVIC_PAGE_SCREEN_ID と一致したら遷移しない防御策を入れる。
   window.showScreen = function(screenId) {
     if (!screenId) return;
+    if (screenId === window.AIVIC_PAGE_SCREEN_ID) return; // 既に該当ページに居る
     window.location.href = './' + encodeURIComponent(screenId) + '.html';
   };
 

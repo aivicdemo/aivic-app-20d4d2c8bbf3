@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -6,19 +6,22 @@
     <title>工数記録システム</title>
     <style>
         :root {
-            --primary: #4a9eff;
-            --primary-hover: #3a8eef;
-            --bg-main: #0f0f0f;
-            --bg-card: #1a1a1a;
-            --bg-sidebar: #141414;
-            --border: #2a2a2a;
-            --text: #e8e8e8;
-            --text-muted: #9a9a9a;
-            --top-bar-bg: #161616;
-            --top-bar-border: #252525;
-            --success: #22c55e;
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-light: #e0f2fe;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f1f5f9;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --success: #10b981;
             --warning: #f59e0b;
-            --error: #ef4444;
+            --danger: #ef4444;
+            --header-bg: #ffffff;
+            --header-border: #e2e8f0;
         }
 
         * {
@@ -31,14 +34,14 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-main);
             color: var(--text);
-            font-size: 13px;
             line-height: 1.4;
-            overflow-x: hidden;
+            font-size: 13px;
         }
 
         .app-container {
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
         .sidebar {
@@ -51,44 +54,36 @@
         }
 
         .sidebar-header {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            height: 52px;
+            background: var(--header-bg);
         }
 
         .logo {
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 12px;
-            color: white;
+            gap: 8px;
         }
 
-        .app-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
+        .logo::before {
+            content: "⏱";
+            font-size: 18px;
         }
 
         .nav-section {
-            padding: 16px 12px 8px;
+            padding: 12px 8px 8px 8px;
         }
 
         .nav-section-title {
             font-size: 11px;
             font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             padding: 0 8px;
         }
 
@@ -98,11 +93,11 @@
             color: var(--text-muted);
             text-decoration: none;
             border-radius: 6px;
+            margin-bottom: 2px;
             font-size: 13px;
             font-weight: 400;
-            margin-bottom: 2px;
-            cursor: pointer;
             transition: all 0.15s ease;
+            cursor: pointer;
             border: none;
             background: none;
             width: 100%;
@@ -110,8 +105,8 @@
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
@@ -129,8 +124,8 @@
 
         .top-bar {
             height: 52px;
-            background: var(--top-bar-bg);
-            border-bottom: 1px solid var(--top-bar-border);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--header-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -138,17 +133,10 @@
             flex-shrink: 0;
         }
 
-        .breadcrumb {
-            font-size: 13px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .breadcrumb-current {
+        .page-title {
+            font-size: 15px;
+            font-weight: 600;
             color: var(--text);
-            font-weight: 500;
         }
 
         .top-bar-actions {
@@ -157,32 +145,42 @@
             gap: 12px;
         }
 
-        .status-indicator {
-            display: flex;
+        .status-badge {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--success);
+            color: white;
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+        .status-badge::before {
+            content: "●";
+            font-size: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
         }
 
         .logout-link {
             color: var(--text-muted);
             text-decoration: none;
             font-size: 12px;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 4px;
             transition: color 0.15s ease;
         }
 
         .logout-link:hover {
-            color: var(--text);
+            color: var(--primary);
         }
 
         .content-area {
@@ -191,49 +189,68 @@
             padding: 16px 20px;
         }
 
+        .panel-container {
+            height: 100%;
+        }
+
         .quick-actions {
             display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-btn {
+            padding: 8px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .quick-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .quick-btn.primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
 
-        .quick-action-btn {
-            padding: 10px 16px;
+        .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text);
-            font-size: 13px;
+            padding: 14px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-light);
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 4px;
         }
 
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            background: rgba(74, 158, 255, 0.1);
-        }
-
-        .quick-action-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .quick-action-btn.primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .panel-container {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            min-height: 400px;
-            padding: 0;
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
         }
 
         .loading-state {
@@ -242,30 +259,7 @@
             justify-content: center;
             height: 200px;
             color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .nav-emergency {
-            margin-top: auto;
-            padding: 12px;
-            border-top: 1px solid var(--border);
-        }
-
-        .emergency-btn {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--error);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.15s ease;
-        }
-
-        .emergency-btn:hover {
-            opacity: 0.9;
+            font-size: 12px;
         }
 
         @media (max-width: 768px) {
@@ -277,31 +271,54 @@
                 padding: 12px 16px;
             }
             
-            .quick-actions {
-                flex-direction: column;
-                gap: 8px;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
+        }
+
+        .emergency-section {
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            padding-top: 12px;
+        }
+
+        .emergency-btn {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .emergency-btn:hover {
+            opacity: 0.9;
         }
     </style>
     <script>
+        <script>
 window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1778899721360";
 window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907121272";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let loginAttempts = 0;\n  const maxAttempts = 5;\n  let isAccountLocked = false;\n\n  // エラーメッセージ表示関数\n  function showError(message) {\n    const errorDiv = container.querySelector('#error-message');\n    errorDiv.textContent = message;\n    errorDiv.classList.remove('hidden');\n  }\n\n  // エラーメッセージ非表示関数\n  function hideError() {\n    const errorDiv = container.querySelector('#error-message');\n    errorDiv.classList.add('hidden');\n  }\n\n  // バリデーション関数\n  function validateForm(userId, password) {\n    if (!userId && !password) {\n      showError('ユーザーIDとパスワードを入力してください');\n      return false;\n    }\n    if (!userId) {\n      showError('ユーザーIDを入力してください');\n      return false;\n    }\n    if (!password) {\n      showError('パスワードを入力してください');\n      return false;\n    }\n    return true;\n  }\n\n  // 特殊文字チェック関数\n  function containsSpecialChars(str) {\n    const dangerousChars = /<script|<\\/script|javascript:|DROP\\s+TABLE|SELECT\\s+\\*|INSERT\\s+INTO|DELETE\\s+FROM/i;\n    return dangerousChars.test(str);\n  }\n\n  // ログイン処理関数\n  async function handleLogin(userId, password, rememberLogin) {\n    // アカウントロックチェック\n    if (isAccountLocked) {\n      showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n      return;\n    }\n\n    // 特殊文字チェック\n    if (containsSpecialChars(userId) || containsSpecialChars(password)) {\n      showError('不正な文字が含まれています');\n      return;\n    }\n\n    try {\n      // ユーザーテーブルから認証情報を取得\n      const users = await window.aivicApi.list(0);\n      if (!users) {\n        showError('システムエラーが発生しました');\n        return;\n      }\n\n      // ユーザー認証\n      const user = users.find(u => u.ユーザー名 === userId && u.有効フラグ === true);\n      \n      if (!user) {\n        loginAttempts++;\n        if (loginAttempts >= maxAttempts) {\n          isAccountLocked = true;\n          showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n        } else {\n          showError('ユーザーIDまたはパスワードが正しくありません');\n        }\n        return;\n      }\n\n      // パスワード検証（実際の実装ではハッシュ比較）\n      // ここでは簡易的にプレーンテキスト比較\n      if (user.パスワードハッシュ !== password) {\n        loginAttempts++;\n        if (loginAttempts >= maxAttempts) {\n          isAccountLocked = true;\n          showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n        } else {\n          showError('ユーザーIDまたはパスワードが正しくありません');\n        }\n        return;\n      }\n\n      // ログイン成功\n      loginAttempts = 0; // リセット\n      \n      // 最終ログイン日時を更新\n      await window.aivicApi.update(0, user.ユーザーID, {\n        最終ログイン日時: new Date().toISOString()\n      });\n\n      // ログイン状態保持\n      if (rememberLogin) {\n        localStorage.setItem('loginUser', JSON.stringify({\n          userId: user.ユーザーID,\n          userName: user.ユーザー名,\n          displayName: user.氏名,\n          loginTime: new Date().toISOString()\n        }));\n      } else {\n        sessionStorage.setItem('loginUser', JSON.stringify({\n          userId: user.ユーザーID,\n          userName: user.ユーザー名,\n          displayName: user.氏名,\n          loginTime: new Date().toISOString()\n        }));\n      }\n\n      // 工数記録画面に遷移\n      window.showScreen(\"scr-1778907133295\");\n\n    } catch (error) {\n      console.error('Login error:', error);\n      showError('ログイン処理中にエラーが発生しました');\n    }\n  }\n\n  // ログイン状態チェック（ページ読み込み時）\n  function checkExistingLogin() {\n    const storedUser = localStorage.getItem('loginUser') || sessionStorage.getItem('loginUser');\n    if (storedUser) {\n      try {\n        const userData = JSON.parse(storedUser);\n        // 自動ログイン（工数記録画面に遷移）\n        window.showScreen(\"scr-1778907133295\");\n        return true;\n      } catch (e) {\n        // 無効なデータの場合はクリア\n        localStorage.removeItem('loginUser');\n        sessionStorage.removeItem('loginUser');\n      }\n    }\n    return false;\n  }\n\n  // パスワード表示切り替え\n  const togglePasswordBtn = container.querySelector('#toggle-password');\n  const passwordInput = container.querySelector('#password');\n  \n  togglePasswordBtn.addEventListener('click', () => {\n    if (passwordInput.type === 'password') {\n      passwordInput.type = 'text';\n      togglePasswordBtn.textContent = '🙈';\n    } else {\n      passwordInput.type = 'password';\n      togglePasswordBtn.textContent = '👁';\n    }\n  });\n\n  // ログインフォーム送信処理\n  const loginForm = container.querySelector('#login-form');\n  loginForm.addEventListener('submit', async (e) => {\n    e.preventDefault();\n    hideError();\n\n    const userId = container.querySelector('#user-id').value.trim();\n    const password = container.querySelector('#password').value;\n    const rememberLogin = container.querySelector('#remember-login').checked;\n\n    if (!validateForm(userId, password)) {\n      return;\n    }\n\n    await handleLogin(userId, password, rememberLogin);\n  });\n\n  // パスワード忘れリンク\n  const forgotPasswordLink = container.querySelector('#forgot-password-link');\n  forgotPasswordLink.addEventListener('click', (e) => {\n    e.preventDefault();\n    // パスワードリセット画面に遷移（実装時に適切な画面IDに変更）\n    alert('パスワードリセット機能は準備中です');\n  });\n\n  // ログインボタンホバー効果\n  const loginBtn = container.querySelector('#login-btn');\n  loginBtn.addEventListener('mouseenter', () => {\n    loginBtn.style.background = 'var(--primary-hover)';\n  });\n  loginBtn.addEventListener('mouseleave', () => {\n    loginBtn.style.background = 'var(--primary)';\n  });\n\n  // 初期化時にログイン状態をチェック\n  if (!checkExistingLogin()) {\n    // 既存ログインがない場合、フォームにフォーカス\n    container.querySelector('#user-id').focus();\n  }\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // DOM要素の取得\n  const loginForm = container.querySelector('#login-form');\n  const userIdInput = container.querySelector('#user-id');\n  const passwordInput = container.querySelector('#password');\n  const togglePasswordBtn = container.querySelector('#toggle-password');\n  const rememberMeCheckbox = container.querySelector('#remember-me');\n  const errorMessage = container.querySelector('#error-message');\n  const forgotPasswordLink = container.querySelector('#forgot-password-link');\n\n  // ログイン試行回数を追跡\n  let loginAttempts = parseInt(localStorage.getItem('loginAttempts') || '0');\n  let lockoutTime = parseInt(localStorage.getItem('lockoutTime') || '0');\n\n  // アカウントロック状態をチェック\n  function isAccountLocked() {\n    if (lockoutTime && Date.now() < lockoutTime) {\n      return true;\n    }\n    if (lockoutTime && Date.now() >= lockoutTime) {\n      // ロック期間が過ぎた場合はリセット\n      localStorage.removeItem('loginAttempts');\n      localStorage.removeItem('lockoutTime');\n      loginAttempts = 0;\n    }\n    return false;\n  }\n\n  // エラーメッセージ表示\n  function showError(message) {\n    errorMessage.textContent = message;\n    errorMessage.classList.remove('hidden');\n  }\n\n  // エラーメッセージ非表示\n  function hideError() {\n    errorMessage.classList.add('hidden');\n  }\n\n  // バリデーション\n  function validateForm() {\n    const userId = userIdInput.value.trim();\n    const password = passwordInput.value.trim();\n\n    if (!userId && !password) {\n      showError('ユーザーIDとパスワードを入力してください');\n      return false;\n    }\n    if (!userId) {\n      showError('ユーザーIDを入力してください');\n      return false;\n    }\n    if (!password) {\n      showError('パスワードを入力してください');\n      return false;\n    }\n\n    // 特殊文字チェック（XSS/SQLインジェクション対策）\n    const dangerousChars = /<script|javascript:|DROP\\s+TABLE|SELECT\\s+\\*|INSERT\\s+INTO|DELETE\\s+FROM/i;\n    if (dangerousChars.test(userId) || dangerousChars.test(password)) {\n      showError('不正な文字が含まれています');\n      return false;\n    }\n\n    return true;\n  }\n\n  // ログイン処理\n  async function handleLogin(userId, password, rememberMe) {\n    try {\n      // アカウントロックチェック\n      if (isAccountLocked()) {\n        showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n        return false;\n      }\n\n      // ユーザーテーブル（tables[0]）からユーザー情報を取得\n      const users = await window.aivicApi.list(0);\n      if (!users) {\n        showError('システムエラーが発生しました');\n        return false;\n      }\n\n      // ユーザー認証（実際の実装では暗号化されたパスワードと比較）\n      const user = users.find(u => \n        u.ユーザー名 === userId && \n        u.有効フラグ === true\n      );\n\n      if (!user) {\n        // ログイン失敗回数を増加\n        loginAttempts++;\n        localStorage.setItem('loginAttempts', loginAttempts.toString());\n        \n        if (loginAttempts >= 5) {\n          // 5回失敗でアカウントロック（30分）\n          const lockTime = Date.now() + (30 * 60 * 1000);\n          localStorage.setItem('lockoutTime', lockTime.toString());\n          showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n        } else {\n          showError('ユーザーIDまたはパスワードが正しくありません');\n        }\n        return false;\n      }\n\n      // 簡易パスワード検証（実際の実装ではハッシュ比較）\n      // ここでは demo 用に固定パスワード \"password123\" を使用\n      if (password !== 'password123') {\n        loginAttempts++;\n        localStorage.setItem('loginAttempts', loginAttempts.toString());\n        \n        if (loginAttempts >= 5) {\n          const lockTime = Date.now() + (30 * 60 * 1000);\n          localStorage.setItem('lockoutTime', lockTime.toString());\n          showError('アカウントがロックされました。しばらく時間をおいてから再度お試しください。');\n        } else {\n          showError('ユーザーIDまたはパスワードが正しくありません');\n        }\n        return false;\n      }\n\n      // ログイン成功 - 試行回数をリセット\n      localStorage.removeItem('loginAttempts');\n      localStorage.removeItem('lockoutTime');\n\n      // 最終ログイン日時を更新\n      await window.aivicApi.update(0, user.ユーザーID, {\n        最終ログイン日時: new Date().toISOString()\n      });\n\n      // セッション情報を保存\n      const sessionData = {\n        userId: user.ユーザーID,\n        userName: user.ユーザー名,\n        displayName: user.氏名,\n        department: user.所属部署,\n        role: user.権限レベル,\n        loginTime: new Date().toISOString()\n      };\n\n      if (rememberMe) {\n        localStorage.setItem('userSession', JSON.stringify(sessionData));\n      } else {\n        sessionStorage.setItem('userSession', JSON.stringify(sessionData));\n      }\n\n      return true;\n    } catch (error) {\n      console.error('Login error:', error);\n      showError('ログイン処理中にエラーが発生しました');\n      return false;\n    }\n  }\n\n  // パスワード表示切り替え\n  togglePasswordBtn.addEventListener('click', () => {\n    const isPassword = passwordInput.type === 'password';\n    passwordInput.type = isPassword ? 'text' : 'password';\n    togglePasswordBtn.textContent = isPassword ? '🙈' : '👁';\n  });\n\n  // フォーム送信処理\n  loginForm.addEventListener('submit', async (e) => {\n    e.preventDefault();\n    hideError();\n\n    if (!validateForm()) {\n      return;\n    }\n\n    const userId = userIdInput.value.trim();\n    const password = passwordInput.value.trim();\n    const rememberMe = rememberMeCheckbox.checked;\n\n    const loginSuccess = await handleLogin(userId, password, rememberMe);\n    \n    if (loginSuccess) {\n      // 工数記録画面に遷移\n      window.showScreen(\"scr-1778907133295\");\n    }\n  });\n\n  // パスワード忘れリンク\n  forgotPasswordLink.addEventListener('click', (e) => {\n    e.preventDefault();\n    // パスワードリセット画面への遷移（実装時に適切な画面IDに変更）\n    alert('パスワードリセット機能は準備中です。管理者にお問い合わせください。');\n  });\n\n  // 既存のログイン状態をチェック\n  const existingSession = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');\n  if (existingSession) {\n    try {\n      const sessionData = JSON.parse(existingSession);\n      // セッションが有効な場合は自動的にメイン画面に遷移\n      window.showScreen(\"scr-1778907133295\");\n    } catch (error) {\n      // セッションデータが無効な場合はクリア\n      localStorage.removeItem('userSession');\n      sessionStorage.removeItem('userSession');\n    }\n  }\n\n  // ホバー効果\n  const loginButton = container.querySelector('#login-button');\n  loginButton.addEventListener('mouseenter', () => {\n    loginButton.style.background = 'var(--primary-hover)';\n  });\n  loginButton.addEventListener('mouseleave', () => {\n    loginButton.style.background = 'var(--primary)';\n  });\n\n  // フォーカス時のスタイル\n  [userIdInput, passwordInput].forEach(input => {\n    input.addEventListener('focus', () => {\n      input.style.borderColor = 'var(--primary)';\n      input.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.08)';\n      input.style.outline = 'none';\n    });\n    input.addEventListener('blur', () => {\n      input.style.borderColor = 'rgba(255,255,255,0.18)';\n      input.style.boxShadow = 'none';\n    });\n  });\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
 </head>
 <body>
     <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">工</div>
-                <div class="app-title">工数記録システム</div>
+                <div class="logo">工数記録システム</div>
             </div>
-
+            
             <div class="nav-section">
                 <div class="nav-section-title">記録・入力</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
@@ -322,126 +339,66 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let loginA
                 <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">修正・管理</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値ログ</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出</button>
             </div>
 
-            <div class="nav-emergency">
-                <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
+            <div class="nav-section emergency-section">
+                <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">🚨 緊急報告</button>
             </div>
         </nav>
 
         <main class="main-content">
-            <div class="top-bar">
-                <div class="breadcrumb">
-                    <span class="breadcrumb-current" id="current-screen-title">工数記録</span>
-                </div>
+            <header class="top-bar">
+                <h1 class="page-title">工数記録システム</h1>
                 <div class="top-bar-actions">
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
+                    <div class="status-badge">システム正常</div>
+                    <div class="user-menu">
+                        <span>作業員</span>
+                        <a href="./login.html" class="logout-link">ログアウト</a>
                     </div>
-                    <a href="./login.html" class="logout-link">ログアウト</a>
                 </div>
-            </div>
+            </header>
 
             <div class="content-area">
-                <div class="quick-actions">
-                    <button class="quick-action-btn primary" onclick="showScreen('scr-1778907187615')">
-                        ▶ 記録開始
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907199709')">
-                        ⏹ 記録終了
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907238439')">
-                        ⏸ 中断記録
-                    </button>
-                    <button class="quick-action-btn" onclick="showScreen('scr-1778907145716')">
-                        📊 履歴確認
-                    </button>
-                </div>
-
-                <div class="panel-container">
-                    <div data-aivic-panel="scr-1778907133295" style="display:none"></div>
-                    </div>
-                    <div data-aivic-panel="scr-1778907145716" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907309324" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907319067" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907330826" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907380182" style="display:none"></div>
-                </div>
+                <div data-aivic-panel="scr-1778907133295" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907145716" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907170814" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907187615" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907199709" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907212862" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907226171" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907238439" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907251446" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907263518" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907278416" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907287126" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907296658" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907309324" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907319067" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907330826" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907343735" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907353387" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907367889" class="panel-container" style="display:none"></div>
+                <div data-aivic-panel="scr-1778907380182" class="panel-container" style="display:none"></div>
             </div>
         </main>
     </div>
-
-    <script>
-        // 画面タイトル更新
-        const screenTitles = {
-            'scr-1778907133295': '工数記録',
-            'scr-1778907145716': '作業履歴一覧',
-            'scr-1778907170814': '異常値検出ログ',
-            'scr-1778907187615': '工数記録開始',
-            'scr-1778907199709': '工数記録終了',
-            'scr-1778907212862': 'データ自動保存処理',
-            'scr-1778907226171': '記録確認',
-            'scr-1778907238439': '中断記録入力',
-            'scr-1778907251446': '作業再開記録',
-            'scr-1778907263518': '入力チェック機能',
-            'scr-1778907278416': 'エラー表示',
-            'scr-1778907287126': 'データ検証処理',
-            'scr-1778907296658': '工数入力',
-            'scr-1778907309324': '異常値検出処理',
-            'scr-1778907319067': '修正入力',
-            'scr-1778907330826': '緊急報告',
-            'scr-1778907343735': '工数修正',
-            'scr-1778907353387': '工数記録データ抽出',
-            'scr-1778907367889': '工数記録確認',
-            'scr-1778907380182': '工数記録入力'
-        };
-
-        window.addEventListener('aivic:screen-changed', function(e) {
-            const title = screenTitles[e.detail.screenId];
-            if (title) {
-                document.getElementById('current-screen-title').textContent = title;
-            }
-        });
-
-        // 初期画面表示
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof window.showScreen === 'function') {
-                window.showScreen('scr-1778907133295');
-            }
-        });
-    </script>
 
     <script>
 (function() {
@@ -519,8 +476,14 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let loginA
   // showScreen はマルチページ構成ではページ遷移として動く。
   // パネル切替 (旧 SPA 動作) ではなく ./<id>.html への navigate に再定義する。
   // 既存の AI 生成 shell が onclick="showScreen('x')" の形で書いていても透過的に動く。
+  //
+  // 重要: 「同じ画面 ID」なら no-op にする。
+  // AI シェルが旧 SPA runtime の習慣で load 時に showScreen(firstScreenId) を呼ぶケースが
+  // あり、マルチページ版ではこれが「自分のページへ navigate」= 無限リロードループになる。
+  // window.AIVIC_PAGE_SCREEN_ID と一致したら遷移しない防御策を入れる。
   window.showScreen = function(screenId) {
     if (!screenId) return;
+    if (screenId === window.AIVIC_PAGE_SCREEN_ID) return; // 既に該当ページに居る
     window.location.href = './' + encodeURIComponent(screenId) + '.html';
   };
 
