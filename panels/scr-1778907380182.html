@@ -1,40 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工数記録システム</title>
-    <script>
-        <script>
-window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
-window.AIVIC_APP_ID = "session-1778899721360";
-window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
-window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
-window.AIVIC_PRESET_SEED = {};
-window.AIVIC_PAGE_SCREEN_ID = "scr-1778907380182";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在のユーザー情報を設定\n  const currentUser = { id: 'user-001', name: '田中太郎' };\n  container.querySelector('#worker-name').value = currentUser.name;\n  \n  // 今日の日付を設定\n  const today = new Date().toISOString().split('T')[0];\n  container.querySelector('#work-date').value = today;\n\n  // 作業項目マスタの読み込み\n  async function loadWorkItems() {\n    const workItems = await window.aivicApi.list(3); // 作業項目マスタ\n    const select = container.querySelector('#work-item');\n    if (workItems) {\n      workItems.forEach(item => {\n        const option = document.createElement('option');\n        option.value = item.作業項目名;\n        option.textContent = `${item.作業項目コード} - ${item.作業項目名}`;\n        select.appendChild(option);\n      });\n    }\n  }\n  loadWorkItems();\n\n  // 文字数カウント\n  const workDetails = container.querySelector('#work-details');\n  const charCount = container.querySelector('#char-count');\n  workDetails.addEventListener('input', () => {\n    charCount.textContent = workDetails.value.length;\n  });\n\n  // エラーメッセージ表示\n  function showError(message) {\n    const errorDiv = container.querySelector('#error-messages');\n    errorDiv.innerHTML = `<div style=\"padding: 8px 12px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; color: #dc2626; font-size: 13px; margin-bottom: 8px;\">${message}</div>`;\n  }\n\n  function clearErrors() {\n    container.querySelector('#error-messages').innerHTML = '';\n  }\n\n  // バリデーション\n  function validateForm() {\n    clearErrors();\n    const workDate = container.querySelector('#work-date').value;\n    const projectName = container.querySelector('#project-name').value;\n    const workItem = container.querySelector('#work-item').value;\n    const workLocation = container.querySelector('#work-location').value;\n    const workType = container.querySelector('#work-type').value;\n    const startTime = container.querySelector('#start-time').value;\n    const endTime = container.querySelector('#end-time').value;\n    const workDetails = container.querySelector('#work-details').value;\n\n    if (!workDate) {\n      showError('作業日は必須です');\n      return false;\n    }\n\n    // 未来日付チェック\n    if (new Date(workDate) > new Date()) {\n      showError('未来日付は選択できません');\n      return false;\n    }\n\n    if (!projectName) {\n      showError('プロジェクト名は必須です');\n      return false;\n    }\n\n    if (!workItem) {\n      showError('作業項目は必須です');\n      return false;\n    }\n\n    if (!workLocation) {\n      showError('作業場所は必須です');\n      return false;\n    }\n\n    if (!workType) {\n      showError('作業種別は必須です');\n      return false;\n    }\n\n    if (!startTime) {\n      showError('開始時刻は必須です');\n      return false;\n    }\n\n    if (!workDetails) {\n      showError('作業内容詳細は必須です');\n      return false;\n    }\n\n    if (workDetails.length > 1000) {\n      showError('作業内容詳細は1000文字以内で入力してください');\n      return false;\n    }\n\n    // 時刻チェック\n    if (endTime && startTime >= endTime) {\n      showError('開始時刻が終了時刻より後になっています');\n      return false;\n    }\n\n    // 24時間チェック\n    if (endTime) {\n      const start = new Date(`${workDate}T${startTime}`);\n      const end = new Date(`${workDate}T${endTime}`);\n      if (end < start) {\n        end.setDate(end.getDate() + 1); // 翌日扱い\n      }\n      const diffHours = (end - start) / (1000 * 60 * 60);\n      if (diffHours >= 24) {\n        showError('24時間以上の作業時間は入力できません');\n        return false;\n      }\n    }\n\n    // 中断時間チェック\n    if (endTime) {\n      const breakTime = parseInt(container.querySelector('#break-time').value) || 0;\n      const start = new Date(`${workDate}T${startTime}`);\n      const end = new Date(`${workDate}T${endTime}`);\n      if (end < start) {\n        end.setDate(end.getDate() + 1);\n      }\n      const totalMinutes = (end - start) / (1000 * 60);\n      if (breakTime > totalMinutes) {\n        showError('中断時間は作業時間を超過できません');\n        return false;\n      }\n    }\n\n    return true;\n  }\n\n  // 工数計算\n  function calculateWorkHours() {\n    const startTime = container.querySelector('#start-time').value;\n    const endTime = container.querySelector('#end-time').value;\n    const breakTime = parseInt(container.querySelector('#break-time').value) || 0;\n    const calculatedHours = container.querySelector('#calculated-hours');\n\n    if (!startTime || !endTime) {\n      calculatedHours.textContent = '0.0h';\n      return 0;\n    }\n\n    const workDate = container.querySelector('#work-date').value || today;\n    const start = new Date(`${workDate}T${startTime}`);\n    const end = new Date(`${workDate}T${endTime}`);\n    \n    if (end < start) {\n      end.setDate(end.getDate() + 1); // 翌日扱い\n    }\n\n    const totalMinutes = (end - start) / (1000 * 60);\n    const workMinutes = Math.max(0, totalMinutes - breakTime);\n    const hours = (workMinutes / 60).toFixed(1);\n    \n    calculatedHours.textContent = `${hours}h`;\n    return workMinutes;\n  }\n\n  // 工数計算ボタン\n  container.querySelector('#btn-calculate').addEventListener('click', calculateWorkHours);\n\n  // 時刻変更時の自動計算\n  container.querySelector('#start-time').addEventListener('change', calculateWorkHours);\n  container.querySelector('#end-time').addEventListener('change', calculateWorkHours);\n  container.querySelector('#break-time').addEventListener('input', calculateWorkHours);\n\n  // 中断記録追加\n  container.querySelector('#btn-add-break').addEventListener('click', () => {\n    window.showScreen('scr-1778907238439'); // 中断記録入力画面\n  });\n\n  // フォームデータ収集\n  function collectFormData(isTemp = false) {\n    const workDate = container.querySelector('#work-date').value;\n    const startTime = container.querySelector('#start-time').value;\n    const endTime = container.querySelector('#end-time').value;\n    const workMinutes = calculateWorkHours();\n\n    return {\n      作業員ID: currentUser.id,\n      作業日: new Date(workDate).toISOString(),\n      作業開始時刻: startTime ? new Date(`${workDate}T${startTime}`).toISOString() : null,\n      作業終了時刻: endTime ? new Date(`${workDate}T${endTime}`).toISOString() : null,\n      作業時間: endTime ? workMinutes : null,\n      プロジェクト名: container.querySelector('#project-name').value,\n      作業場所: container.querySelector('#work-location').value,\n      作業種別: container.querySelector('#work-type').value,\n      作業内容: container.querySelector('#work-details').value,\n      進捗状況: isTemp ? '一時保存' : (endTime ? '完了' : '作業中'),\n      備考: '',\n      承認状態: '未承認',\n      承認者ID: null,\n      承認日時: null,\n      作成日時: new Date().toISOString(),\n      更新日時: new Date().toISOString(),\n      作成者ID: currentUser.id\n    };\n  }\n\n  // 一時保存\n  container.querySelector('#btn-temp-save').addEventListener('click', async () => {\n    const formData = collectFormData(true);\n    const saved = await window.aivicApi.save(1, formData); // 作業記録テーブル\n    if (saved) {\n      alert('一時保存しました');\n    }\n  });\n\n  // 記録確定\n  container.querySelector('#btn-save').addEventListener('click', async () => {\n    if (!validateForm()) return;\n\n    if (!confirm('記録を確定しますか？')) return;\n\n    const formData = collectFormData(false);\n    const saved = await window.aivicApi.save(1, formData); // 作業記録テーブル\n    if (saved) {\n      alert('工数記録を登録しました');\n      // フォームクリア\n      container.querySelector('#work-record-form').reset();\n      container.querySelector('#worker-name').value = currentUser.name;\n      container.querySelector('#work-date').value = today;\n      container.querySelector('#break-time').value = '0';\n      container.querySelector('#calculated-hours').textContent = '0.0h';\n      container.querySelector('#char-count').textContent = '0';\n      clearErrors();\n    }\n  });\n\n  // キャンセル\n  container.querySelector('#btn-cancel').addEventListener('click', () => {\n    if (confirm('入力内容をクリアしますか？')) {\n      container.querySelector('#work-record-form').reset();\n      container.querySelector('#worker-name').value = currentUser.name;\n      container.querySelector('#work-date').value = today;\n      container.querySelector('#break-time').value = '0';\n      container.querySelector('#calculated-hours').textContent = '0.0h';\n      container.querySelector('#char-count').textContent = '0';\n      clearErrors();\n    }\n  });\n\n  // 作業履歴画面へ\n  container.querySelector('#btn-history').addEventListener('click', () => {\n    window.showScreen('scr-1778907145716'); // 作業履歴一覧画面\n  });\n}";
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </script>
     <style>
         :root {
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --primary-light: #e0f2fe;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-sidebar: #f1f5f9;
-            --bg-header: #ffffff;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --primary: #cc1f1f;
+            --primary-hover: #a61a1a;
+            --bg-main: #0d0d0d;
+            --bg-card: #1a1010;
+            --bg-sidebar: #151111;
+            --border: #331a1a;
+            --text: #e6e6e6;
+            --text-muted: #999999;
+            --top-bar-bg: #1f1515;
+            --top-bar-border: #2d1a1a;
+            --warning: #ff6b35;
+            --error: #ff3333;
+            --success: #28a745;
         }
 
         * {
@@ -45,14 +29,14 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
             font-size: 13px;
             line-height: 1.4;
-            color: var(--text);
-            background: var(--bg-main);
             overflow-x: hidden;
         }
 
-        .app-layout {
+        .app-container {
             display: flex;
             height: 100vh;
         }
@@ -63,13 +47,15 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
         }
 
         .sidebar-header {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
+            background: var(--top-bar-bg);
         }
 
         .logo {
@@ -81,36 +67,34 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             gap: 8px;
         }
 
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
+        .logo::before {
+            content: "⚠";
+            font-size: 18px;
         }
 
         .nav-section {
             padding: 16px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .nav-section-title {
+        .nav-section:last-child {
+            border-bottom: none;
+            flex: 1;
+        }
+
+        .nav-title {
+            padding: 0 16px 8px;
             font-size: 11px;
-            font-weight: 600;
-            color: var(--text-light);
+            font-weight: 500;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 0 16px 8px;
         }
 
         .nav-item {
             display: block;
             padding: 8px 16px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             font-size: 13px;
             font-weight: 400;
@@ -124,12 +108,12 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         }
 
         .nav-item:hover {
-            background: var(--bg-card);
-            color: var(--text);
+            background: rgba(204, 31, 31, 0.1);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
-            background: var(--primary-light);
+            background: rgba(204, 31, 31, 0.15);
             color: var(--primary);
             border-left-color: var(--primary);
             font-weight: 500;
@@ -137,20 +121,23 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
 
         .main-content {
             flex: 1;
+            margin-left: 220px;
             display: flex;
             flex-direction: column;
-            min-width: 0;
+            min-height: 100vh;
         }
 
         .top-bar {
             height: 52px;
-            background: var(--bg-header);
-            border-bottom: 1px solid var(--border);
+            background: var(--top-bar-bg);
+            border-bottom: 1px solid var(--top-bar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
         .top-bar-left {
@@ -159,25 +146,16 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             gap: 16px;
         }
 
-        .page-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
+        .breadcrumb {
+            font-size: 13px;
             color: var(--text-muted);
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+        .current-time {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
         }
 
         .top-bar-right {
@@ -186,172 +164,171 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             gap: 12px;
         }
 
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .user-menu {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            padding: 6px 12px;
             background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             transition: all 0.15s ease;
         }
 
         .user-menu:hover {
+            background: var(--bg-sidebar);
             border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .user-avatar {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
         }
 
         .content-area {
             flex: 1;
-            overflow: auto;
-            padding: 16px 20px;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .panel-container {
-            max-width: 1200px;
-            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: calc(100vh - 132px);
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, var(--error), var(--warning));
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            animation: flash 3s infinite;
+        }
+
+        @keyframes flash {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.7; }
         }
 
         .quick-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
         }
 
-        .quick-action-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg-card);
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
+        .quick-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .quick-action-btn.primary {
+            padding: 6px 12px;
             background: var(--primary);
-            border-color: var(--primary);
             color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: all 0.15s ease;
         }
 
-        .quick-action-btn.primary:hover {
+        .quick-btn:hover {
             background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
-        .loading-state {
-            display: flex;
+        .quick-btn.secondary {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+        }
+
+        .quick-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                padding: 12px;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 13, 13, 0.8);
+            display: none;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-size: 12px;
+            z-index: 1000;
         }
 
         .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border);
-            border-top: 2px solid var(--primary);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .emergency-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--danger);
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            transition: all 0.15s ease;
-            z-index: 1000;
-        }
-
-        .emergency-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px -8px var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -220px;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .quick-actions {
-                flex-wrap: wrap;
-            }
-
-            .content-area {
-                padding: 12px 16px;
-            }
-        }
     </style>
+    <script>
+        <script>
+window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
+window.AIVIC_APP_ID = "session-1778899721360";
+window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
+window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
+window.AIVIC_PRESET_SEED = {};
+window.AIVIC_PAGE_SCREEN_ID = "scr-1778907380182";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
+</script>
+  <script>window.AIVIC_DB_TYPE = "aurora_postgresql";</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="emergency-banner">
+        ⚠ 緊急事態発生時は即座に報告してください ⚠
+    </div>
+
+    <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">工</div>
-                    工数記録システム
-                </div>
+                <div class="logo">工数記録システム</div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">記録・入力</div>
+                <div class="nav-title">記録管理</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
@@ -360,60 +337,70 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">中断・再開</div>
+                <div class="nav-title">中断・再開</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">確認・履歴</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
+                <div class="nav-title">確認・修正</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">修正・管理</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
+                <div class="nav-title">履歴・分析</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907275416" onclick="showScreen('scr-1778907275416')">入力チェック</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <div class="nav-title">異常・緊急</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値ログ</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">システム</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
             </div>
         </nav>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="top-bar-left">
-                    <h1 class="page-title" id="current-page-title">工数記録システム</h1>
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
-                    </div>
+                    <div class="breadcrumb">現場作業管理システム</div>
+                    <div class="current-time" id="current-time">--:--:--</div>
                 </div>
                 <div class="top-bar-right">
-                    <div class="quick-actions">
-                        <button class="quick-action-btn primary" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">
-                            ▶ 記録開始
-                        </button>
-                        <button class="quick-action-btn" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">
-                            ⏸ 中断
-                        </button>
-                    </div>
+                    <div class="status-indicator" title="システム稼働中"></div>
                     <a href="./login.html" class="user-menu">
-                        <div class="user-avatar">U</div>
+                        <span>👤</span>
                         <span>ログアウト</span>
                     </a>
                 </div>
             </header>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="showScreen('scr-1778907187615')">
+                    ▶ 作業開始
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907238439')">
+                    ⏸ 中断記録
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907199709')">
+                    ⏹ 作業終了
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907330826')">
+                    🚨 緊急報告
+                </button>
+            </div>
 
             <div class="content-area">
                 <div class="panel-container">
@@ -436,123 +423,168 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
                     <div data-aivic-panel="scr-1778907343735" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907353387" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907367889" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907380182"><div class="card" style="margin: 12px; padding: 14px;">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <div data-aivic-panel="scr-1778907380182"><div class="work-record-form">
+  <div class="form-header" style="margin-bottom: 16px;">
     <h2 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0;">工数記録入力</h2>
-    <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" data-testid="history-button" id="btn-history">
-        作業履歴
-      </button>
+    <div class="nav-buttons" style="display: flex; gap: 8px; margin-top: 8px;">
+      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907145716')" style="font-size: 12px; padding: 4px 10px;">作業履歴一覧</button>
+      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907170814')" style="font-size: 12px; padding: 4px 10px;">異常値検出ログ</button>
     </div>
   </div>
 
-  <form id="work-record-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px;">
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業日</label>
-      <input type="date" data-testid="work-date" id="work-date" required
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+  <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-bottom: 16px;">
+    <div class="form-group">
+      <label for="work-date" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業日 *</label>
+      <input type="date" id="work-date" data-testid="work-date" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">担当者</label>
-      <input type="text" data-testid="worker-name" id="worker-name" readonly
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="worker-name" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">担当者名</label>
+      <input type="text" id="worker-name" data-testid="worker-name" value="田中太郎" readonly style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; line-height: 1.4;">
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">プロジェクト名</label>
-      <input type="text" data-testid="project-name" id="project-name" required
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-    </div>
-
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業項目</label>
-      <select data-testid="work-item" id="work-item" required
-              style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="project-name" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">プロジェクト名 *</label>
+      <select id="project-name" data-testid="project-name" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
         <option value="">選択してください</option>
+        <option value="システム開発A">システム開発A</option>
+        <option value="設備点検B">設備点検B</option>
+        <option value="保守作業C">保守作業C</option>
       </select>
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業場所</label>
-      <input type="text" data-testid="work-location" id="work-location" required
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="work-location" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業場所 *</label>
+      <select id="work-location" data-testid="work-location" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
+        <option value="">選択してください</option>
+        <option value="現場A">現場A</option>
+        <option value="現場B">現場B</option>
+        <option value="事務所">事務所</option>
+      </select>
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業種別</label>
-      <select data-testid="work-type" id="work-type" required
-              style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="work-type" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業種別 *</label>
+      <select id="work-type" data-testid="work-type" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
         <option value="">選択してください</option>
         <option value="設置">設置</option>
         <option value="点検">点検</option>
         <option value="修理">修理</option>
-        <option value="保守">保守</option>
-        <option value="清掃">清掃</option>
+        <option value="設計">設計</option>
       </select>
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始時刻</label>
-      <input type="time" data-testid="start-time" id="start-time" required
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="progress-status" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">進捗状況</label>
+      <select id="progress-status" data-testid="progress-status" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+        <option value="作業中">作業中</option>
+        <option value="完了">完了</option>
+        <option value="中断">中断</option>
+      </select>
     </div>
 
-    <div>
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了時刻</label>
-      <input type="time" data-testid="end-time" id="end-time"
-             style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    <div class="form-group">
+      <label for="start-time" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始時刻 *</label>
+      <input type="time" id="start-time" data-testid="start-time" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
     </div>
 
-    <div style="grid-column: 1 / -1;">
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業内容詳細</label>
-      <textarea data-testid="work-details" id="work-details" required maxlength="1000" rows="3"
-                style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
-      <div style="font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px;">
-        <span id="char-count">0</span>/1000文字
-      </div>
+    <div class="form-group">
+      <label for="end-time" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了時刻 *</label>
+      <input type="time" id="end-time" data-testid="end-time" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;" required>
     </div>
-  </form>
 
-  <div class="card" style="margin-bottom: 16px; padding: 12px; background: var(--bg-card);">
-    <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin: 0 0 8px 0;">中断記録</h3>
-    <div style="display: flex; gap: 12px; align-items: end;">
-      <div style="flex: 1;">
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断時間（分）</label>
-        <input type="number" data-testid="break-time" id="break-time" min="0" value="0"
-               style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
-      </div>
-      <button type="button" class="action-btn secondary" data-testid="add-break-button" id="btn-add-break">
-        中断記録追加
-      </button>
+    <div class="form-group">
+      <label for="break-time" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断時間（分）</label>
+      <input type="number" id="break-time" data-testid="break-time" min="0" max="1440" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
+    </div>
+
+    <div class="form-group">
+      <label for="work-hours" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">工数時間</label>
+      <input type="text" id="work-hours" data-testid="work-hours" readonly style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; line-height: 1.4;" placeholder="自動計算">
     </div>
   </div>
 
-  <div class="card" style="margin-bottom: 16px; padding: 12px; background: var(--bg-card);">
-    <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin: 0 0 8px 0;">工数計算</h3>
-    <div style="display: flex; gap: 16px; align-items: center;">
+  <div class="form-group" style="margin-bottom: 16px;">
+    <label for="work-content" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業内容詳細 *</label>
+    <textarea id="work-content" data-testid="work-content" rows="4" maxlength="1000" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;" placeholder="具体的な作業内容を入力してください" required></textarea>
+    <div class="char-count" style="text-align: right; font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+      <span id="char-count">0</span>/1000
+    </div>
+  </div>
+
+  <div class="form-group" style="margin-bottom: 20px;">
+    <label for="remarks" style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">備考</label>
+    <textarea id="remarks" data-testid="remarks" rows="2" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;" placeholder="特記事項があれば入力してください"></textarea>
+  </div>
+
+  <div class="break-records" style="margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h3 style="font-size: 13px; font-weight: 600; color: var(--text); margin: 0;">中断記録</h3>
+      <button type="button" id="add-break" data-testid="add-break" class="action-btn" style="font-size: 12px; padding: 4px 10px;">中断追加</button>
+    </div>
+    <div id="break-list" style="display: none;">
+      <div class="table-wrap">
+        <table style="width: 100%; font-size: 12px;">
+          <thead>
+            <tr>
+              <th style="padding: 6px 8px; text-align: left; color: var(--text);">開始</th>
+              <th style="padding: 6px 8px; text-align: left; color: var(--text);">終了</th>
+              <th style="padding: 6px 8px; text-align: left; color: var(--text);">理由</th>
+              <th style="padding: 6px 8px; text-align: left; color: var(--text);">時間</th>
+              <th style="padding: 6px 8px; text-align: center; color: var(--text);">操作</th>
+            </tr>
+          </thead>
+          <tbody id="break-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-messages" id="error-messages" style="display: none; background: rgba(220,20,60,0.1); border: 1px solid rgba(220,20,60,0.3); border-radius: 6px; padding: 10px; margin-bottom: 16px;">
+    <div style="color: #ff6b6b; font-size: 12px; font-weight: 500;">入力エラー</div>
+    <ul id="error-list" style="margin: 4px 0 0 16px; padding: 0; color: #ff6b6b; font-size: 12px;">
+    </ul>
+  </div>
+
+  <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--border);">
+    <button type="button" id="btn-cancel" data-testid="cancel-button" class="action-btn secondary">キャンセル</button>
+    <button type="button" id="btn-temp-save" data-testid="temp-save-button" class="action-btn secondary">一時保存</button>
+    <button type="button" id="btn-save" data-testid="save-button" class="action-btn">記録確定</button>
+  </div>
+</div>
+
+<!-- 中断記録モーダル -->
+<div id="break-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+  <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border-radius: 8px; padding: 20px; width: 400px; max-width: 90vw;">
+    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 16px 0;">中断記録追加</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
       <div>
-        <span style="font-size: 11px; color: var(--text-muted);">実働時間</span>
-        <div data-testid="calculated-hours" id="calculated-hours" style="font-size: 16px; font-weight: 600; color: var(--primary);">0.0h</div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始時刻</label>
+        <input type="time" id="break-start" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
       </div>
-      <button type="button" class="action-btn secondary" data-testid="calculate-button" id="btn-calculate">
-        工数計算
-      </button>
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了時刻</label>
+        <input type="time" id="break-end" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
+      </div>
     </div>
-  </div>
-
-  <div id="error-messages" style="margin-bottom: 12px;"></div>
-
-  <div style="display: flex; gap: 8px; justify-content: flex-end;">
-    <button type="button" class="action-btn secondary" data-testid="cancel-button" id="btn-cancel">
-      キャンセル
-    </button>
-    <button type="button" class="action-btn secondary" data-testid="temp-save-button" id="btn-temp-save">
-      一時保存
-    </button>
-    <button type="button" class="action-btn" data-testid="save-button" id="btn-save">
-      記録確定
-    </button>
+    
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断理由</label>
+      <select id="break-reason" style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
+        <option value="機械故障">機械故障</option>
+        <option value="材料不足">材料不足</option>
+        <option value="天候">天候</option>
+        <option value="休憩">休憩</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+      <button type="button" id="break-cancel" class="action-btn secondary">キャンセル</button>
+      <button type="button" id="break-add" class="action-btn">追加</button>
+    </div>
   </div>
 </div></div>
                 </div>
@@ -560,9 +592,35 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         </main>
     </div>
 
-    <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')" title="緊急報告">
-        ⚠
-    </button>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // リアルタイム時計
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ja-JP', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // ローディング表示制御
+        window.showLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        };
+        
+        window.hideLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        };
+    </script>
 
     <script>
 (function() {

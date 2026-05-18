@@ -1,40 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工数記録システム</title>
-    <script>
-        <script>
-window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
-window.AIVIC_APP_ID = "session-1778899721360";
-window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
-window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
-window.AIVIC_PRESET_SEED = {};
-window.AIVIC_PAGE_SCREEN_ID = "scr-1778907212862";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSaveInterval = 30; // デフォルト30秒\n  let autoSaveTimer = null;\n  let isOnline = navigator.onLine;\n  let localData = JSON.parse(localStorage.getItem('workRecords') || '[]');\n  let pendingSyncCount = localData.filter(item => !item.synced).length;\n\n  // ローカルデータ再描画関数\n  function renderLocalData() {\n    const tbody = container.querySelector('#local-data-tbody');\n    if (localData.length === 0) {\n      tbody.innerHTML = '<tr><td colspan=\"4\" style=\"padding: 12px; text-align: center; color: var(--text-muted); font-size: 13px;\">ローカルデータはありません</td></tr>';\n      return;\n    }\n    \n    tbody.innerHTML = localData.map(item => `\n      <tr data-id=\"${item.id}\">\n        <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${item.作業日 || ''}</td>\n        <td style=\"padding: 6px 10px; font-size: 13px; color: var(--text);\">${(item.作業内容 || '').substring(0, 30)}${(item.作業内容 || '').length > 30 ? '...' : ''}</td>\n        <td style=\"padding: 6px 10px; font-size: 13px;\">\n          <span style=\"color: ${item.synced ? '#22c55e' : '#f59e0b'};\">\n            ${item.synced ? '同期済み' : '未同期'}\n          </span>\n        </td>\n        <td style=\"padding: 6px 10px;\">\n          <button class=\"action-btn secondary delete-local-btn\" data-id=\"${item.id}\" style=\"background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;\">削除</button>\n        </td>\n      </tr>\n    `).join('');\n  }\n\n  // ステータス更新\n  function updateStatus() {\n    const autoSaveIndicator = container.querySelector('#auto-save-indicator');\n    const autoSaveStatus = container.querySelector('#auto-save-status');\n    const networkIndicator = container.querySelector('#network-indicator');\n    const networkStatus = container.querySelector('#network-status');\n    const pendingSyncCountEl = container.querySelector('#pending-sync-count');\n    \n    // 自動保存ステータス\n    autoSaveIndicator.style.background = autoSaveTimer ? '#22c55e' : '#ef4444';\n    autoSaveStatus.textContent = autoSaveTimer ? '正常動作中' : '停止中';\n    \n    // ネットワークステータス\n    networkIndicator.style.background = isOnline ? '#22c55e' : '#ef4444';\n    networkStatus.textContent = isOnline ? 'オンライン' : 'オフライン';\n    \n    // 同期待ち件数\n    pendingSyncCount = localData.filter(item => !item.synced).length;\n    pendingSyncCountEl.textContent = pendingSyncCount;\n  }\n\n  // エラー表示\n  function showError(message) {\n    const errorNotification = container.querySelector('#error-notification');\n    const errorMessage = container.querySelector('#error-message');\n    errorMessage.textContent = message;\n    errorNotification.style.display = 'block';\n  }\n\n  // エラー非表示\n  function hideError() {\n    const errorNotification = container.querySelector('#error-notification');\n    errorNotification.style.display = 'none';\n  }\n\n  // 自動保存開始\n  function startAutoSave() {\n    if (autoSaveTimer) clearInterval(autoSaveTimer);\n    \n    if (autoSaveInterval < 1) {\n      showError('保存間隔は1秒以上で設定してください');\n      return;\n    }\n    \n    autoSaveTimer = setInterval(async () => {\n      try {\n        // 未同期データがあれば同期を試行\n        const unsyncedData = localData.filter(item => !item.synced);\n        if (unsyncedData.length > 0 && isOnline) {\n          await syncData();\n        }\n        \n        // 最終保存時刻更新\n        const lastSaveTime = container.querySelector('#last-save-time');\n        lastSaveTime.textContent = new Date().toLocaleString('ja-JP');\n        \n        hideError();\n      } catch (error) {\n        showError('自動保存中にエラーが発生しました: ' + error.message);\n      }\n    }, autoSaveInterval * 1000);\n    \n    updateStatus();\n  }\n\n  // データ同期\n  async function syncData() {\n    const unsyncedData = localData.filter(item => !item.synced);\n    \n    for (const item of unsyncedData) {\n      try {\n        const saved = await window.aivicApi.save(1, {\n          作業員ID: item.作業員ID,\n          作業日: item.作業日,\n          作業開始時刻: item.作業開始時刻,\n          作業終了時刻: item.作業終了時刻,\n          作業時間: item.作業時間,\n          プロジェクト名: item.プロジェクト名,\n          作業場所: item.作業場所,\n          作業種別: item.作業種別,\n          作業内容: item.作業内容,\n          進捗状況: item.進捗状況,\n          備考: item.備考,\n          承認状態: '未承認',\n          作成者ID: item.作業員ID\n        });\n        \n        if (saved) {\n          // 同期成功\n          item.synced = true;\n          item.serverId = saved.作業記録ID;\n        }\n      } catch (error) {\n        console.error('同期エラー:', error);\n        throw error;\n      }\n    }\n    \n    // ローカルストレージ更新\n    localStorage.setItem('workRecords', JSON.stringify(localData));\n    renderLocalData();\n    updateStatus();\n  }\n\n  // 手動同期\n  async function manualSync() {\n    try {\n      if (!isOnline) {\n        showError('ネットワークに接続されていません');\n        return;\n      }\n      \n      await syncData();\n      hideError();\n      \n      // 成功通知（簡易版）\n      const btn = container.querySelector('#btn-manual-sync');\n      const originalText = btn.textContent;\n      btn.textContent = '同期完了';\n      btn.style.background = '#22c55e';\n      setTimeout(() => {\n        btn.textContent = originalText;\n        btn.style.background = 'transparent';\n      }, 2000);\n      \n    } catch (error) {\n      showError('同期に失敗しました: ' + error.message);\n    }\n  }\n\n  // データ復旧チェック\n  function checkRecovery() {\n    const recoveryData = localStorage.getItem('unsavedWorkData');\n    if (recoveryData) {\n      const recoverySection = container.querySelector('#recovery-section');\n      recoverySection.style.display = 'block';\n    }\n  }\n\n  // ネットワーク状態監視\n  window.addEventListener('online', () => {\n    isOnline = true;\n    updateStatus();\n    // オンライン復旧時の自動同期\n    if (pendingSyncCount > 0) {\n      setTimeout(() => {\n        syncData().catch(error => {\n          showError('自動同期に失敗しました: ' + error.message);\n        });\n      }, 1000);\n    }\n  });\n\n  window.addEventListener('offline', () => {\n    isOnline = false;\n    updateStatus();\n  });\n\n  // 初期データ表示\n  renderLocalData();\n  updateStatus();\n  checkRecovery();\n  \n  // 保存間隔設定の初期値\n  const saveIntervalInput = container.querySelector('#save-interval');\n  saveIntervalInput.value = autoSaveInterval;\n\n  // 自動保存開始\n  startAutoSave();\n\n  // イベントリスナー登録\n  \n  // 設定保存\n  container.querySelector('#btn-save-settings').addEventListener('click', () => {\n    const newInterval = parseInt(saveIntervalInput.value);\n    \n    if (newInterval < 1) {\n      showError('保存間隔は1秒以上で設定してください');\n      return;\n    }\n    \n    if (newInterval > 86400) {\n      showError('保存間隔は86400秒以下で設定してください');\n      return;\n    }\n    \n    autoSaveInterval = newInterval;\n    localStorage.setItem('autoSaveInterval', autoSaveInterval.toString());\n    startAutoSave();\n    hideError();\n    \n    // 成功通知\n    const btn = container.querySelector('#btn-save-settings');\n    const originalText = btn.textContent;\n    btn.textContent = '保存完了';\n    setTimeout(() => {\n      btn.textContent = originalText;\n    }, 1500);\n  });\n\n  // 手動同期\n  container.querySelector('#btn-manual-sync').addEventListener('click', manualSync);\n\n  // 再試行\n  container.querySelector('#btn-retry').addEventListener('click', () => {\n    hideError();\n    manualSync();\n  });\n\n  // ローカルデータクリア\n  container.querySelector('#btn-clear-local').addEventListener('click', () => {\n    if (!confirm('ローカルデータをすべて削除しますか？未同期のデータは失われます。')) return;\n    \n    localStorage.removeItem('workRecords');\n    localData = [];\n    renderLocalData();\n    updateStatus();\n  });\n\n  // データ復旧\n  container.querySelector('#btn-recover')?.addEventListener('click', () => {\n    const recoveryData = localStorage.getItem('unsavedWorkData');\n    if (recoveryData) {\n      try {\n        const data = JSON.parse(recoveryData);\n        localData.push({\n          id: Date.now().toString(),\n          ...data,\n          synced: false\n        });\n        localStorage.setItem('workRecords', JSON.stringify(localData));\n        localStorage.removeItem('unsavedWorkData');\n        renderLocalData();\n        updateStatus();\n        container.querySelector('#recovery-section').style.display = 'none';\n      } catch (error) {\n        showError('データ復旧に失敗しました');\n      }\n    }\n  });\n\n  // データ破棄\n  container.querySelector('#btn-discard')?.addEventListener('click', () => {\n    localStorage.removeItem('unsavedWorkData');\n    container.querySelector('#recovery-section').style.display = 'none';\n  });\n\n  // ローカルデータ削除（イベントデリゲーション）\n  container.addEventListener('click', (e) => {\n    const deleteBtn = e.target.closest('.delete-local-btn');\n    if (deleteBtn) {\n      if (!confirm('このローカルデータを削除しますか？')) return;\n      \n      const id = deleteBtn.dataset.id;\n      localData = localData.filter(item => item.id !== id);\n      localStorage.setItem('workRecords', JSON.stringify(localData));\n      renderLocalData();\n      updateStatus();\n    }\n  });\n\n  // 保存間隔の設定値を復元\n  const savedInterval = localStorage.getItem('autoSaveInterval');\n  if (savedInterval) {\n    autoSaveInterval = parseInt(savedInterval);\n    saveIntervalInput.value = autoSaveInterval;\n    startAutoSave();\n  }\n}";
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </script>
     <style>
         :root {
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --primary-light: #e0f2fe;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-sidebar: #f1f5f9;
-            --bg-header: #ffffff;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --primary: #cc1f1f;
+            --primary-hover: #a61a1a;
+            --bg-main: #0d0d0d;
+            --bg-card: #1a1010;
+            --bg-sidebar: #151111;
+            --border: #331a1a;
+            --text: #e6e6e6;
+            --text-muted: #999999;
+            --top-bar-bg: #1f1515;
+            --top-bar-border: #2d1a1a;
+            --warning: #ff6b35;
+            --error: #ff3333;
+            --success: #28a745;
         }
 
         * {
@@ -45,14 +29,14 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
             font-size: 13px;
             line-height: 1.4;
-            color: var(--text);
-            background: var(--bg-main);
             overflow-x: hidden;
         }
 
-        .app-layout {
+        .app-container {
             display: flex;
             height: 100vh;
         }
@@ -63,13 +47,15 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
         }
 
         .sidebar-header {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
+            background: var(--top-bar-bg);
         }
 
         .logo {
@@ -81,36 +67,34 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
             gap: 8px;
         }
 
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
+        .logo::before {
+            content: "⚠";
+            font-size: 18px;
         }
 
         .nav-section {
             padding: 16px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .nav-section-title {
+        .nav-section:last-child {
+            border-bottom: none;
+            flex: 1;
+        }
+
+        .nav-title {
+            padding: 0 16px 8px;
             font-size: 11px;
-            font-weight: 600;
-            color: var(--text-light);
+            font-weight: 500;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 0 16px 8px;
         }
 
         .nav-item {
             display: block;
             padding: 8px 16px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             font-size: 13px;
             font-weight: 400;
@@ -124,12 +108,12 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
         }
 
         .nav-item:hover {
-            background: var(--bg-card);
-            color: var(--text);
+            background: rgba(204, 31, 31, 0.1);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
-            background: var(--primary-light);
+            background: rgba(204, 31, 31, 0.15);
             color: var(--primary);
             border-left-color: var(--primary);
             font-weight: 500;
@@ -137,20 +121,23 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
 
         .main-content {
             flex: 1;
+            margin-left: 220px;
             display: flex;
             flex-direction: column;
-            min-width: 0;
+            min-height: 100vh;
         }
 
         .top-bar {
             height: 52px;
-            background: var(--bg-header);
-            border-bottom: 1px solid var(--border);
+            background: var(--top-bar-bg);
+            border-bottom: 1px solid var(--top-bar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
         .top-bar-left {
@@ -159,25 +146,16 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
             gap: 16px;
         }
 
-        .page-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
+        .breadcrumb {
+            font-size: 13px;
             color: var(--text-muted);
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+        .current-time {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
         }
 
         .top-bar-right {
@@ -186,172 +164,170 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
             gap: 12px;
         }
 
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .user-menu {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            padding: 6px 12px;
             background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             transition: all 0.15s ease;
         }
 
         .user-menu:hover {
+            background: var(--bg-sidebar);
             border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .user-avatar {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
         }
 
         .content-area {
             flex: 1;
-            overflow: auto;
-            padding: 16px 20px;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .panel-container {
-            max-width: 1200px;
-            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: calc(100vh - 132px);
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, var(--error), var(--warning));
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            animation: flash 3s infinite;
+        }
+
+        @keyframes flash {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.7; }
         }
 
         .quick-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
         }
 
-        .quick-action-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg-card);
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
+        .quick-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .quick-action-btn.primary {
+            padding: 6px 12px;
             background: var(--primary);
-            border-color: var(--primary);
             color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: all 0.15s ease;
         }
 
-        .quick-action-btn.primary:hover {
+        .quick-btn:hover {
             background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
-        .loading-state {
-            display: flex;
+        .quick-btn.secondary {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+        }
+
+        .quick-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                padding: 12px;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 13, 13, 0.8);
+            display: none;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-size: 12px;
+            z-index: 1000;
         }
 
         .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border);
-            border-top: 2px solid var(--primary);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .emergency-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--danger);
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            transition: all 0.15s ease;
-            z-index: 1000;
-        }
-
-        .emergency-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px -8px var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -220px;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .quick-actions {
-                flex-wrap: wrap;
-            }
-
-            .content-area {
-                padding: 12px 16px;
-            }
-        }
     </style>
+    <script>
+        <script>
+window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
+window.AIVIC_APP_ID = "session-1778899721360";
+window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
+window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
+window.AIVIC_PRESET_SEED = {};
+window.AIVIC_PAGE_SCREEN_ID = "scr-1778907212862";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSaveInterval = null;\n  let currentSaveInterval = 30;\n  let localDataCache = [];\n  let syncPendingCount = 0;\n  let isOnline = navigator.onLine;\n\n  // DOM要素の取得\n  const autoSaveStatus = container.querySelector('#auto-save-status');\n  const lastSaveTime = container.querySelector('#last-save-time');\n  const networkStatus = container.querySelector('#network-status');\n  const syncPendingCountEl = container.querySelector('#sync-pending-count');\n  const localDataCount = container.querySelector('#local-data-count');\n  const saveIntervalInput = container.querySelector('#save-interval');\n  const errorNotification = container.querySelector('#error-notification');\n  const errorMessage = container.querySelector('#error-message');\n  const localDataSection = container.querySelector('#local-data-section');\n  const localDataTbody = container.querySelector('#local-data-tbody');\n  const recoverySection = container.querySelector('#recovery-section');\n\n  // ローカルストレージキー\n  const STORAGE_KEYS = {\n    WORK_RECORDS: 'workRecords_local',\n    SAVE_INTERVAL: 'autoSaveInterval',\n    LAST_SAVE_TIME: 'lastSaveTime',\n    RECOVERY_DATA: 'recoveryData'\n  };\n\n  // 初期化\n  function init() {\n    loadSettings();\n    updateNetworkStatus();\n    loadLocalData();\n    checkRecoveryData();\n    startAutoSave();\n    \n    // ネットワーク状態の監視\n    window.addEventListener('online', handleOnline);\n    window.addEventListener('offline', handleOffline);\n  }\n\n  // 設定の読み込み\n  function loadSettings() {\n    const savedInterval = localStorage.getItem(STORAGE_KEYS.SAVE_INTERVAL);\n    if (savedInterval) {\n      currentSaveInterval = parseInt(savedInterval);\n      saveIntervalInput.value = currentSaveInterval;\n    }\n    \n    const lastSave = localStorage.getItem(STORAGE_KEYS.LAST_SAVE_TIME);\n    if (lastSave) {\n      lastSaveTime.textContent = `最終保存: ${new Date(lastSave).toLocaleString()}`;\n    }\n  }\n\n  // ネットワーク状態の更新\n  function updateNetworkStatus() {\n    if (isOnline) {\n      networkStatus.textContent = 'オンライン';\n      networkStatus.style.color = '#059669';\n    } else {\n      networkStatus.textContent = 'オフライン';\n      networkStatus.style.color = '#dc2626';\n    }\n    syncPendingCountEl.textContent = `同期待ち: ${syncPendingCount}件`;\n  }\n\n  // ローカルデータの読み込み\n  function loadLocalData() {\n    try {\n      const data = localStorage.getItem(STORAGE_KEYS.WORK_RECORDS);\n      localDataCache = data ? JSON.parse(data) : [];\n      localDataCount.textContent = `${localDataCache.length}件`;\n      \n      // 同期待ち件数の計算\n      syncPendingCount = localDataCache.filter(record => !record.synced).length;\n      updateNetworkStatus();\n    } catch (error) {\n      console.error('ローカルデータの読み込みエラー:', error);\n      localDataCache = [];\n      localDataCount.textContent = '0件';\n    }\n  }\n\n  // 復旧データのチェック\n  function checkRecoveryData() {\n    const recoveryData = localStorage.getItem(STORAGE_KEYS.RECOVERY_DATA);\n    if (recoveryData) {\n      recoverySection.style.display = 'block';\n    }\n  }\n\n  // 自動保存の開始\n  function startAutoSave() {\n    if (autoSaveInterval) {\n      clearInterval(autoSaveInterval);\n    }\n    \n    autoSaveInterval = setInterval(performAutoSave, currentSaveInterval * 1000);\n    autoSaveStatus.textContent = '動作中';\n    autoSaveStatus.style.color = '#059669';\n  }\n\n  // 自動保存の停止\n  function stopAutoSave() {\n    if (autoSaveInterval) {\n      clearInterval(autoSaveInterval);\n      autoSaveInterval = null;\n    }\n    autoSaveStatus.textContent = '停止中';\n    autoSaveStatus.style.color = '#dc2626';\n  }\n\n  // 自動保存の実行\n  async function performAutoSave() {\n    try {\n      // 現在の入力データを取得（実際の実装では工数記録画面からデータを取得）\n      const currentData = getCurrentWorkData();\n      \n      if (currentData && Object.keys(currentData).length > 0) {\n        await saveWorkRecord(currentData);\n        \n        const now = new Date().toISOString();\n        localStorage.setItem(STORAGE_KEYS.LAST_SAVE_TIME, now);\n        lastSaveTime.textContent = `最終保存: ${new Date(now).toLocaleString()}`;\n        \n        hideError();\n      }\n    } catch (error) {\n      console.error('自動保存エラー:', error);\n      showError('自動保存に失敗しました: ' + error.message);\n    }\n  }\n\n  // 現在の作業データを取得（モック）\n  function getCurrentWorkData() {\n    // 実際の実装では工数記録画面から現在の入力値を取得\n    const mockData = {\n      workDate: new Date().toISOString().split('T')[0],\n      startTime: new Date().toISOString(),\n      projectName: 'サンプルプロジェクト',\n      workLocation: 'A現場',\n      workType: '点検作業',\n      workContent: '定期点検実施',\n      progress: '作業中'\n    };\n    \n    // データが空でない場合のみ返す\n    return Math.random() > 0.7 ? mockData : null;\n  }\n\n  // 作業記録の保存\n  async function saveWorkRecord(data) {\n    const record = {\n      id: 'local_' + Date.now(),\n      ...data,\n      createdAt: new Date().toISOString(),\n      synced: false\n    };\n\n    // ローカルストレージに保存\n    localDataCache.push(record);\n    localStorage.setItem(STORAGE_KEYS.WORK_RECORDS, JSON.stringify(localDataCache));\n    \n    // オンラインの場合はサーバーにも保存を試行\n    if (isOnline) {\n      try {\n        const saved = await window.aivicApi.save(1, {\n          作業員ID: 'current_user_id',\n          作業日: data.workDate,\n          作業開始時刻: data.startTime,\n          プロジェクト名: data.projectName,\n          作業場所: data.workLocation,\n          作業種別: data.workType,\n          作業内容: data.workContent,\n          進捗状況: data.progress,\n          承認状態: '未承認',\n          作成者ID: 'current_user_id'\n        });\n        \n        if (saved) {\n          record.synced = true;\n          record.serverId = saved.id;\n          localStorage.setItem(STORAGE_KEYS.WORK_RECORDS, JSON.stringify(localDataCache));\n        }\n      } catch (error) {\n        console.error('サーバー保存エラー:', error);\n        // ローカル保存は成功しているのでエラーは表示しない\n      }\n    }\n    \n    loadLocalData();\n  }\n\n  // 手動同期の実行\n  async function performManualSync() {\n    const unsyncedRecords = localDataCache.filter(record => !record.synced);\n    \n    if (unsyncedRecords.length === 0) {\n      alert('同期待ちのデータはありません。');\n      return;\n    }\n\n    if (!isOnline) {\n      showError('オフライン状態のため同期できません。');\n      return;\n    }\n\n    let successCount = 0;\n    let failCount = 0;\n\n    for (const record of unsyncedRecords) {\n      try {\n        const saved = await window.aivicApi.save(1, {\n          作業員ID: 'current_user_id',\n          作業日: record.workDate,\n          作業開始時刻: record.startTime,\n          プロジェクト名: record.projectName,\n          作業場所: record.workLocation,\n          作業種別: record.workType,\n          作業内容: record.workContent,\n          進捗状況: record.progress,\n          承認状態: '未承認',\n          作成者ID: 'current_user_id'\n        });\n        \n        if (saved) {\n          record.synced = true;\n          record.serverId = saved.id;\n          successCount++;\n        } else {\n          failCount++;\n        }\n      } catch (error) {\n        console.error('同期エラー:', error);\n        failCount++;\n      }\n    }\n\n    localStorage.setItem(STORAGE_KEYS.WORK_RECORDS, JSON.stringify(localDataCache));\n    loadLocalData();\n    \n    if (failCount === 0) {\n      alert(`${successCount}件のデータを同期しました。`);\n      hideError();\n    } else {\n      showError(`${successCount}件同期成功、${failCount}件失敗しました。`);\n    }\n  }\n\n  // ローカルデータ一覧の表示\n  function renderLocalData() {\n    localDataTbody.innerHTML = localDataCache.map(record => `\n      <tr data-id=\"${record.id}\">\n        <td style=\"padding: 6px 10px;\">${new Date(record.createdAt).toLocaleString()}</td>\n        <td style=\"padding: 6px 10px;\">${record.workContent || '--'}</td>\n        <td style=\"padding: 6px 10px;\">\n          <span style=\"color: ${record.synced ? '#059669' : '#f59e0b'};\">\n            ${record.synced ? '同期済み' : '未同期'}\n          </span>\n        </td>\n        <td style=\"padding: 6px 10px;\">\n          <button class=\"action-btn secondary delete-local-btn\" data-id=\"${record.id}\" style=\"font-size: 11px; padding: 4px 8px;\">削除</button>\n        </td>\n      </tr>\n    `).join('');\n  }\n\n  // エラー表示\n  function showError(message) {\n    errorMessage.textContent = message;\n    errorNotification.style.display = 'block';\n  }\n\n  // エラー非表示\n  function hideError() {\n    errorNotification.style.display = 'none';\n  }\n\n  // ネットワーク接続時の処理\n  function handleOnline() {\n    isOnline = true;\n    updateNetworkStatus();\n    \n    // 自動同期を実行\n    setTimeout(() => {\n      performManualSync();\n    }, 1000);\n  }\n\n  // ネットワーク切断時の処理\n  function handleOffline() {\n    isOnline = false;\n    updateNetworkStatus();\n  }\n\n  // イベントリスナーの設定\n  container.querySelector('#btn-save-settings').addEventListener('click', () => {\n    const newInterval = parseInt(saveIntervalInput.value);\n    \n    if (newInterval < 1) {\n      showError('保存間隔は1秒以上で設定してください。');\n      return;\n    }\n    \n    if (newInterval > 86400) {\n      showError('保存間隔は86400秒以下で設定してください。');\n      return;\n    }\n    \n    currentSaveInterval = newInterval;\n    localStorage.setItem(STORAGE_KEYS.SAVE_INTERVAL, currentSaveInterval.toString());\n    \n    // 自動保存を再開\n    startAutoSave();\n    \n    alert('保存間隔を更新しました。');\n    hideError();\n  });\n\n  container.querySelector('#btn-manual-sync').addEventListener('click', performManualSync);\n\n  container.querySelector('#btn-view-local').addEventListener('click', () => {\n    renderLocalData();\n    localDataSection.style.display = 'block';\n  });\n\n  container.querySelector('#btn-hide-local').addEventListener('click', () => {\n    localDataSection.style.display = 'none';\n  });\n\n  container.querySelector('#btn-retry').addEventListener('click', performAutoSave);\n\n  container.querySelector('#btn-recover-data').addEventListener('click', () => {\n    const recoveryData = localStorage.getItem(STORAGE_KEYS.RECOVERY_DATA);\n    if (recoveryData) {\n      // 復旧データを工数記録画面に渡す（実際の実装では画面間でデータを受け渡し）\n      localStorage.removeItem(STORAGE_KEYS.RECOVERY_DATA);\n      recoverySection.style.display = 'none';\n      alert('データを復旧しました。工数記録画面で確認してください。');\n      window.showScreen('scr-1778907133295');\n    }\n  });\n\n  container.querySelector('#btn-discard-data').addEventListener('click', () => {\n    if (confirm('復旧データを破棄しますか？この操作は取り消せません。')) {\n      localStorage.removeItem(STORAGE_KEYS.RECOVERY_DATA);\n      recoverySection.style.display = 'none';\n    }\n  });\n\n  // ローカルデータの削除\n  container.addEventListener('click', (e) => {\n    const deleteBtn = e.target.closest('.delete-local-btn');\n    if (deleteBtn) {\n      const recordId = deleteBtn.dataset.id;\n      if (confirm('このローカルデータを削除しますか？')) {\n        localDataCache = localDataCache.filter(record => record.id !== recordId);\n        localStorage.setItem(STORAGE_KEYS.WORK_RECORDS, JSON.stringify(localDataCache));\n        loadLocalData();\n        renderLocalData();\n      }\n    }\n  });\n\n  // 初期化実行\n  init();\n}";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="emergency-banner">
+        ⚠ 緊急事態発生時は即座に報告してください ⚠
+    </div>
+
+    <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">工</div>
-                    工数記録システム
-                </div>
+                <div class="logo">工数記録システム</div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">記録・入力</div>
+                <div class="nav-title">記録管理</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
@@ -360,60 +336,70 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">中断・再開</div>
+                <div class="nav-title">中断・再開</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">確認・履歴</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
+                <div class="nav-title">確認・修正</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">修正・管理</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
+                <div class="nav-title">履歴・分析</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907275416" onclick="showScreen('scr-1778907275416')">入力チェック</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <div class="nav-title">異常・緊急</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値ログ</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">システム</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
             </div>
         </nav>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="top-bar-left">
-                    <h1 class="page-title" id="current-page-title">工数記録システム</h1>
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
-                    </div>
+                    <div class="breadcrumb">現場作業管理システム</div>
+                    <div class="current-time" id="current-time">--:--:--</div>
                 </div>
                 <div class="top-bar-right">
-                    <div class="quick-actions">
-                        <button class="quick-action-btn primary" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">
-                            ▶ 記録開始
-                        </button>
-                        <button class="quick-action-btn" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">
-                            ⏸ 中断
-                        </button>
-                    </div>
+                    <div class="status-indicator" title="システム稼働中"></div>
                     <a href="./login.html" class="user-menu">
-                        <div class="user-avatar">U</div>
+                        <span>👤</span>
                         <span>ログアウト</span>
                     </a>
                 </div>
             </header>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="showScreen('scr-1778907187615')">
+                    ▶ 作業開始
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907238439')">
+                    ⏸ 中断記録
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907199709')">
+                    ⏹ 作業終了
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907330826')">
+                    🚨 緊急報告
+                </button>
+            </div>
 
             <div class="content-area">
                 <div class="panel-container">
@@ -422,96 +408,90 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
                     <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907212862"><div class="card" style="margin: 12px; padding: 14px;">
+                    <div data-aivic-panel="scr-1778907212862"><div style="padding: 12px; background: var(--bg-main); color: var(--text); font-size: 13px;">
+  <!-- ページヘッダー -->
   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-    <h1 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0;">データ自動保存処理</h1>
+    <h1 style="font-size: 18px; font-weight: 600; margin: 0; color: var(--text);">データ自動保存処理</h1>
     <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907133295')" style="font-size: 13px; padding: 6px 12px;">工数記録画面</button>
-      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907145716')" style="font-size: 13px; padding: 6px 12px;">作業履歴</button>
+      <button class="action-btn secondary" data-testid="back-button" onclick="window.showScreen('scr-1778907133295')">工数記録画面へ</button>
+      <button class="action-btn secondary" data-testid="history-button" onclick="window.showScreen('scr-1778907145716')">作業履歴一覧</button>
     </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-    <!-- 自動保存ステータス -->
-    <div class="card" style="padding: 12px; background: var(--bg-card);">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 8px 0;">自動保存ステータス</h3>
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <div id="auto-save-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
-        <span id="auto-save-status" style="font-size: 13px; color: var(--text);">正常動作中</span>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        最終保存: <span id="last-save-time">2024/01/15 14:32:15</span>
-      </div>
+  <!-- ステータス表示エリア -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+    <div class="card" style="padding: 12px;">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">自動保存ステータス</div>
+      <div id="auto-save-status" style="font-weight: 600; color: #dc2626;" data-testid="auto-save-status">停止中</div>
+      <div id="last-save-time" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" data-testid="last-save-time">最終保存: --</div>
     </div>
-
-    <!-- ネットワーク接続状態 -->
-    <div class="card" style="padding: 12px; background: var(--bg-card);">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 8px 0;">ネットワーク接続状態</h3>
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-        <div id="network-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
-        <span id="network-status" style="font-size: 13px; color: var(--text);">オンライン</span>
-      </div>
-      <div style="font-size: 11px; color: var(--text-muted);">
-        同期待ち: <span id="pending-sync-count">0</span>件
-      </div>
+    <div class="card" style="padding: 12px;">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ネットワーク状態</div>
+      <div id="network-status" style="font-weight: 600; color: #059669;" data-testid="network-status">オンライン</div>
+      <div id="sync-pending-count" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" data-testid="sync-pending-count">同期待ち: 0件</div>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ローカルデータ</div>
+      <div id="local-data-count" style="font-weight: 600; color: var(--text);" data-testid="local-data-count">0件</div>
+      <button class="action-btn secondary" style="font-size: 11px; padding: 4px 8px; margin-top: 4px;" data-testid="view-local-data" id="btn-view-local">一覧表示</button>
     </div>
   </div>
 
-  <!-- 保存設定 -->
-  <div class="card" style="padding: 12px; background: var(--bg-card); margin-bottom: 16px;">
-    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">保存設定</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end;">
+  <!-- 保存設定エリア -->
+  <div class="card" style="padding: 12px; margin-bottom: 16px;">
+    <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">保存設定</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
       <div>
         <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">自動保存間隔（秒）</label>
-        <input type="number" id="save-interval" data-testid="save-interval-input" min="1" max="86400" value="30" 
-               style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+        <input type="number" id="save-interval" min="1" max="86400" value="30" 
+               style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;"
+               data-testid="save-interval-input">
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button id="btn-save-settings" data-testid="save-settings-button" class="action-btn" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">設定保存</button>
-        <button id="btn-manual-sync" data-testid="manual-sync-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">手動同期</button>
+      <div style="display: flex; align-items: end; gap: 8px;">
+        <button class="action-btn" id="btn-save-settings" data-testid="save-settings-button">設定保存</button>
+        <button class="action-btn secondary" id="btn-manual-sync" data-testid="manual-sync-button">手動同期</button>
       </div>
     </div>
   </div>
 
   <!-- エラー通知エリア -->
-  <div id="error-notification" class="card" style="padding: 12px; background: var(--bg-card); border-left: 3px solid #ef4444; margin-bottom: 16px; display: none;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 14px; color: #ef4444;">⚠</span>
-      <span id="error-message" style="font-size: 13px; color: var(--text);">保存エラーが発生しました</span>
-    </div>
-    <button id="btn-retry" data-testid="retry-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 8px;">再試行</button>
+  <div id="error-notification" class="card" style="padding: 12px; margin-bottom: 16px; border-left: 3px solid #dc2626; background: var(--bg-card); display: none;" data-testid="error-notification">
+    <div style="font-size: 12px; font-weight: 600; color: #dc2626; margin-bottom: 4px;">保存エラー</div>
+    <div id="error-message" style="font-size: 11px; color: var(--text-muted);"></div>
+    <button class="action-btn secondary" style="font-size: 11px; padding: 4px 8px; margin-top: 8px;" id="btn-retry" data-testid="retry-button">再試行</button>
   </div>
 
-  <!-- ローカル保存データ一覧 -->
-  <div class="card" style="padding: 12px; background: var(--bg-card); margin-bottom: 16px;">
+  <!-- ローカルデータ一覧 -->
+  <div id="local-data-section" class="card" style="padding: 12px; display: none;" data-testid="local-data-section">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0;">ローカル保存データ一覧</h3>
-      <button id="btn-clear-local" data-testid="clear-local-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;">ローカルデータクリア</button>
+      <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">ローカル保存データ一覧</h3>
+      <button class="action-btn secondary" id="btn-hide-local" data-testid="hide-local-data">閉じる</button>
     </div>
     <div class="table-wrap">
-      <table data-testid="local-data-list" style="width: 100%;">
+      <table data-testid="local-data-table">
         <thead>
           <tr>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text); text-align: left;">作業日時</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text); text-align: left;">作業内容</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text); text-align: left;">同期状態</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text); text-align: left;">操作</th>
+            <th style="padding: 6px 10px; color: var(--text);">作業日時</th>
+            <th style="padding: 6px 10px; color: var(--text);">作業内容</th>
+            <th style="padding: 6px 10px; color: var(--text);">保存状態</th>
+            <th style="padding: 6px 10px; color: var(--text);">操作</th>
           </tr>
         </thead>
         <tbody id="local-data-tbody">
-          <!-- ローカルデータがここに表示される -->
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- データ復旧オプション -->
-  <div id="recovery-section" class="card" style="padding: 12px; background: var(--bg-card); border-left: 3px solid #f59e0b; display: none;">
-    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 8px 0;">データ復旧オプション</h3>
-    <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0;">未保存のデータが検出されました。復旧しますか？</p>
+  <div id="recovery-section" class="card" style="padding: 12px; display: none; border-left: 3px solid #f59e0b;" data-testid="recovery-section">
+    <div style="font-size: 12px; font-weight: 600; color: #f59e0b; margin-bottom: 8px;">データ復旧オプション</div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+      前回の作業中に保存されていない入力データが見つかりました。復旧しますか？
+    </div>
     <div style="display: flex; gap: 8px;">
-      <button id="btn-recover" data-testid="recover-button" class="action-btn" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">復旧する</button>
-      <button id="btn-discard" data-testid="discard-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">破棄する</button>
+      <button class="action-btn" id="btn-recover-data" data-testid="recover-data-button">復旧する</button>
+      <button class="action-btn secondary" id="btn-discard-data" data-testid="discard-data-button">破棄する</button>
     </div>
   </div>
 </div></div>
@@ -534,9 +514,35 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSa
         </main>
     </div>
 
-    <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')" title="緊急報告">
-        ⚠
-    </button>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // リアルタイム時計
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ja-JP', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // ローディング表示制御
+        window.showLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        };
+        
+        window.hideLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        };
+    </script>
 
     <script>
 (function() {

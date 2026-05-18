@@ -1,40 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工数記録システム</title>
-    <script>
-        <script>
-window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
-window.AIVIC_APP_ID = "session-1778899721360";
-window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
-window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
-window.AIVIC_PRESET_SEED = {};
-window.AIVIC_PAGE_SCREEN_ID = "scr-1778907278416";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラー情報の管理\n  let errorInfo = {\n    title: 'システムエラーが発生しました',\n    code: 'E001',\n    message: '申し訳ございませんが、システムで予期しないエラーが発生しました。しばらく時間をおいてから再度お試しください。',\n    type: 'ネットワークエラー',\n    location: '工数記録保存処理',\n    technical: 'HTTP 500 - Internal Server Error',\n    timestamp: new Date().toLocaleString('ja-JP', {\n      year: 'numeric',\n      month: '2-digit',\n      day: '2-digit',\n      hour: '2-digit',\n      minute: '2-digit',\n      second: '2-digit'\n    }).replace(/\\//g, '/'),\n    retryCount: 0\n  };\n\n  // URLパラメータからエラー情報を取得\n  const urlParams = new URLSearchParams(window.location.search);\n  if (urlParams.get('error')) {\n    try {\n      const errorData = JSON.parse(decodeURIComponent(urlParams.get('error')));\n      errorInfo = { ...errorInfo, ...errorData };\n    } catch (e) {\n      console.warn('エラー情報の解析に失敗しました:', e);\n    }\n  }\n\n  // エラー情報を画面に反映\n  function updateErrorDisplay() {\n    container.querySelector('.error-title').textContent = errorInfo.title;\n    container.querySelector('[data-testid=\"error-code\"]').textContent = `エラーコード: ${errorInfo.code}`;\n    container.querySelector('[data-testid=\"error-message\"]').textContent = errorInfo.message;\n    container.querySelector('#error-timestamp').textContent = errorInfo.timestamp;\n    container.querySelector('#error-type').textContent = errorInfo.type;\n    container.querySelector('#error-location').textContent = errorInfo.location;\n    container.querySelector('#error-technical').textContent = errorInfo.technical;\n  }\n\n  // 初期表示\n  updateErrorDisplay();\n\n  // 再試行ボタン\n  container.querySelector('#btn-retry').addEventListener('click', async function() {\n    const button = this;\n    const originalText = button.innerHTML;\n    \n    // ボタンを無効化\n    button.disabled = true;\n    button.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 12a9 9 0 11-6.219-8.56\"/></svg> 再試行中...';\n    \n    try {\n      // 再試行回数をカウント\n      errorInfo.retryCount++;\n      \n      // ネットワーク接続チェック（簡易）\n      if (!navigator.onLine) {\n        throw new Error('ネットワーク接続がありません');\n      }\n      \n      // API接続テスト\n      if (apiUrl) {\n        const response = await fetch(`${apiUrl}/api/health`, { \n          method: 'GET',\n          timeout: 5000 \n        });\n        if (!response.ok) {\n          throw new Error(`サーバーエラー: ${response.status}`);\n        }\n      }\n      \n      // 成功時は元の画面に戻る\n      if (window.history.length > 1) {\n        window.history.back();\n      } else {\n        window.showScreen('scr-1778907133295'); // 工数記録画面\n      }\n      \n    } catch (error) {\n      // 再試行失敗\n      errorInfo.message = `再試行に失敗しました（${errorInfo.retryCount}回目）。${error.message}`;\n      errorInfo.timestamp = new Date().toLocaleString('ja-JP', {\n        year: 'numeric',\n        month: '2-digit', \n        day: '2-digit',\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      }).replace(/\\//g, '/');\n      \n      updateErrorDisplay();\n      \n      // 連続失敗時は管理者連絡を促す\n      if (errorInfo.retryCount >= 3) {\n        const solutionContent = container.querySelector('.solution-content');\n        solutionContent.innerHTML = `\n          <p style=\"color: #ff4757; font-weight: 500;\">再試行が${errorInfo.retryCount}回失敗しました。管理者にお問い合わせください。</p>\n          <ul>\n            <li>「管理者に連絡」ボタンから問題を報告する</li>\n            <li>しばらく時間をおいてから再度お試しください</li>\n            <li>緊急の場合は直接電話でお問い合わせください</li>\n          </ul>\n        `;\n      }\n    } finally {\n      // ボタンを有効化\n      button.disabled = false;\n      button.innerHTML = originalText;\n    }\n  });\n\n  // 戻るボタン\n  container.querySelector('#btn-back').addEventListener('click', function() {\n    if (window.history.length > 1) {\n      window.history.back();\n    } else {\n      window.showScreen('scr-1778907133295'); // 工数記録画面\n    }\n  });\n\n  // ホームに戻るボタン\n  container.querySelector('#btn-home').addEventListener('click', function() {\n    window.showScreen('scr-1778907133295'); // 工数記録画面（ホーム）\n  });\n\n  // 管理者に連絡ボタン\n  container.querySelector('#btn-contact').addEventListener('click', async function() {\n    const button = this;\n    const originalText = button.innerHTML;\n    \n    try {\n      button.disabled = true;\n      button.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 12a9 9 0 11-6.219-8.56\"/></svg> 送信中...';\n      \n      // 管理者連絡機能をテスト\n      if (apiUrl) {\n        const response = await fetch(`${apiUrl}/api/support/contact`, {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json' },\n          body: JSON.stringify({\n            errorCode: errorInfo.code,\n            errorMessage: errorInfo.message,\n            errorDetails: {\n              type: errorInfo.type,\n              location: errorInfo.location,\n              technical: errorInfo.technical,\n              timestamp: errorInfo.timestamp,\n              retryCount: errorInfo.retryCount\n            },\n            userAgent: navigator.userAgent,\n            url: window.location.href\n          })\n        });\n        \n        if (!response.ok) {\n          throw new Error('連絡機能が利用できません');\n        }\n        \n        // 成功時\n        alert('管理者に問題を報告しました。対応をお待ちください。');\n        \n      } else {\n        throw new Error('連絡機能が設定されていません');\n      }\n      \n    } catch (error) {\n      // 連絡機能エラー時は連絡先情報を表示\n      container.querySelector('#contact-info-card').classList.remove('hidden');\n      container.querySelector('#contact-info-card').scrollIntoView({ behavior: 'smooth' });\n      \n    } finally {\n      button.disabled = false;\n      button.innerHTML = originalText;\n    }\n  });\n\n  // エラー詳細表示ボタン\n  container.querySelector('#btn-details').addEventListener('click', function() {\n    const detailsCard = container.querySelector('#error-details-card');\n    const button = this;\n    \n    if (detailsCard.classList.contains('hidden')) {\n      // 詳細情報が取得できない場合のシミュレーション\n      if (Math.random() < 0.1) { // 10%の確率で詳細取得失敗\n        errorInfo.technical = 'エラーの詳細情報を取得できませんでした';\n        container.querySelector('#error-technical').textContent = errorInfo.technical;\n      }\n      \n      detailsCard.classList.remove('hidden');\n      button.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"18 15 12 9 6 15\"></polyline></svg> 詳細を隠す';\n      detailsCard.scrollIntoView({ behavior: 'smooth' });\n    } else {\n      detailsCard.classList.add('hidden');\n      button.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"1\"></circle><circle cx=\"19\" cy=\"12\" r=\"1\"></circle><circle cx=\"5\" cy=\"12\" r=\"1\"></circle></svg> エラー詳細表示';\n    }\n  });\n\n  // ネットワーク状態の監視\n  window.addEventListener('online', function() {\n    const solutionContent = container.querySelector('.solution-content');\n    solutionContent.innerHTML = `\n      <p style=\"color: #2ed573; font-weight: 500;\">ネットワーク接続が復旧しました。再試行をお試しください。</p>\n      <ul>\n        <li>「再試行」ボタンをクリックして操作をやり直す</li>\n        <li>問題が解決しない場合は管理者にお問い合わせください</li>\n      </ul>\n    `;\n  });\n\n  window.addEventListener('offline', function() {\n    errorInfo.type = 'ネットワーク切断';\n    errorInfo.message = 'ネットワーク接続が切断されました。接続を確認してから再試行してください。';\n    updateErrorDisplay();\n    \n    const solutionContent = container.querySelector('.solution-content');\n    solutionContent.innerHTML = `\n      <p style=\"color: #ff4757; font-weight: 500;\">ネットワーク接続が切断されています。</p>\n      <ul>\n        <li>Wi-Fiまたはモバイルデータ接続を確認する</li>\n        <li>接続復旧後に「再試行」ボタンをクリックする</li>\n        <li>問題が続く場合は管理者にお問い合わせください</li>\n      </ul>\n    `;\n  });\n\n  // セッション切れの検出\n  if (urlParams.get('session') === 'expired') {\n    errorInfo.title = 'セッションが切れました';\n    errorInfo.code = 'E401';\n    errorInfo.message = 'ログインセッションの有効期限が切れました。再度ログインしてください。';\n    errorInfo.type = '認証エラー';\n    \n    updateErrorDisplay();\n    \n    // ログイン画面へのボタンを追加\n    const primaryActions = container.querySelector('.primary-actions');\n    const loginButton = document.createElement('button');\n    loginButton.className = 'action-btn';\n    loginButton.innerHTML = '<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4\"></path><polyline points=\"10 17 15 12 10 7\"></polyline><line x1=\"15\" y1=\"12\" x2=\"3\" y2=\"12\"></line></svg> ログイン画面へ';\n    loginButton.addEventListener('click', function() {\n      window.location.href = './login.html';\n    });\n    primaryActions.appendChild(loginButton);\n  }\n\n  // 長いエラーメッセージの制限\n  const messageElement = container.querySelector('[data-testid=\"error-message\"]');\n  if (errorInfo.message.length > 500) {\n    const truncatedMessage = errorInfo.message.substring(0, 500) + '...';\n    messageElement.textContent = truncatedMessage;\n    messageElement.title = errorInfo.message; // ホバーで全文表示\n  }\n}";
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </script>
     <style>
         :root {
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --primary-light: #e0f2fe;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-sidebar: #f1f5f9;
-            --bg-header: #ffffff;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --primary: #cc1f1f;
+            --primary-hover: #a61a1a;
+            --bg-main: #0d0d0d;
+            --bg-card: #1a1010;
+            --bg-sidebar: #151111;
+            --border: #331a1a;
+            --text: #e6e6e6;
+            --text-muted: #999999;
+            --top-bar-bg: #1f1515;
+            --top-bar-border: #2d1a1a;
+            --warning: #ff6b35;
+            --error: #ff3333;
+            --success: #28a745;
         }
 
         * {
@@ -45,14 +29,14 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
             font-size: 13px;
             line-height: 1.4;
-            color: var(--text);
-            background: var(--bg-main);
             overflow-x: hidden;
         }
 
-        .app-layout {
+        .app-container {
             display: flex;
             height: 100vh;
         }
@@ -63,13 +47,15 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
         }
 
         .sidebar-header {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
-            background: var(--bg-card);
+            background: var(--top-bar-bg);
         }
 
         .logo {
@@ -81,36 +67,34 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
             gap: 8px;
         }
 
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
+        .logo::before {
+            content: "⚠";
+            font-size: 18px;
         }
 
         .nav-section {
             padding: 16px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .nav-section-title {
+        .nav-section:last-child {
+            border-bottom: none;
+            flex: 1;
+        }
+
+        .nav-title {
+            padding: 0 16px 8px;
             font-size: 11px;
-            font-weight: 600;
-            color: var(--text-light);
+            font-weight: 500;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 0 16px 8px;
         }
 
         .nav-item {
             display: block;
             padding: 8px 16px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             font-size: 13px;
             font-weight: 400;
@@ -124,12 +108,12 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
         }
 
         .nav-item:hover {
-            background: var(--bg-card);
-            color: var(--text);
+            background: rgba(204, 31, 31, 0.1);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
-            background: var(--primary-light);
+            background: rgba(204, 31, 31, 0.15);
             color: var(--primary);
             border-left-color: var(--primary);
             font-weight: 500;
@@ -137,20 +121,23 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
 
         .main-content {
             flex: 1;
+            margin-left: 220px;
             display: flex;
             flex-direction: column;
-            min-width: 0;
+            min-height: 100vh;
         }
 
         .top-bar {
             height: 52px;
-            background: var(--bg-header);
-            border-bottom: 1px solid var(--border);
+            background: var(--top-bar-bg);
+            border-bottom: 1px solid var(--top-bar-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
         .top-bar-left {
@@ -159,25 +146,16 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
             gap: 16px;
         }
 
-        .page-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
+        .breadcrumb {
+            font-size: 13px;
             color: var(--text-muted);
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
+        .current-time {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
         }
 
         .top-bar-right {
@@ -186,172 +164,170 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
             gap: 12px;
         }
 
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .user-menu {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            padding: 6px 12px;
             background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text);
             text-decoration: none;
             transition: all 0.15s ease;
         }
 
         .user-menu:hover {
+            background: var(--bg-sidebar);
             border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .user-avatar {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
         }
 
         .content-area {
             flex: 1;
-            overflow: auto;
-            padding: 16px 20px;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .panel-container {
-            max-width: 1200px;
-            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: calc(100vh - 132px);
+        }
+
+        .emergency-banner {
+            background: linear-gradient(135deg, var(--error), var(--warning));
+            color: white;
+            padding: 8px 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            animation: flash 3s infinite;
+        }
+
+        @keyframes flash {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.7; }
         }
 
         .quick-actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
         }
 
-        .quick-action-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg-card);
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
+        .quick-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-        }
-
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .quick-action-btn.primary {
+            padding: 6px 12px;
             background: var(--primary);
-            border-color: var(--primary);
             color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 8px;
+            transition: all 0.15s ease;
         }
 
-        .quick-action-btn.primary:hover {
+        .quick-btn:hover {
             background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
-        .loading-state {
-            display: flex;
+        .quick-btn.secondary {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+        }
+
+        .quick-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-area {
+                padding: 12px;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(13, 13, 13, 0.8);
+            display: none;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-size: 12px;
+            z-index: 1000;
         }
 
         .loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border);
-            border-top: 2px solid var(--primary);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .emergency-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--danger);
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            transition: all 0.15s ease;
-            z-index: 1000;
-        }
-
-        .emergency-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px -8px var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -220px;
-                top: 0;
-                height: 100vh;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .quick-actions {
-                flex-wrap: wrap;
-            }
-
-            .content-area {
-                padding: 12px 16px;
-            }
-        }
     </style>
+    <script>
+        <script>
+window.AIVIC_API_URL = "https://mkwmoife37uqyv4zhy4yhweozq0oddxn.lambda-url.us-east-1.on.aws/";
+window.AIVIC_APP_ID = "session-1778899721360";
+window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発";
+window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
+window.AIVIC_PRESET_SEED = {};
+window.AIVIC_PAGE_SCREEN_ID = "scr-1778907278416";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラー情報の管理\n  let errorState = {\n    title: 'システムエラーが発生しました',\n    message: '作業記録の保存中にエラーが発生しました。ネットワーク接続を確認してください。',\n    code: 'E001-NETWORK_ERROR',\n    timestamp: new Date().toLocaleString('ja-JP', {\n      year: 'numeric',\n      month: '2-digit',\n      day: '2-digit',\n      hour: '2-digit',\n      minute: '2-digit',\n      second: '2-digit'\n    }),\n    solution: '1. ネットワーク接続を確認してください\\n2. しばらく時間をおいて再試行してください\\n3. 問題が解決しない場合は管理者にお問い合わせください',\n    details: 'TypeError: Failed to fetch\\n  at saveWorkRecord (work-record.js:45)\\n  at HTMLButtonElement.<anonymous> (work-record.js:12)',\n    previousScreen: 'scr-1778907133295', // 工数記録画面\n    retryAction: null,\n    isDetailsVisible: false,\n    isNetworkError: true\n  };\n\n  // URLパラメータからエラー情報を取得\n  const urlParams = new URLSearchParams(window.location.search);\n  if (urlParams.get('error')) {\n    try {\n      const errorData = JSON.parse(decodeURIComponent(urlParams.get('error')));\n      errorState = { ...errorState, ...errorData };\n    } catch (e) {\n      console.warn('エラーパラメータの解析に失敗:', e);\n    }\n  }\n\n  // エラー情報を画面に反映\n  function updateErrorDisplay() {\n    container.querySelector('#error-title').textContent = errorState.title;\n    container.querySelector('#error-message').textContent = errorState.message;\n    container.querySelector('#error-code').textContent = errorState.code;\n    container.querySelector('#error-timestamp').textContent = errorState.timestamp;\n    container.querySelector('#error-solution').innerHTML = errorState.solution.replace(/\\n/g, '<br>');\n    container.querySelector('#error-stack').innerHTML = errorState.details.replace(/\\n/g, '<br>').replace(/ /g, '&nbsp;');\n    \n    // 長いメッセージの制限（500文字以下）\n    const messageEl = container.querySelector('#error-message');\n    if (errorState.message.length > 500) {\n      messageEl.textContent = errorState.message.substring(0, 497) + '...';\n    }\n  }\n\n  updateErrorDisplay();\n\n  // 再試行ボタン\n  let isRetrying = false;\n  container.querySelector('#btn-retry').addEventListener('click', async () => {\n    if (isRetrying) return;\n    \n    isRetrying = true;\n    const retryBtn = container.querySelector('#btn-retry');\n    const originalText = retryBtn.textContent;\n    retryBtn.textContent = '再試行中...';\n    retryBtn.disabled = true;\n\n    try {\n      // ネットワークエラーの場合の再試行シミュレーション\n      if (errorState.isNetworkError) {\n        // 実際のネットワーク状態をチェック\n        if (!navigator.onLine) {\n          throw new Error('ネットワーク接続がありません');\n        }\n        \n        // 簡単な接続テスト\n        const response = await fetch(apiUrl + '/api/health', { \n          method: 'GET',\n          timeout: 5000 \n        }).catch(() => {\n          throw new Error('サーバーに接続できません');\n        });\n        \n        if (!response.ok) {\n          throw new Error('サーバーエラーが発生しています');\n        }\n      }\n\n      // 再試行成功 - 元の画面に戻る\n      if (errorState.previousScreen) {\n        window.showScreen(errorState.previousScreen);\n      } else {\n        window.showScreen('scr-1778907133295'); // デフォルトで工数記録画面\n      }\n    } catch (error) {\n      // 再試行失敗\n      errorState.message = `再試行に失敗しました。${error.message}`;\n      errorState.timestamp = new Date().toLocaleString('ja-JP', {\n        year: 'numeric',\n        month: '2-digit', \n        day: '2-digit',\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      });\n      updateErrorDisplay();\n    } finally {\n      isRetrying = false;\n      retryBtn.textContent = originalText;\n      retryBtn.disabled = false;\n    }\n  });\n\n  // 戻るボタン\n  container.querySelector('#btn-back').addEventListener('click', () => {\n    if (errorState.previousScreen) {\n      window.showScreen(errorState.previousScreen);\n    } else {\n      window.showScreen('scr-1778907133295'); // デフォルトで工数記録画面\n    }\n  });\n\n  // ホームに戻るボタン\n  container.querySelector('#btn-home').addEventListener('click', () => {\n    window.showScreen('scr-1778907133295'); // 工数記録画面をホームとする\n  });\n\n  // 管理者に連絡ボタン\n  container.querySelector('#btn-contact-admin').addEventListener('click', async () => {\n    try {\n      // 管理者連絡機能の利用可能性をチェック\n      const response = await fetch(apiUrl + '/api/contact/admin', {\n        method: 'HEAD'\n      }).catch(() => {\n        throw new Error('連絡機能が利用できません');\n      });\n\n      if (!response.ok) {\n        throw new Error('連絡機能が利用できません');\n      }\n\n      // 緊急報告画面に遷移\n      window.showScreen('scr-1778907330826');\n    } catch (error) {\n      // 管理者連絡機能エラーを表示\n      const contactError = container.querySelector('#contact-error');\n      contactError.classList.remove('hidden');\n      \n      setTimeout(() => {\n        contactError.classList.add('hidden');\n      }, 10000); // 10秒後に自動で非表示\n    }\n  });\n\n  // エラー詳細表示切り替えボタン\n  container.querySelector('#btn-toggle-details').addEventListener('click', () => {\n    const detailsEl = container.querySelector('#error-details');\n    const toggleBtn = container.querySelector('#btn-toggle-details');\n    \n    errorState.isDetailsVisible = !errorState.isDetailsVisible;\n    \n    if (errorState.isDetailsVisible) {\n      detailsEl.classList.remove('hidden');\n      toggleBtn.textContent = 'エラー詳細を非表示';\n    } else {\n      detailsEl.classList.add('hidden');\n      toggleBtn.textContent = 'エラー詳細を表示';\n    }\n  });\n\n  // セッション切れの検出\n  const checkSession = async () => {\n    try {\n      const response = await fetch(apiUrl + '/api/auth/check', {\n        method: 'GET',\n        credentials: 'include'\n      });\n      \n      if (response.status === 401) {\n        // セッション切れの場合\n        errorState.title = 'セッションが切れました';\n        errorState.message = 'ログインセッションの有効期限が切れています。再度ログインしてください。';\n        errorState.code = 'E401-SESSION_EXPIRED';\n        errorState.solution = '1. ログイン画面に移動してください\\n2. 認証情報を入力し直してください';\n        updateErrorDisplay();\n        \n        // ログイン画面へのボタンを追加\n        const homeBtn = container.querySelector('#btn-home');\n        homeBtn.textContent = 'ログイン画面へ';\n        homeBtn.onclick = () => {\n          window.location.href = './login.html';\n        };\n      }\n    } catch (error) {\n      // ネットワークエラーの場合は何もしない\n    }\n  };\n\n  // 初期化時にセッションチェック\n  checkSession();\n\n  // ネットワーク状態の監視\n  window.addEventListener('online', () => {\n    if (errorState.isNetworkError) {\n      errorState.message = 'ネットワーク接続が復旧しました。再試行してください。';\n      updateErrorDisplay();\n    }\n  });\n\n  window.addEventListener('offline', () => {\n    errorState.title = 'ネットワークエラー';\n    errorState.message = 'インターネット接続が切断されています。接続を確認してください。';\n    errorState.code = 'E000-OFFLINE';\n    errorState.isNetworkError = true;\n    updateErrorDisplay();\n  });\n}";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </script>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="emergency-banner">
+        ⚠ 緊急事態発生時は即座に報告してください ⚠
+    </div>
+
+    <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">工</div>
-                    工数記録システム
-                </div>
+                <div class="logo">工数記録システム</div>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">記録・入力</div>
+                <div class="nav-title">記録管理</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907133295" onclick="showScreen('scr-1778907133295')">工数記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">記録開始</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907199709" onclick="showScreen('scr-1778907199709')">記録終了</button>
@@ -360,60 +336,70 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">中断・再開</div>
+                <div class="nav-title">中断・再開</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">中断記録</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907251446" onclick="showScreen('scr-1778907251446')">作業再開</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">確認・履歴</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
+                <div class="nav-title">確認・修正</div>
                 <button class="nav-item" data-aivic-nav="scr-1778907226171" onclick="showScreen('scr-1778907226171')">記録確認</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907367889" onclick="showScreen('scr-1778907367889')">工数記録確認</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">修正・管理</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907319067" onclick="showScreen('scr-1778907319067')">修正入力</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907343735" onclick="showScreen('scr-1778907343735')">工数修正</button>
+                <div class="nav-title">履歴・分析</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907145716" onclick="showScreen('scr-1778907145716')">作業履歴</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907353387" onclick="showScreen('scr-1778907353387')">データ抽出</button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-section-title">システム</div>
-                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値検出ログ</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存処理</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907275416" onclick="showScreen('scr-1778907275416')">入力チェック</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
+                <div class="nav-title">異常・緊急</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907170814" onclick="showScreen('scr-1778907170814')">異常値ログ</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')">緊急報告</button>
                 <button class="nav-item" data-aivic-nav="scr-1778907287126" onclick="showScreen('scr-1778907287126')">データ検証</button>
-                <button class="nav-item" data-aivic-nav="scr-1778907309324" onclick="showScreen('scr-1778907309324')">異常値検出処理</button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">システム</div>
+                <button class="nav-item" data-aivic-nav="scr-1778907212862" onclick="showScreen('scr-1778907212862')">自動保存</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907263518" onclick="showScreen('scr-1778907263518')">入力チェック</button>
+                <button class="nav-item" data-aivic-nav="scr-1778907278416" onclick="showScreen('scr-1778907278416')">エラー表示</button>
             </div>
         </nav>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="top-bar-left">
-                    <h1 class="page-title" id="current-page-title">工数記録システム</h1>
-                    <div class="status-indicator">
-                        <div class="status-dot"></div>
-                        <span>オンライン</span>
-                    </div>
+                    <div class="breadcrumb">現場作業管理システム</div>
+                    <div class="current-time" id="current-time">--:--:--</div>
                 </div>
                 <div class="top-bar-right">
-                    <div class="quick-actions">
-                        <button class="quick-action-btn primary" data-aivic-nav="scr-1778907187615" onclick="showScreen('scr-1778907187615')">
-                            ▶ 記録開始
-                        </button>
-                        <button class="quick-action-btn" data-aivic-nav="scr-1778907238439" onclick="showScreen('scr-1778907238439')">
-                            ⏸ 中断
-                        </button>
-                    </div>
+                    <div class="status-indicator" title="システム稼働中"></div>
                     <a href="./login.html" class="user-menu">
-                        <div class="user-avatar">U</div>
+                        <span>👤</span>
                         <span>ログアウト</span>
                     </a>
                 </div>
             </header>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="showScreen('scr-1778907187615')">
+                    ▶ 作業開始
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907238439')">
+                    ⏸ 中断記録
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907199709')">
+                    ⏹ 作業終了
+                </button>
+                <button class="quick-btn secondary" onclick="showScreen('scr-1778907330826')">
+                    🚨 緊急報告
+                </button>
+            </div>
 
             <div class="content-area">
                 <div class="panel-container">
@@ -427,340 +413,88 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
                     <div data-aivic-panel="scr-1778907238439" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
-                    <div data-aivic-panel="scr-1778907278416"><div class="error-display-screen">
-  <!-- エラーヘッダー -->
-  <div class="error-header">
-    <div class="error-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="15" y1="9" x2="9" y2="15"></line>
-        <line x1="9" y1="9" x2="15" y2="15"></line>
-      </svg>
-    </div>
-    <div class="error-title-section">
-      <h1 class="error-title" data-testid="error-title">システムエラーが発生しました</h1>
-      <div class="error-code" data-testid="error-code">エラーコード: E001</div>
-    </div>
-  </div>
-
-  <!-- エラーメッセージ -->
-  <div class="card error-message-card">
-    <div class="error-message" data-testid="error-message">
-      申し訳ございませんが、システムで予期しないエラーが発生しました。しばらく時間をおいてから再度お試しください。
-    </div>
-    <div class="error-time" data-testid="error-time">
-      発生時刻: <span id="error-timestamp">2024/01/15 14:30:25</span>
-    </div>
-  </div>
-
-  <!-- 対処方法 -->
-  <div class="card solution-card">
-    <h3 class="solution-title">対処方法</h3>
-    <div class="solution-content">
-      <p>以下の方法をお試しください：</p>
-      <ul>
-        <li>「再試行」ボタンをクリックして操作をやり直す</li>
-        <li>ネットワーク接続を確認する</li>
-        <li>ブラウザを再読み込みする</li>
-        <li>問題が解決しない場合は管理者にお問い合わせください</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- エラー詳細（初期は非表示） -->
-  <div class="card error-details-card hidden" id="error-details-card">
-    <h3 class="details-title">エラー詳細情報</h3>
-    <div class="error-details" data-testid="error-details">
-      <div class="detail-row">
-        <span class="detail-label">エラー種別:</span>
-        <span class="detail-value" id="error-type">ネットワークエラー</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">発生箇所:</span>
-        <span class="detail-value" id="error-location">工数記録保存処理</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">技術情報:</span>
-        <span class="detail-value" id="error-technical">HTTP 500 - Internal Server Error</span>
+                    <div data-aivic-panel="scr-1778907278416"><div class="error-container" style="padding: 16px; max-width: 600px; margin: 0 auto;">
+  <div class="error-card" style="background: var(--bg-card); border-radius: 8px; padding: 16px; border: 1px solid rgba(220, 38, 38, 0.3);">
+    <!-- エラーアイコンとタイトル -->
+    <div class="error-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+      <div class="error-icon" style="width: 48px; height: 48px; background: #dc2626; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: bold;">!</div>
+      <div>
+        <h2 id="error-title" style="color: var(--text); font-size: 18px; font-weight: 600; margin: 0;">システムエラーが発生しました</h2>
+        <div id="error-timestamp" style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">2024/01/15 14:30:25</div>
       </div>
     </div>
-  </div>
 
-  <!-- アクションボタン -->
-  <div class="error-actions">
-    <div class="primary-actions">
-      <button class="action-btn" data-testid="retry-button" id="btn-retry">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"></polyline>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-        </svg>
+    <!-- エラーメッセージ -->
+    <div class="error-message-section" style="margin-bottom: 16px;">
+      <div id="error-message" style="color: var(--text); font-size: 13px; line-height: 1.5; background: rgba(220, 38, 38, 0.1); padding: 12px; border-radius: 6px; border-left: 3px solid #dc2626;">
+        作業記録の保存中にエラーが発生しました。ネットワーク接続を確認してください。
+      </div>
+    </div>
+
+    <!-- エラーコード -->
+    <div class="error-code-section" style="margin-bottom: 16px;">
+      <label style="color: var(--text-muted); font-size: 11px; display: block; margin-bottom: 4px;">エラーコード</label>
+      <div id="error-code" style="color: var(--text); font-size: 13px; font-family: monospace; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18);">
+        E001-NETWORK_ERROR
+      </div>
+    </div>
+
+    <!-- 対処方法 -->
+    <div class="error-solution-section" style="margin-bottom: 20px;">
+      <label style="color: var(--text-muted); font-size: 11px; display: block; margin-bottom: 4px;">対処方法</label>
+      <div id="error-solution" style="color: var(--text); font-size: 13px; line-height: 1.5;">
+        1. ネットワーク接続を確認してください<br>
+        2. しばらく時間をおいて再試行してください<br>
+        3. 問題が解決しない場合は管理者にお問い合わせください
+      </div>
+    </div>
+
+    <!-- エラー詳細（初期は非表示） -->
+    <div id="error-details" class="hidden" style="margin-bottom: 16px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18);">
+      <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 8px;">詳細情報</div>
+      <div id="error-stack" style="color: var(--text); font-size: 12px; font-family: monospace; line-height: 1.4; max-height: 200px; overflow-y: auto;">
+        TypeError: Failed to fetch<br>
+        &nbsp;&nbsp;at saveWorkRecord (work-record.js:45)<br>
+        &nbsp;&nbsp;at HTMLButtonElement.&lt;anonymous&gt; (work-record.js:12)
+      </div>
+    </div>
+
+    <!-- アクションボタン群 -->
+    <div class="error-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+      <button id="btn-retry" data-testid="retry-button" class="action-btn" style="background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
         再試行
       </button>
-      <button class="action-btn secondary" data-testid="back-button" id="btn-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+      <button id="btn-back" data-testid="back-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
         戻る
       </button>
     </div>
-    
-    <div class="secondary-actions">
-      <button class="action-btn secondary" data-testid="home-button" id="btn-home">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-          <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
+
+    <div class="error-actions-secondary" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+      <button id="btn-home" data-testid="home-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
         ホームに戻る
       </button>
-      <button class="action-btn secondary" data-testid="contact-admin-button" id="btn-contact">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-          <polyline points="22,6 12,13 2,6"></polyline>
-        </svg>
+      <button id="btn-contact-admin" data-testid="contact-admin-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
         管理者に連絡
       </button>
-      <button class="action-btn secondary" data-testid="show-details-button" id="btn-details">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="1"></circle>
-          <circle cx="19" cy="12" r="1"></circle>
-          <circle cx="5" cy="12" r="1"></circle>
-        </svg>
-        エラー詳細表示
+    </div>
+
+    <div class="error-actions-tertiary" style="text-align: center;">
+      <button id="btn-toggle-details" data-testid="toggle-details-button" style="background: transparent; color: var(--text-muted); border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: underline;">
+        エラー詳細を表示
       </button>
     </div>
   </div>
 
-  <!-- 連絡先情報（管理者連絡機能エラー時に表示） -->
-  <div class="card contact-info-card hidden" id="contact-info-card">
-    <h3 class="contact-title">管理者連絡先</h3>
-    <div class="contact-content">
-      <p>システム管理者への連絡機能が利用できません。以下の方法で直接お問い合わせください：</p>
-      <div class="contact-methods">
-        <div class="contact-method">
-          <strong>電話:</strong> 03-1234-5678（平日 9:00-18:00）
-        </div>
-        <div class="contact-method">
-          <strong>メール:</strong> support@company.com
-        </div>
-      </div>
+  <!-- 管理者連絡エラー表示エリア -->
+  <div id="contact-error" class="hidden" style="margin-top: 12px; background: var(--bg-card); border-radius: 6px; padding: 12px; border: 1px solid rgba(255, 165, 0, 0.3);">
+    <div style="color: #fbbf24; font-size: 13px; margin-bottom: 8px;">管理者連絡機能が利用できません</div>
+    <div style="color: var(--text); font-size: 12px; line-height: 1.4;">
+      代替の連絡方法をご利用ください：<br>
+      電話: 03-1234-5678<br>
+      メール: admin@company.com
     </div>
   </div>
-</div>
-
-<style>
-.error-display-screen {
-  padding: 16px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.error-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.error-icon {
-  color: #ff4757;
-  flex-shrink: 0;
-}
-
-.error-title-section {
-  flex: 1;
-}
-
-.error-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 8px 0;
-}
-
-.error-code {
-  font-size: 13px;
-  color: var(--text-muted);
-  font-family: monospace;
-}
-
-.error-message-card {
-  margin-bottom: 16px;
-  padding: 16px;
-}
-
-.error-message {
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.error-time {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.solution-card {
-  margin-bottom: 16px;
-  padding: 16px;
-}
-
-.solution-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 12px 0;
-}
-
-.solution-content {
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.5;
-}
-
-.solution-content ul {
-  margin: 8px 0 0 0;
-  padding-left: 20px;
-}
-
-.solution-content li {
-  margin-bottom: 4px;
-}
-
-.error-details-card {
-  margin-bottom: 16px;
-  padding: 16px;
-}
-
-.details-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 12px 0;
-}
-
-.detail-row {
-  display: flex;
-  margin-bottom: 8px;
-  font-size: 13px;
-}
-
-.detail-label {
-  color: var(--text-muted);
-  min-width: 100px;
-  flex-shrink: 0;
-}
-
-.detail-value {
-  color: var(--text);
-  font-family: monospace;
-}
-
-.error-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.primary-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.secondary-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: none;
-}
-
-.action-btn:not(.secondary) {
-  background: var(--primary);
-  color: #fff;
-}
-
-.action-btn:not(.secondary):hover {
-  background: var(--primary-hover);
-}
-
-.action-btn.secondary {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid rgba(255,255,255,0.18);
-}
-
-.action-btn.secondary:hover {
-  background: rgba(255,255,255,0.05);
-}
-
-.action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.contact-info-card {
-  margin-top: 16px;
-  padding: 16px;
-  border-left: 3px solid #ff6a00;
-}
-
-.contact-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 12px 0;
-}
-
-.contact-content {
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.5;
-}
-
-.contact-methods {
-  margin-top: 12px;
-}
-
-.contact-method {
-  margin-bottom: 8px;
-  padding: 8px;
-  background: rgba(255,255,255,0.02);
-  border-radius: 4px;
-}
-
-.hidden {
-  display: none;
-}
-
-@media (max-width: 600px) {
-  .error-header {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .primary-actions,
-  .secondary-actions {
-    flex-direction: column;
-  }
-  
-  .action-btn {
-    justify-content: center;
-  }
-}
-</style></div>
+</div></div>
                     <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
                     <div data-aivic-panel="scr-1778907309324" style="display:none"></div>
@@ -775,9 +509,35 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // エラ�
         </main>
     </div>
 
-    <button class="emergency-btn" data-aivic-nav="scr-1778907330826" onclick="showScreen('scr-1778907330826')" title="緊急報告">
-        ⚠
-    </button>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+        // リアルタイム時計
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ja-JP', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // ローディング表示制御
+        window.showLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        };
+        
+        window.hideLoading = function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        };
+    </script>
 
     <script>
 (function() {
