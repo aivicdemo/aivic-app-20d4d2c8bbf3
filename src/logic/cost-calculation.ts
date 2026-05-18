@@ -1,206 +1,245 @@
-/**
- * 人件費率と原価計算モジュール
- * 工数実績データと売上データの照合、ROI分析、投資効果検証を行う
- */
+// 人件費計算と原価分析のための純関数モジュール
 
-// 基本型定義
-export interface LaborCostCalculationInput {
-  totalLaborCost: number;
-  totalRevenue: number;
+export interface WorkRecord {
+  作業記録ID: string;
+  作業員ID: string;
+  作業日: Date;
+  作業開始時刻: Date;
+  作業終了時刻: Date | null;
+  作業時間: number | null;
+  プロジェクト名: string;
+  作業場所: string;
+  作業種別: string;
+  作業内容: string;
+  進捗状況: string;
+  備考: string | null;
+  承認状態: string;
+  承認者ID: string | null;
+  承認日時: Date | null;
+  作成日時: Date;
+  更新日時: Date;
+  作成者ID: string;
 }
 
-export interface ROICalculationInput {
-  annualSavings: number;
-  operatingCost: number;
-  initialInvestment: number;
+export interface InterruptionRecord {
+  中断記録ID: string;
+  作業記録ID: string;
+  中断開始日時: Date;
+  中断終了日時: Date | null;
+  中断理由区分: string;
+  中断理由詳細: string | null;
+  中断時間: number | null;
+  影響度: string | null;
+  対応状況: string;
+  記録者ID: string;
+  作成日時: Date;
+  更新日時: Date;
 }
 
-export interface PaybackPeriodInput {
-  initialInvestment: number;
-  annualSavings: number;
+export interface AnomalyDetectionLog {
+  異常値検出ログID: string;
+  検出対象テーブル: string;
+  検出対象レコードID: string;
+  ユーザーID: string;
+  異常値種別: string;
+  検出項目: string;
+  検出値: string;
+  閾値: string;
+  重要度: string;
+  確認状況: string;
+  通知送信フラグ: boolean;
+  確認者ID: string | null;
+  確認日時: Date | null;
+  対応メモ: string | null;
+  検出日時: Date;
+  作成日時: Date;
+  更新日時: Date;
 }
 
-export interface CostAnalysisResult {
+export interface CostCalculationResult {
   laborCostRate: number;
+  emergencyResponseCost: number;
   roi: number;
+  profitabilityIndex: number;
+}
+
+export interface EmergencyResponseData {
+  emergencyHours: number;
+  additionalStaff: number;
+  hourlyRate: number;
+  totalCost: number;
+}
+
+export interface ROIAnalysisData {
+  annualSavings: number;
+  operationCost: number;
+  initialInvestment: number;
+  roiPercentage: number;
   paybackPeriod: number;
-  isViable: boolean;
 }
 
-export interface InvestmentViabilityInput {
-  roi: number;
-  paybackPeriodMonths: number;
+export interface ProfitabilityData {
+  revenue: number;
+  laborCost: number;
+  operationCost: number;
+  profitMargin: number;
+  profitabilityIndex: number;
 }
 
-// 閾値定数
-export const INVESTMENT_THRESHOLDS = {
-  MIN_ROI_PERCENT: 15,
-  MAX_PAYBACK_MONTHS: 24,
-  RISK_COEFFICIENT: 0.8
-} as const;
-
-/**
- * 対応ルール: 工数実績データと売上データが存在する状態で売上データとの照合処理が実行されたとき → 工数実績データと売上データを自動照合し、人件費率を算出して基準値との乖離をチェックする
- */
-export function calculateLaborCostRate(totalLaborCost: number, totalRevenue: number): number {
+/** 対応ルール: 工数実績データと売上データが存在する状態で売上データとの照合処理が実行されたとき → 工数実績データと売上データを自動照合し、人件費率を算出して基準値との乖離をチェックする */
+export const calculateLaborCostRate = (totalHours: number, totalRevenue: number, hourlyRate: number): number => {
   if (totalRevenue <= 0) {
-    throw new Error('売上高は0より大きい値である必要があります');
+    return 0;
   }
   
-  if (totalLaborCost < 0) {
-    throw new Error('人件費は0以上の値である必要があります');
-  }
-
-  return (totalLaborCost / totalRevenue) * 100;
-}
-
-/**
- * 対応ルール: 工数削減効果と導入コストが算出されている状態でROI実績算出が実行されたとき → （年間工数削減による人件費削減額 - 年間システム運用費）÷ 初期導入費用 × 100でROI率を計算する
- */
-export function calculateROI(annualSavings: number, operatingCost: number, initialInvestment: number): number {
-  if (initialInvestment <= 0) {
-    throw new Error('初期投資額は0より大きい値である必要があります');
-  }
-
-  const netAnnualSavings = annualSavings - operatingCost;
-  return (netAnnualSavings / initialInvestment) * 100;
-}
-
-/**
- * 対応ルール: ROI実績がマイナス値を示している状態で全国展開判定が実行されたとき → 展開計画を保留し、改善施策の検討を推奨するアラートを生成する
- */
-export function isROIPositive(roi: number): boolean {
-  return roi > 0;
-}
-
-/**
- * 対応ルール: 投資回収期間が24ヶ月以内かつROI15%以上の場合に投資効果ありと判定する → 投資回収期間が3年以内かつROI15%以上の場合に投資効果ありと判定する
- */
-export function calculatePaybackPeriod(initialInvestment: number, annualSavings: number): number {
-  if (annualSavings <= 0) {
-    throw new Error('年間削減効果は0より大きい値である必要があります');
-  }
-
-  if (initialInvestment <= 0) {
-    throw new Error('初期投資額は0より大きい値である必要があります');
-  }
-
-  return initialInvestment / annualSavings;
-}
-
-/**
- * 対応ルール: 投資回収期間が24ヶ月以内かつROI15%以上の計画のみ承認対象とし、段階的実施スケジュールを確定する
- */
-export function isInvestmentViable(roi: number, paybackPeriodMonths: number): boolean {
-  return roi >= INVESTMENT_THRESHOLDS.MIN_ROI_PERCENT && 
-         paybackPeriodMonths <= INVESTMENT_THRESHOLDS.MAX_PAYBACK_MONTHS;
-}
-
-/**
- * 対応ルール: 全国展開を想定したROI分析において投資回収シミュレーションが実行されたとき → スモールスタート実績データを基に全国680名展開時の効果を線形スケールで予測し、リスク係数0.8を適用して保守的なROIを算出する
- */
-export function calculateConservativeROI(baseROI: number): number {
-  return baseROI * INVESTMENT_THRESHOLDS.RISK_COEFFICIENT;
-}
-
-/**
- * 対応ルール: 拠点別に工数実績を集計し、売上高に対する人件費率と作業効率指標を算出して拠点間比較レポートを生成する
- */
-export function calculateSiteEfficiencyMetrics(
-  laborCost: number, 
-  revenue: number, 
-  totalWorkHours: number, 
-  completedTasks: number
-): { laborCostRate: number; efficiency: number } {
-  const laborCostRate = calculateLaborCostRate(laborCost, revenue);
+  const totalLaborCost = totalHours * hourlyRate;
+  const laborCostRate = (totalLaborCost / totalRevenue) * 100;
   
+  return Math.round(laborCostRate * 100) / 100;
+};
+
+/** 対応ルール: 緊急対応が完了した状態で緊急対応フローが終了したとき → 対応開始から完了までの総工数と追加人件費を自動算出し、緊急対応コストレポートを生成する */
+export const calculateEmergencyResponseCost = (emergencyHours: number, additionalStaff: number, hourlyRate: number): number => {
+  const baseCost = emergencyHours * hourlyRate;
+  const additionalStaffCost = additionalStaff * hourlyRate * emergencyHours;
+  const totalCost = baseCost + additionalStaffCost;
+  
+  return Math.round(totalCost * 100) / 100;
+};
+
+/** 対応ルール: ROI実績が算出されている状態でROI実績算出が実行されたとき → （年間工数削減による人件費削減額 - 年間システム運用費）÷ 初期導入費用 × 100でROI率を計算する */
+export const calculateROI = (annualSavings: number, operationCost: number, initialInvestment: number): number => {
+  if (initialInvestment <= 0) {
+    return 0;
+  }
+  
+  const netAnnualBenefit = annualSavings - operationCost;
+  const roiPercentage = (netAnnualBenefit / initialInvestment) * 100;
+  
+  return Math.round(roiPercentage * 100) / 100;
+};
+
+/** 対応ルール: 各拠点の工数データと売上データが揃っている状態で拠点別採算性分析が実行されたとき → 拠点別に工数実績を集計し、売上高に対する人件費率と作業効率指標を算出して拠点間比較レポートを生成する */
+export const calculateProfitabilityIndex = (revenue: number, laborCost: number, operationCost: number): number => {
+  if (revenue <= 0) {
+    return 0;
+  }
+  
+  const totalCost = laborCost + operationCost;
+  const profit = revenue - totalCost;
+  const profitabilityIndex = (profit / revenue) * 100;
+  
+  return Math.round(profitabilityIndex * 100) / 100;
+};
+
+export const calculatePaybackPeriod = (initialInvestment: number, annualSavings: number, operationCost: number): number => {
+  const netAnnualBenefit = annualSavings - operationCost;
+  
+  if (netAnnualBenefit <= 0) {
+    return Infinity;
+  }
+  
+  const paybackPeriod = initialInvestment / netAnnualBenefit;
+  return Math.round(paybackPeriod * 100) / 100;
+};
+
+export const calculateWorkEfficiencyRate = (actualHours: number, plannedHours: number): number => {
+  if (plannedHours <= 0) {
+    return 0;
+  }
+  
+  const efficiencyRate = (plannedHours / actualHours) * 100;
+  return Math.round(efficiencyRate * 100) / 100;
+};
+
+export const calculateProgressRate = (actualHours: number, plannedHours: number): number => {
+  if (plannedHours <= 0) {
+    return 0;
+  }
+  
+  const progressRate = (actualHours / plannedHours) * 100;
+  return Math.round(progressRate * 100) / 100;
+};
+
+export const calculateDeviationRate = (actualValue: number, plannedValue: number): number => {
+  if (plannedValue <= 0) {
+    return 0;
+  }
+  
+  const deviationRate = ((actualValue - plannedValue) / plannedValue) * 100;
+  return Math.round(deviationRate * 100) / 100;
+};
+
+export const isAnomalousWorkHours = (workHours: number): boolean => {
+  return workHours > 24 || workHours < 0;
+};
+
+export const isShortWorkSession = (workHours: number): boolean => {
+  return workHours < 0.5; // 30分未満
+};
+
+export const isExcessiveWorkHours = (workHours: number): boolean => {
+  return workHours > 8; // 8時間超過
+};
+
+export const calculateInterruptionImpact = (interruptionHours: number, totalWorkHours: number): number => {
   if (totalWorkHours <= 0) {
-    throw new Error('総作業時間は0より大きい値である必要があります');
+    return 0;
   }
-
-  const efficiency = completedTasks / totalWorkHours;
   
-  return {
-    laborCostRate,
-    efficiency
-  };
-}
+  const impactRate = (interruptionHours / totalWorkHours) * 100;
+  return Math.round(impactRate * 100) / 100;
+};
 
-/**
- * 対応ルール: 人件費率が業界標準値を大幅に上回っている拠点において採算性分析結果が確定したとき → 該当拠点を要改善拠点として分類し、作業プロセス最適化の優先対象に設定する
- */
-export function identifyImprovementSites(
-  laborCostRate: number, 
-  industryStandard: number, 
-  thresholdPercent: number = 20
-): boolean {
-  const deviationPercent = ((laborCostRate - industryStandard) / industryStandard) * 100;
-  return deviationPercent > thresholdPercent;
-}
-
-/**
- * 対応ルール: 現在の工数実績をベースラインとし、改善後の予想工数削減率を適用して年間削減効果を算出し、初期投資額との比較でROIを計算する
- */
-export function calculateImprovementROI(
-  currentAnnualLaborCost: number,
-  reductionRate: number,
-  initialInvestment: number,
-  annualOperatingCost: number
-): number {
-  if (reductionRate < 0 || reductionRate > 1) {
-    throw new Error('削減率は0から1の間の値である必要があります');
-  }
-
-  const annualSavings = currentAnnualLaborCost * reductionRate;
-  return calculateROI(annualSavings, annualOperatingCost, initialInvestment);
-}
-
-/**
- * 対応ルール: 工数データを基にした作業効率改善効果と人件費削減効果を定量化し、ROI計算による投資回収期間を算出する
- */
-export function analyzeCostBenefit(
-  currentLaborCost: number,
-  projectedSavings: number,
-  initialInvestment: number,
-  operatingCost: number
-): CostAnalysisResult {
-  const roi = calculateROI(projectedSavings, operatingCost, initialInvestment);
-  const paybackPeriod = calculatePaybackPeriod(initialInvestment, projectedSavings - operatingCost);
-  const paybackPeriodMonths = paybackPeriod * 12;
-  
-  return {
-    laborCostRate: 0, // この関数では人件費率は計算対象外
-    roi,
-    paybackPeriod,
-    isViable: isInvestmentViable(roi, paybackPeriodMonths)
-  };
-}
-
-/**
- * 対応ルール: 各拠点の時間当たり作業完了件数を算出し、平均値からの乖離率で生産性ランキングを作成する
- */
-export function calculateProductivityScore(
-  completedTasks: number,
-  totalHours: number,
-  averageTasksPerHour: number
-): number {
+export const calculateProductivityIndex = (completedTasks: number, totalHours: number): number => {
   if (totalHours <= 0) {
-    throw new Error('総時間は0より大きい値である必要があります');
+    return 0;
   }
+  
+  const productivityIndex = completedTasks / totalHours;
+  return Math.round(productivityIndex * 100) / 100;
+};
 
-  const tasksPerHour = completedTasks / totalHours;
-  return ((tasksPerHour - averageTasksPerHour) / averageTasksPerHour) * 100;
-}
-
-/**
- * 対応ルール: 生産性上位3拠点をベストプラクティス候補とし、下位拠点には改善アクションプランの策定を必須とする
- */
-export function categorizePerformance(productivityScore: number): 'top' | 'average' | 'improvement_required' {
-  if (productivityScore >= 25) {
-    return 'top';
-  } else if (productivityScore >= -10) {
-    return 'average';
-  } else {
-    return 'improvement_required';
+export const calculateCostReductionEffect = (beforeCost: number, afterCost: number): number => {
+  if (beforeCost <= 0) {
+    return 0;
   }
-}
+  
+  const reductionRate = ((beforeCost - afterCost) / beforeCost) * 100;
+  return Math.round(reductionRate * 100) / 100;
+};
+
+export const isInvestmentViable = (roi: number, paybackPeriod: number): boolean => {
+  return roi >= 15 && paybackPeriod <= 3;
+};
+
+export const calculateSeasonalVariation = (currentValue: number, previousYearValue: number): number => {
+  if (previousYearValue <= 0) {
+    return 0;
+  }
+  
+  const variationRate = ((currentValue - previousYearValue) / previousYearValue) * 100;
+  return Math.round(variationRate * 100) / 100;
+};
+
+export const isSignificantVariation = (variationRate: number): boolean => {
+  return Math.abs(variationRate) > 20;
+};
+
+export const calculateOptimalStaffAllocation = (totalWorkload: number, averageProductivity: number): number => {
+  if (averageProductivity <= 0) {
+    return 0;
+  }
+  
+  const requiredStaff = Math.ceil(totalWorkload / averageProductivity);
+  return requiredStaff;
+};
+
+export const calculateQualityIndex = (defectCount: number, totalTasks: number): number => {
+  if (totalTasks <= 0) {
+    return 100;
+  }
+  
+  const qualityIndex = ((totalTasks - defectCount) / totalTasks) * 100;
+  return Math.round(qualityIndex * 100) / 100;
+};
