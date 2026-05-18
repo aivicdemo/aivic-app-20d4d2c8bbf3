@@ -3,12 +3,8 @@ export type Role = 'admin' | 'operator' | 'viewer';
 export interface User {
   id: string;
   role: Role;
-  username: string;
-  name: string;
   department?: string;
-  jobTitle?: string;
-  permissionLevel: string;
-  isActive: boolean;
+  position?: string;
 }
 
 export interface Permission {
@@ -26,42 +22,37 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   operator: [
     { resource: 'users', action: 'read' },
-    { resource: 'workRecords', action: 'create' },
-    { resource: 'workRecords', action: 'read' },
-    { resource: 'workRecords', action: 'update' },
-    { resource: 'workRecords', action: 'bulk' },
-    { resource: 'interruptionRecords', action: 'create' },
-    { resource: 'interruptionRecords', action: 'read' },
-    { resource: 'interruptionRecords', action: 'update' },
-    { resource: 'interruptionRecords', action: 'bulk' },
-    { resource: 'workItems', action: 'read' },
-    { resource: 'workItems', action: 'bulk' },
-    { resource: 'anomalyLogs', action: 'read' },
-    { resource: 'anomalyLogs', action: 'update' },
-    { resource: 'anomalyLogs', action: 'bulk' }
+    { resource: 'work-records', action: 'create' },
+    { resource: 'work-records', action: 'read' },
+    { resource: 'work-records', action: 'update' },
+    { resource: 'work-records', action: 'bulk' },
+    { resource: 'interruption-records', action: 'create' },
+    { resource: 'interruption-records', action: 'read' },
+    { resource: 'interruption-records', action: 'update' },
+    { resource: 'interruption-records', action: 'bulk' },
+    { resource: 'work-items', action: 'read' },
+    { resource: 'work-items', action: 'bulk' },
+    { resource: 'anomaly-logs', action: 'read' },
+    { resource: 'anomaly-logs', action: 'bulk' }
   ],
   viewer: [
     { resource: 'users', action: 'read' },
-    { resource: 'workRecords', action: 'read' },
-    { resource: 'interruptionRecords', action: 'read' },
-    { resource: 'workItems', action: 'read' },
-    { resource: 'anomalyLogs', action: 'read' }
+    { resource: 'work-records', action: 'read' },
+    { resource: 'interruption-records', action: 'read' },
+    { resource: 'work-items', action: 'read' },
+    { resource: 'anomaly-logs', action: 'read' }
   ]
 };
 
-export function hasPermission(user: User, resource: string, action: string): boolean {
-  if (!user.isActive) return false;
-  
-  const permissions = ROLE_PERMISSIONS[user.role] || [];
-  
-  return permissions.some(permission => 
-    (permission.resource === '*' || permission.resource === resource) &&
-    permission.action === action
+export function hasPermission(user: User, resource: string, action: Permission['action']): boolean {
+  const permissions = ROLE_PERMISSIONS[user.role];
+  return permissions.some(p => 
+    (p.resource === '*' || p.resource === resource) && p.action === action
   );
 }
 
-export function checkPermission(user: User, resource: string, action: string): void {
+export function checkPermission(user: User, resource: string, action: Permission['action']): void {
   if (!hasPermission(user, resource, action)) {
-    throw new Error(`Access denied: ${user.role} cannot ${action} ${resource}`);
+    throw new Error(`Insufficient permissions for ${action} on ${resource}`);
   }
 }
