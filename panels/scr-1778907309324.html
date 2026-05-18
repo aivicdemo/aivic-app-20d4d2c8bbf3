@@ -417,9 +417,9 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
           <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
           <div data-aivic-panel="scr-1778907287126" style="display:none"></div>
           <div data-aivic-panel="scr-1778907296658" style="display:none"></div>
-          <div data-aivic-panel="scr-1778907309324"><div style="padding: 12px; background: var(--bg-main); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <div data-aivic-panel="scr-1778907309324"><div style="padding: 12px; background: var(--bg-main); color: var(--text); font-family: 'Courier New', monospace;">
   <!-- ヘッダー -->
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px; background: var(--bg-card); border-radius: 6px; border-left: 3px solid #8b0000;">
     <h1 style="font-size: 18px; font-weight: 600; margin: 0; color: var(--text);">異常値検出処理</h1>
     <div style="display: flex; gap: 8px;">
       <button class="action-btn secondary" data-testid="detection-log-btn" onclick="window.showScreen('scr-1778907170814')">検出ログ</button>
@@ -428,145 +428,142 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
   </div>
 
   <!-- 検出設定エリア -->
-  <div class="card" style="margin-bottom: 16px; padding: 14px;">
+  <div class="card" style="margin-bottom: 16px; padding: 12px;">
     <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">検出設定</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
       <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始日</label>
+        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">検出開始日</label>
         <input type="date" id="start-date" data-testid="start-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
       </div>
       <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了日</label>
+        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">検出終了日</label>
         <input type="date" id="end-date" data-testid="end-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
       </div>
       <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">検出対象</label>
-        <select id="detection-target" data-testid="detection-target" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-          <option value="all">全作業員</option>
-          <option value="department">部署別</option>
-          <option value="individual">個人指定</option>
+        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">対象作業員</label>
+        <select id="target-user" data-testid="target-user" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+          <option value="">全作業員</option>
         </select>
       </div>
-      <button id="btn-execute" data-testid="execute-detection-btn" class="action-btn" style="padding: 8px 16px;">検出実行</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">工数上限しきい値（時間）</label>
+        <input type="number" id="hour-threshold" data-testid="hour-threshold" value="12" step="0.5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">中断回数しきい値（回/日）</label>
+        <input type="number" id="interrupt-threshold" data-testid="interrupt-threshold" value="5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+      <input type="checkbox" id="exclude-break" data-testid="exclude-break" style="accent-color: var(--primary);">
+      <label for="exclude-break" style="font-size: 13px; color: var(--text);">休憩時間を除外（30分以上）</label>
+      
+      <input type="checkbox" id="exclude-travel" data-testid="exclude-travel" style="accent-color: var(--primary); margin-left: 16px;">
+      <label for="exclude-travel" style="font-size: 13px; color: var(--text);">移動時間を除外（60分以上）</label>
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <button id="btn-detect" data-testid="detect-button" class="action-btn" style="background: var(--primary); color: #fff;">検出実行</button>
+      <button id="btn-save-settings" data-testid="save-settings-button" class="action-btn secondary">設定保存</button>
     </div>
   </div>
 
-  <!-- 進捗表示 -->
-  <div id="progress-area" class="card hidden" style="margin-bottom: 16px; padding: 14px;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-      <span style="font-size: 13px; font-weight: 500; color: var(--text);">検出処理中...</span>
-      <span id="progress-text" style="font-size: 12px; color: var(--text-muted);">0%</span>
+  <!-- 進捗表示エリア -->
+  <div id="progress-area" class="card" style="margin-bottom: 16px; padding: 12px; display: none;">
+    <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 8px 0; color: var(--text);">検出進捗</h2>
+    <div style="background: rgba(0,0,0,0.25); border-radius: 6px; height: 24px; position: relative; margin-bottom: 8px;">
+      <div id="progress-bar" style="background: var(--primary); height: 100%; border-radius: 6px; width: 0%; transition: width 0.3s;"></div>
+      <span id="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; color: var(--text); font-weight: 500;">0%</span>
     </div>
-    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;">
-      <div id="progress-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.3s;"></div>
-    </div>
-    <div style="margin-top: 8px; display: flex; gap: 8px;">
-      <button id="btn-cancel" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">キャンセル</button>
-    </div>
-  </div>
-
-  <!-- 検出ルール設定 -->
-  <div class="card" style="margin-bottom: 16px; padding: 14px;">
-    <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">検出ルール設定</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">工数上限 (時間)</label>
-        <input type="number" id="max-hours" data-testid="max-hours-threshold" value="12" step="0.5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-      </div>
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">工数下限 (時間)</label>
-        <input type="number" id="min-hours" data-testid="min-hours-threshold" value="0.5" step="0.1" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-      </div>
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断回数上限</label>
-        <input type="number" id="max-interruptions" data-testid="max-interruptions" value="5" min="0" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-      </div>
-    </div>
-    <div style="margin-top: 12px;">
-      <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text);">除外条件</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div>
-          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
-            <input type="checkbox" id="exclude-breaks" data-testid="exclude-breaks" checked style="accent-color: var(--primary);">
-            休憩時間を除外 (30分以上)
-          </label>
-        </div>
-        <div>
-          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
-            <input type="checkbox" id="exclude-travel" data-testid="exclude-travel" checked style="accent-color: var(--primary);">
-            移動時間を除外 (60分以上)
-          </label>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top: 12px; display: flex; gap: 8px;">
-      <button id="btn-save-rules" data-testid="save-rules-btn" class="action-btn">ルール保存</button>
-      <button id="btn-reset-rules" class="action-btn secondary">リセット</button>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+      <span id="progress-status">準備中...</span>
+      <button id="btn-cancel" data-testid="cancel-button" class="action-btn secondary" style="font-size: 11px; padding: 4px 8px;">キャンセル</button>
     </div>
   </div>
 
-  <!-- 検出結果エリア -->
-  <div class="card" style="padding: 14px;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+  <!-- フィルター・一括操作エリア -->
+  <div class="card" style="margin-bottom: 16px; padding: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <h2 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">検出結果</h2>
       <div style="display: flex; gap: 8px; align-items: center;">
         <select id="severity-filter" data-testid="severity-filter" style="padding: 4px 8px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 12px;">
-          <option value="">全ての重要度</option>
+          <option value="">全重要度</option>
           <option value="高">高</option>
           <option value="中">中</option>
           <option value="低">低</option>
         </select>
         <select id="status-filter" data-testid="status-filter" style="padding: 4px 8px; border: 1px solid rgba(255,255,255,0.18); border-radius: 4px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 12px;">
-          <option value="">全ての状態</option>
+          <option value="">全状態</option>
           <option value="未確認">未確認</option>
           <option value="確認済み">確認済み</option>
           <option value="対応済み">対応済み</option>
         </select>
-        <button id="btn-filter" data-testid="apply-filter-btn" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">フィルター適用</button>
-        <button id="btn-clear-filter" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;">クリア</button>
+        <button id="btn-filter" data-testid="filter-button" class="action-btn secondary" style="font-size: 12px; padding: 4px 8px;">フィルター</button>
       </div>
     </div>
 
-    <!-- 一括操作 -->
-    <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
-      <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text);">
-        <input type="checkbox" id="select-all" data-testid="select-all-checkbox" style="accent-color: var(--primary);">
-        全選択
-      </label>
-      <button id="btn-bulk-approve" data-testid="bulk-approve-btn" class="action-btn" style="padding: 4px 12px; font-size: 12px;" disabled>一括承認</button>
-      <button id="btn-bulk-reject" data-testid="bulk-reject-btn" class="action-btn secondary" style="padding: 4px 12px; font-size: 12px;" disabled>一括却下</button>
+    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+      <input type="checkbox" id="select-all" data-testid="select-all" style="accent-color: var(--primary);">
+      <label for="select-all" style="font-size: 12px; color: var(--text-muted);">全選択</label>
+      <button id="btn-bulk-approve" data-testid="bulk-approve-button" class="action-btn" style="background: #2d5a27; color: #fff; font-size: 12px; padding: 4px 8px; margin-left: 16px;">一括承認</button>
+      <button id="btn-bulk-reject" data-testid="bulk-reject-button" class="action-btn" style="background: #8b0000; color: #fff; font-size: 12px; padding: 4px 8px;">一括却下</button>
     </div>
+  </div>
 
-    <!-- 結果テーブル -->
-    <div class="table-wrap">
-      <table data-testid="anomaly-results-table" style="width: 100%;">
-        <thead>
-          <tr>
-            <th style="width: 40px; padding: 6px 10px; font-size: 12px; color: var(--text);">選択</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出日時</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">作業員</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">異常種別</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出値</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">閾値</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">重要度</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">状態</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">操作</th>
-          </tr>
-        </thead>
-        <tbody id="results-tbody">
-          <tr>
-            <td colspan="9" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">
-              検出処理を実行してください
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- 異常値一覧テーブル -->
+  <div class="table-wrap">
+    <table data-testid="anomaly-list">
+      <thead>
+        <tr>
+          <th style="width: 40px; padding: 6px 10px; font-size: 12px; color: var(--text);">選択</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出日時</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">作業員</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">異常種別</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出値</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">閾値</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">重要度</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">状態</th>
+          <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">操作</th>
+        </tr>
+      </thead>
+      <tbody id="anomaly-tbody">
+        <!-- データは JavaScript で動的生成 -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 異常値詳細モーダル -->
+  <div id="detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border-radius: 8px; padding: 16px; width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text);">異常値詳細</h3>
+        <button id="btn-close-modal" style="background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer;">&times;</button>
+      </div>
+      <div id="detail-content" style="font-size: 13px; color: var(--text); line-height: 1.6;">
+        <!-- 詳細内容は JavaScript で動的生成 -->
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end;">
+        <button id="btn-approve-detail" data-testid="approve-button" class="action-btn" style="background: #2d5a27; color: #fff;">承認</button>
+        <button id="btn-reject-detail" data-testid="reject-button" class="action-btn" style="background: #8b0000; color: #fff;">却下</button>
+        <button id="btn-cancel-detail" class="action-btn secondary">キャンセル</button>
+      </div>
     </div>
+  </div>
 
-    <!-- 詳細表示エリア -->
-    <div id="detail-area" class="hidden" style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
-      <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px 0; color: var(--text);">異常値詳細</h3>
-      <div id="detail-content" style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"></div>
+  <!-- 却下理由入力モーダル -->
+  <div id="reject-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1001;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border-radius: 8px; padding: 16px; width: 400px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">却下理由入力</h3>
+      <textarea id="reject-reason" data-testid="reject-reason" placeholder="却下理由を入力してください" style="padding: 8px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; width: 100%; height: 80px; resize: vertical;"></textarea>
+      <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
+        <button id="btn-confirm-reject" data-testid="confirm-reject-button" class="action-btn" style="background: #8b0000; color: #fff;">確定</button>
+        <button id="btn-cancel-reject" class="action-btn secondary">キャンセル</button>
+      </div>
     </div>
   </div>
 </div></div>

@@ -15,7 +15,7 @@ window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発"
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907199709";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在の作業記録データを取得（最新の未完了記録を想定）\n  let currentRecord = null;\n  \n  // 初期データの設定\n  function initializeData() {\n    const workRecords = tables[1].records || []; // 作業記録テーブル\n    const breakRecords = tables[2].records || []; // 中断記録テーブル\n    \n    // 最新の未完了作業記録を取得\n    currentRecord = workRecords.find(r => !r.作業終了時刻) || workRecords[0];\n    \n    if (currentRecord) {\n      // 作業項目名を表示\n      container.querySelector('#work-item').textContent = currentRecord.作業内容 || '作業項目未設定';\n      container.querySelector('#record-id').textContent = currentRecord.作業記録ID || 'WR-2024-001';\n      \n      // 時刻情報を表示\n      const startTime = currentRecord.作業開始時刻 ? new Date(currentRecord.作業開始時刻) : new Date();\n      const endTime = new Date(); // 現在時刻を終了時刻とする\n      \n      container.querySelector('#start-time').textContent = formatTime(startTime);\n      container.querySelector('#end-time').textContent = formatTime(endTime);\n      \n      // 作業時間計算\n      const totalMinutes = Math.floor((endTime - startTime) / (1000 * 60));\n      \n      // 中断時間計算\n      const relatedBreaks = breakRecords.filter(b => b.作業記録ID === currentRecord.作業記録ID);\n      const breakMinutes = relatedBreaks.reduce((sum, b) => sum + (b.中断時間 || 0), 0);\n      \n      // 実作業時間計算\n      const actualMinutes = totalMinutes - breakMinutes;\n      \n      container.querySelector('#total-time').textContent = formatDuration(totalMinutes);\n      container.querySelector('#break-time').textContent = formatDuration(breakMinutes);\n      container.querySelector('#actual-work-time').textContent = formatDuration(actualMinutes);\n    }\n  }\n  \n  // 時刻フォーマット関数\n  function formatTime(date) {\n    return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });\n  }\n  \n  // 時間フォーマット関数\n  function formatDuration(minutes) {\n    const hours = Math.floor(minutes / 60);\n    const mins = minutes % 60;\n    return `${hours}:${mins.toString().padStart(2, '0')}`;\n  }\n  \n  // エラーメッセージ表示関数\n  function showError(message) {\n    const errorDiv = container.querySelector('#error-message');\n    errorDiv.textContent = message;\n    errorDiv.style.display = 'block';\n    setTimeout(() => {\n      errorDiv.style.display = 'none';\n    }, 5000);\n  }\n  \n  // バリデーション関数\n  function validateForm() {\n    const completionStatus = container.querySelector('#completion-status').value;\n    const hasIssue = container.querySelector('#has-issue').checked;\n    const issueDetail = container.querySelector('#issue-detail').value.trim();\n    const workMemo = container.querySelector('#work-memo').value.trim();\n    \n    // 完了状況必須チェック\n    if (!completionStatus) {\n      showError('完了状況を選択してください。');\n      return false;\n    }\n    \n    // 異常報告チェック時の異常内容必須チェック\n    if (hasIssue && !issueDetail) {\n      showError('異常報告をチェックした場合は、異常内容を入力してください。');\n      return false;\n    }\n    \n    // 文字数制限チェック\n    if (workMemo.length > 1000) {\n      showError('作業メモは1000文字以内で入力してください。');\n      return false;\n    }\n    \n    if (issueDetail.length > 500) {\n      showError('異常内容は500文字以内で入力してください。');\n      return false;\n    }\n    \n    return true;\n  }\n  \n  // 文字数カウンター更新\n  function updateCharCount(inputId, countId) {\n    const input = container.querySelector(`#${inputId}`);\n    const counter = container.querySelector(`#${countId}`);\n    if (input && counter) {\n      counter.textContent = input.value.length;\n    }\n  }\n  \n  // 初期化\n  initializeData();\n  \n  // 異常報告チェックボックスの制御\n  container.querySelector('#has-issue').addEventListener('change', function() {\n    const issueSection = container.querySelector('#issue-detail-section');\n    const issueDetail = container.querySelector('#issue-detail');\n    \n    if (this.checked) {\n      issueSection.style.display = 'block';\n    } else {\n      issueSection.style.display = 'none';\n      issueDetail.value = ''; // 内容をクリア\n      updateCharCount('issue-detail', 'issue-count');\n    }\n  });\n  \n  // 文字数カウンター\n  container.querySelector('#work-memo').addEventListener('input', function() {\n    updateCharCount('work-memo', 'memo-count');\n  });\n  \n  container.querySelector('#issue-detail').addEventListener('input', function() {\n    updateCharCount('issue-detail', 'issue-count');\n  });\n  \n  // 記録確定ボタン\n  container.querySelector('#btn-confirm').addEventListener('click', async function() {\n    if (!validateForm()) return;\n    \n    const completionStatus = container.querySelector('#completion-status').value;\n    const workMemo = container.querySelector('#work-memo').value.trim();\n    const hasIssue = container.querySelector('#has-issue').checked;\n    const issueDetail = container.querySelector('#issue-detail').value.trim();\n    \n    try {\n      // 作業記録を更新\n      const endTime = new Date().toISOString();\n      const startTime = currentRecord ? new Date(currentRecord.作業開始時刻).getTime() : Date.now();\n      const workMinutes = Math.floor((Date.now() - startTime) / (1000 * 60));\n      \n      const updateData = {\n        作業終了時刻: endTime,\n        作業時間: workMinutes,\n        進捗状況: completionStatus,\n        備考: workMemo || null,\n        承認状態: '未承認'\n      };\n      \n      const updated = await window.aivicApi.update(1, currentRecord.作業記録ID, updateData);\n      \n      if (updated) {\n        // 異常報告がある場合は異常値検出ログに記録\n        if (hasIssue && issueDetail) {\n          await window.aivicApi.save(4, {\n            検出対象テーブル: '作業記録',\n            検出対象レコードID: currentRecord.作業記録ID,\n            ユーザーID: currentRecord.作業員ID,\n            異常値種別: '作業異常報告',\n            検出項目: '異常内容',\n            検出値: issueDetail,\n            閾値: '手動報告',\n            重要度: '中',\n            確認状況: '未確認',\n            通知送信フラグ: false,\n            検出日時: new Date().toISOString()\n          });\n        }\n        \n        alert('工数記録が正常に確定されました。');\n        // 記録確認画面に遷移\n        window.showScreen(\"scr-1778907226171\");\n      } else {\n        showError('記録の保存に失敗しました。もう一度お試しください。');\n      }\n    } catch (error) {\n      console.error('記録確定エラー:', error);\n      showError('記録の保存中にエラーが発生しました。');\n    }\n  });\n  \n  // キャンセルボタン\n  container.querySelector('#btn-cancel').addEventListener('click', function() {\n    if (confirm('入力内容が破棄されますが、よろしいですか？')) {\n      history.back(); // 前画面に戻る\n    }\n  });\n  \n  // 記録確認ボタン\n  container.querySelector('#btn-check-record').addEventListener('click', function() {\n    window.showScreen(\"scr-1778907226171\");\n  });\n  \n  // ホバー効果\n  const buttons = container.querySelectorAll('button');\n  buttons.forEach(btn => {\n    if (btn.classList.contains('action-btn') && !btn.classList.contains('secondary')) {\n      btn.addEventListener('mouseenter', function() {\n        this.style.background = 'var(--primary-hover)';\n      });\n      btn.addEventListener('mouseleave', function() {\n        this.style.background = 'var(--primary)';\n      });\n    } else if (btn.classList.contains('secondary')) {\n      btn.addEventListener('mouseenter', function() {\n        this.style.background = 'rgba(255,255,255,0.05)';\n      });\n      btn.addEventListener('mouseleave', function() {\n        this.style.background = 'transparent';\n      });\n    }\n  });\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在の作業記録データ（仮想データ）\n  const currentWorkRecord = {\n    workItemName: \"設備点検作業\",\n    startTime: \"09:00\",\n    endTime: \"12:30\",\n    totalTime: \"3時間30分\",\n    breakTime: \"15分\",\n    actualWorkTime: \"3時間15分\"\n  };\n\n  // 時刻情報を表示\n  function displayTimeInfo() {\n    container.querySelector(\"#work-item-name\").textContent = currentWorkRecord.workItemName;\n    container.querySelector(\"#start-time\").textContent = currentWorkRecord.startTime;\n    container.querySelector(\"#end-time\").textContent = currentWorkRecord.endTime;\n    container.querySelector(\"#total-time\").textContent = currentWorkRecord.totalTime;\n    container.querySelector(\"#break-time\").textContent = currentWorkRecord.breakTime;\n    container.querySelector(\"#actual-work-time\").textContent = currentWorkRecord.actualWorkTime;\n  }\n\n  // 文字数カウンター\n  function setupCharacterCounter(textareaId, counterId, maxLength) {\n    const textarea = container.querySelector(`#${textareaId}`);\n    const counter = container.querySelector(`#${counterId}`);\n    \n    textarea.addEventListener(\"input\", () => {\n      const currentLength = textarea.value.length;\n      counter.textContent = currentLength;\n      \n      if (currentLength > maxLength) {\n        counter.style.color = \"#ff6a00\";\n      } else {\n        counter.style.color = \"var(--text-muted)\";\n      }\n    });\n  }\n\n  // 異常報告チェックボックスの制御\n  function setupIssueReportToggle() {\n    const hasIssueCheckbox = container.querySelector(\"#has-issue\");\n    const issueContentSection = container.querySelector(\"#issue-content-section\");\n    const issueContentTextarea = container.querySelector(\"#issue-content\");\n\n    hasIssueCheckbox.addEventListener(\"change\", () => {\n      if (hasIssueCheckbox.checked) {\n        issueContentSection.style.display = \"block\";\n      } else {\n        issueContentSection.style.display = \"none\";\n        issueContentTextarea.value = \"\";\n        container.querySelector(\"#issue-count\").textContent = \"0\";\n      }\n    });\n  }\n\n  // エラーメッセージ表示\n  function showError(message) {\n    const errorDiv = container.querySelector(\"#error-message\");\n    errorDiv.textContent = message;\n    errorDiv.style.display = \"block\";\n    setTimeout(() => {\n      errorDiv.style.display = \"none\";\n    }, 5000);\n  }\n\n  // バリデーション\n  function validateForm() {\n    const completionStatus = container.querySelector(\"#completion-status\").value;\n    const hasIssue = container.querySelector(\"#has-issue\").checked;\n    const issueContent = container.querySelector(\"#issue-content\").value.trim();\n    const workMemo = container.querySelector(\"#work-memo\").value;\n    const issueContentValue = container.querySelector(\"#issue-content\").value;\n\n    // 完了状況必須チェック\n    if (!completionStatus) {\n      showError(\"完了状況を選択してください。\");\n      return false;\n    }\n\n    // 異常報告チェック時の異常内容必須チェック\n    if (hasIssue && !issueContent) {\n      showError(\"異常内容を入力してください。\");\n      return false;\n    }\n\n    // 作業メモ文字数チェック\n    if (workMemo.length > 1000) {\n      showError(\"作業メモは1000文字以内で入力してください。\");\n      return false;\n    }\n\n    // 異常内容文字数チェック\n    if (issueContentValue.length > 500) {\n      showError(\"異常内容は500文字以内で入力してください。\");\n      return false;\n    }\n\n    return true;\n  }\n\n  // 記録確定処理\n  async function confirmRecord() {\n    if (!validateForm()) {\n      return;\n    }\n\n    const workMemo = container.querySelector(\"#work-memo\").value.trim();\n    const completionStatus = container.querySelector(\"#completion-status\").value;\n    const hasIssue = container.querySelector(\"#has-issue\").checked;\n    const issueContent = container.querySelector(\"#issue-content\").value.trim();\n\n    const recordData = {\n      作業員ID: \"current-user-id\", // 実際の実装では現在のユーザーIDを使用\n      作業日: new Date().toISOString().split('T')[0],\n      作業開始時刻: new Date().toISOString(),\n      作業終了時刻: new Date().toISOString(),\n      作業時間: 210, // 3時間30分を分単位で\n      プロジェクト名: \"設備点検プロジェクト\",\n      作業場所: \"工場A棟\",\n      作業種別: \"点検\",\n      作業内容: workMemo || \"設備点検作業を実施\",\n      進捗状況: completionStatus,\n      備考: hasIssue ? `異常報告: ${issueContent}` : \"\",\n      承認状態: \"未承認\",\n      作成日時: new Date().toISOString(),\n      更新日時: new Date().toISOString(),\n      作成者ID: \"current-user-id\"\n    };\n\n    try {\n      const saved = await window.aivicApi.save(1, recordData); // 作業記録テーブル\n      if (saved) {\n        // 異常報告がある場合は異常値検出ログにも記録\n        if (hasIssue) {\n          const anomalyData = {\n            検出対象テーブル: \"作業記録\",\n            検出対象レコードID: saved.id,\n            ユーザーID: \"current-user-id\",\n            異常値種別: \"作業異常報告\",\n            検出項目: \"異常内容\",\n            検出値: issueContent,\n            閾値: \"なし\",\n            重要度: \"中\",\n            確認状況: \"未確認\",\n            通知送信フラグ: true,\n            検出日時: new Date().toISOString(),\n            作成日時: new Date().toISOString(),\n            更新日時: new Date().toISOString()\n          };\n          await window.aivicApi.save(4, anomalyData); // 異常値検出ログテーブル\n        }\n\n        alert(\"工数記録を確定しました。\");\n        // 前画面に戻る（実際の実装では適切な画面IDを使用）\n        window.history.back();\n      }\n    } catch (error) {\n      showError(\"記録の保存に失敗しました。\");\n    }\n  }\n\n  // イベントリスナー設定\n  function setupEventListeners() {\n    // 記録確定ボタン\n    container.querySelector(\"#btn-confirm\").addEventListener(\"click\", confirmRecord);\n\n    // キャンセルボタン\n    container.querySelector(\"#btn-cancel\").addEventListener(\"click\", () => {\n      if (confirm(\"入力内容が破棄されますが、よろしいですか？\")) {\n        window.history.back();\n      }\n    });\n\n    // 記録確認ボタン\n    container.querySelector(\"#btn-check-record\").addEventListener(\"click\", () => {\n      window.showScreen(\"scr-1778907226171\");\n    });\n\n    // ホバー効果\n    const confirmBtn = container.querySelector(\"#btn-confirm\");\n    const cancelBtn = container.querySelector(\"#btn-cancel\");\n    const checkRecordBtn = container.querySelector(\"#btn-check-record\");\n\n    confirmBtn.addEventListener(\"mouseenter\", () => {\n      confirmBtn.style.background = \"var(--primary-hover)\";\n    });\n    confirmBtn.addEventListener(\"mouseleave\", () => {\n      confirmBtn.style.background = \"var(--primary)\";\n    });\n\n    cancelBtn.addEventListener(\"mouseenter\", () => {\n      cancelBtn.style.background = \"rgba(255,255,255,0.05)\";\n    });\n    cancelBtn.addEventListener(\"mouseleave\", () => {\n      cancelBtn.style.background = \"transparent\";\n    });\n\n    checkRecordBtn.addEventListener(\"mouseenter\", () => {\n      checkRecordBtn.style.background = \"rgba(255,255,255,0.05)\";\n    });\n    checkRecordBtn.addEventListener(\"mouseleave\", () => {\n      checkRecordBtn.style.background = \"transparent\";\n    });\n  }\n\n  // 初期化\n  displayTimeInfo();\n  setupCharacterCounter(\"work-memo\", \"memo-count\", 1000);\n  setupCharacterCounter(\"issue-content\", \"issue-count\", 500);\n  setupIssueReportToggle();\n  setupEventListeners();\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </script>
@@ -409,55 +409,63 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
           <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
           <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
           <div data-aivic-panel="scr-1778907199709"><div class="card" style="max-width: 800px; margin: 0 auto; padding: 14px;">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-    <h2 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0;">工数記録終了</h2>
-    <div style="font-size: 11px; color: var(--text-muted);">記録ID: <span id="record-id">WR-2024-001</span></div>
-  </div>
-
-  <!-- 時刻情報表示 -->
-  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.15); border-radius: 6px; border: 1px solid rgba(139,0,0,0.3);">
+  <h2 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0 0 16px 0;">工数記録終了</h2>
+  
+  <!-- 作業情報表示 -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.15); border-radius: 6px;">
     <div>
-      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">開始時刻</label>
-      <div id="start-time" data-testid="start-time" style="font-size: 13px; color: var(--text); font-weight: 500;">09:30</div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">作業項目</label>
+      <div id="work-item-name" style="font-size: 13px; color: var(--text); font-weight: 500;">設備点検作業</div>
     </div>
     <div>
-      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">終了時刻</label>
-      <div id="end-time" data-testid="end-time" style="font-size: 13px; color: var(--text); font-weight: 500;">17:45</div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">開始時刻</label>
+      <div id="start-time" style="font-size: 13px; color: var(--text);">09:00</div>
     </div>
     <div>
-      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">作業時間</label>
-      <div id="total-time" data-testid="total-time" style="font-size: 13px; color: var(--text); font-weight: 500;">8:15</div>
-    </div>
-    <div>
-      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">中断時間</label>
-      <div id="break-time" data-testid="break-time" style="font-size: 13px; color: var(--text); font-weight: 500;">1:00</div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">終了時刻</label>
+      <div id="end-time" style="font-size: 13px; color: var(--text);">12:30</div>
     </div>
   </div>
 
-  <!-- 実作業時間 -->
-  <div style="margin-bottom: 16px; padding: 10px; background: rgba(139,0,0,0.1); border-radius: 6px; border-left: 3px solid #8b0000;">
-    <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">実作業時間</label>
-    <div id="actual-work-time" data-testid="actual-work-time" style="font-size: 15px; color: var(--text); font-weight: 600;">7:15</div>
+  <!-- 時間情報表示 -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.15); border-radius: 6px;">
+    <div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">作業時間</label>
+      <div id="total-time" style="font-size: 13px; color: var(--text); font-weight: 500;">3時間30分</div>
+    </div>
+    <div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">中断時間</label>
+      <div id="break-time" style="font-size: 13px; color: var(--text);">15分</div>
+    </div>
+    <div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">実作業時間</label>
+      <div id="actual-work-time" style="font-size: 13px; color: var(--text); font-weight: 500;">3時間15分</div>
+    </div>
   </div>
 
-  <!-- 作業項目表示 -->
-  <div style="margin-bottom: 16px;">
-    <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">作業項目</label>
-    <div id="work-item" data-testid="work-item" style="font-size: 13px; color: var(--text); padding: 8px 10px; background: rgba(0,0,0,0.15); border-radius: 6px; border: 1px solid rgba(139,0,0,0.2);">配管設備点検作業</div>
-  </div>
-
-  <!-- フォーム入力エリア -->
-  <div style="display: grid; grid-template-columns: 1fr 200px; gap: 16px; margin-bottom: 16px;">
+  <!-- 入力フォーム -->
+  <div style="display: grid; grid-template-columns: 1fr; gap: 14px;">
+    <!-- 作業メモ -->
     <div>
       <label for="work-memo" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">作業メモ</label>
-      <textarea id="work-memo" data-testid="work-memo" placeholder="作業内容の詳細を記録..." style="width: 100%; height: 80px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;" maxlength="1000"></textarea>
-      <div style="font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 2px;">
+      <textarea 
+        id="work-memo" 
+        data-testid="work-memo"
+        placeholder="作業内容の詳細を入力してください"
+        style="width: 100%; height: 80px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical; box-sizing: border-box;"
+        maxlength="1000"></textarea>
+      <div style="font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px;">
         <span id="memo-count">0</span>/1000文字
       </div>
     </div>
+
+    <!-- 完了状況 -->
     <div>
-      <label for="completion-status" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">完了状況 <span style="color: #dc2626;">*</span></label>
-      <select id="completion-status" data-testid="completion-status" style="width: 100%; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
+      <label for="completion-status" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">完了状況 <span style="color: #ff6a00;">*</span></label>
+      <select 
+        id="completion-status" 
+        data-testid="completion-status"
+        style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; box-sizing: border-box;">
         <option value="">選択してください</option>
         <option value="完了">完了</option>
         <option value="一部完了">一部完了</option>
@@ -465,37 +473,57 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         <option value="延期">延期</option>
       </select>
     </div>
-  </div>
 
-  <!-- 異常報告セクション -->
-  <div style="margin-bottom: 16px; padding: 12px; background: rgba(139,0,0,0.08); border-radius: 6px; border: 1px solid rgba(139,0,0,0.2);">
-    <div style="margin-bottom: 12px;">
-      <label style="display: flex; align-items: center; font-size: 13px; color: var(--text); cursor: pointer;">
-        <input type="checkbox" id="has-issue" data-testid="has-issue" style="margin-right: 8px; accent-color: var(--primary);">
-        異常・問題が発生した
-      </label>
+    <!-- 異常・問題報告 -->
+    <div>
+      <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">異常・問題報告</label>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input 
+          type="checkbox" 
+          id="has-issue" 
+          data-testid="has-issue"
+          style="accent-color: var(--primary);">
+        <label for="has-issue" style="font-size: 13px; color: var(--text); cursor: pointer;">異常・問題が発生した</label>
+      </div>
     </div>
-    <div id="issue-detail-section" style="display: none;">
-      <label for="issue-detail" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">異常内容 <span style="color: #dc2626;">*</span></label>
-      <textarea id="issue-detail" data-testid="issue-detail" placeholder="発生した異常や問題の詳細を記録してください..." style="width: 100%; height: 70px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;" maxlength="500"></textarea>
-      <div style="font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 2px;">
+
+    <!-- 異常内容 -->
+    <div id="issue-content-section" style="display: none;">
+      <label for="issue-content" style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">異常内容 <span style="color: #ff6a00;">*</span></label>
+      <textarea 
+        id="issue-content" 
+        data-testid="issue-content"
+        placeholder="発生した異常や問題の詳細を入力してください"
+        style="width: 100%; height: 80px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical; box-sizing: border-box;"
+        maxlength="500"></textarea>
+      <div style="font-size: 11px; color: var(--text-muted); text-align: right; margin-top: 2px;">
         <span id="issue-count">0</span>/500文字
       </div>
     </div>
   </div>
 
-  <!-- エラーメッセージ表示エリア -->
-  <div id="error-message" data-testid="error-message" style="display: none; margin-bottom: 12px; padding: 8px 12px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); border-radius: 6px; color: #dc2626; font-size: 12px;"></div>
+  <!-- エラーメッセージ -->
+  <div id="error-message" data-testid="error-message" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; color: #fca5a5; font-size: 12px;"></div>
 
-  <!-- アクションボタン -->
-  <div style="display: flex; gap: 12px; justify-content: flex-end;">
-    <button id="btn-cancel" data-testid="cancel-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+  <!-- ボタン -->
+  <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
+    <button 
+      id="btn-cancel" 
+      data-testid="cancel-button"
+      class="action-btn secondary"
+      style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
       キャンセル
     </button>
-    <button id="btn-confirm" data-testid="confirm-button" class="action-btn" style="background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+    <button 
+      id="btn-confirm" 
+      data-testid="save-button"
+      style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">
       記録確定
     </button>
-    <button id="btn-check-record" data-testid="check-record-button" class="action-btn secondary" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+    <button 
+      id="btn-check-record" 
+      data-testid="check-record-button"
+      style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
       記録確認
     </button>
   </div>

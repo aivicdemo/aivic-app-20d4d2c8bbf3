@@ -415,166 +415,123 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
           <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
           <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
           <div data-aivic-panel="scr-1778907278416" style="display:none"></div>
-          <div data-aivic-panel="scr-1778907287126"><div class="data-validation-screen">
-  <!-- ヘッダー -->
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-    <h1 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0;">データ検証処理</h1>
+          <div data-aivic-panel="scr-1778907287126"><div class="card" style="padding: 14px; margin-bottom: 12px;">
+  <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">データ検証処理</h2>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 16px;">
+    <div>
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">検証開始日</label>
+      <input type="date" id="start-date" data-testid="start-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+    </div>
+    <div>
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">検証終了日</label>
+      <input type="date" id="end-date" data-testid="end-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
+    </div>
+    <button id="btn-execute" data-testid="execute-validation" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">検証実行</button>
+  </div>
+
+  <div id="progress-area" class="hidden" style="margin-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <span style="font-size: 12px; color: var(--text-muted);">検証進捗</span>
+      <span id="progress-text" style="font-size: 12px; color: var(--text);">0%</span>
+    </div>
+    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+      <div id="progress-bar" data-testid="progress-bar" style="height: 100%; background: var(--primary); width: 0%; transition: width 0.3s;"></div>
+    </div>
+  </div>
+
+  <div id="notification-area" class="hidden" style="padding: 8px 12px; background: rgba(0,255,0,0.1); border: 1px solid rgba(0,255,0,0.3); border-radius: 6px; margin-bottom: 16px;">
+    <span id="notification-text" style="font-size: 13px; color: var(--text);"></span>
+  </div>
+</div>
+
+<div class="card" style="padding: 14px; margin-bottom: 12px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">異常値検出結果</h3>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <select id="error-type-filter" data-testid="error-type-filter" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
+        <option value="">全てのエラー種別</option>
+        <option value="長時間作業">長時間作業</option>
+        <option value="頻繁中断">頻繁中断</option>
+        <option value="工数超過">工数超過</option>
+        <option value="入力値エラー">入力値エラー</option>
+        <option value="必須項目エラー">必須項目エラー</option>
+        <option value="データ形式エラー">データ形式エラー</option>
+      </select>
+      <select id="severity-filter" data-testid="severity-filter" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px;">
+        <option value="">全ての重要度</option>
+        <option value="高">高</option>
+        <option value="中">中</option>
+        <option value="低">低</option>
+      </select>
+      <button id="btn-filter" data-testid="filter-button" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">フィルター</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table data-testid="anomaly-list">
+      <thead>
+        <tr>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">
+            <input type="checkbox" id="select-all" data-testid="select-all" style="accent-color: var(--primary);">
+          </th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">検出日時</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">作業員</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">異常値種別</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">検出項目</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">検出値</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">重要度</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">確認状況</th>
+          <th style="padding: 6px 10px; color: var(--text); font-size: 13px;">操作</th>
+        </tr>
+      </thead>
+      <tbody id="anomaly-tbody">
+      </tbody>
+    </table>
+  </div>
+
+  <div id="no-data-message" class="hidden" style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">
+    データに異常はありません
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
     <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907170814')" style="font-size: 13px; padding: 6px 12px;">
-        異常値ログ
-      </button>
-      <button class="action-btn secondary" onclick="window.showScreen('scr-1778907133295')" style="font-size: 13px; padding: 6px 12px;">
-        工数記録へ
-      </button>
+      <button id="btn-bulk-approve" data-testid="bulk-approve" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">一括承認</button>
+      <button id="btn-export-log" data-testid="export-log" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">検証ログ出力</button>
     </div>
-  </div>
-
-  <!-- 検証実行エリア -->
-  <div class="card" style="margin-bottom: 16px; padding: 14px;">
-    <h2 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">検証実行</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end;">
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">開始日</label>
-        <input type="date" id="start-date" data-testid="start-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-      </div>
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">終了日</label>
-        <input type="date" id="end-date" data-testid="end-date" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
-      </div>
-      <div>
-        <button id="btn-validate" data-testid="validate-button" class="action-btn" style="padding: 6px 14px; font-size: 13px;">検証実行</button>
-      </div>
-    </div>
-    
-    <!-- 進捗バー -->
-    <div id="progress-container" class="hidden" style="margin-top: 12px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-        <span style="font-size: 12px; color: var(--text-muted);">検証進捗</span>
-        <span id="progress-text" style="font-size: 12px; color: var(--text);">0%</span>
-      </div>
-      <div style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 8px; overflow: hidden;">
-        <div id="progress-bar" style="background: var(--primary); height: 100%; width: 0%; transition: width 0.3s;"></div>
-      </div>
-    </div>
-
-    <!-- 通知エリア -->
-    <div id="notification-area" class="hidden" style="margin-top: 12px; padding: 8px 12px; border-radius: 6px; font-size: 13px;"></div>
-  </div>
-
-  <!-- フィルターエリア -->
-  <div class="card" style="margin-bottom: 16px; padding: 14px;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end;">
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">エラー種別</label>
-        <select id="error-type-filter" data-testid="error-type-filter" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; width: 100%;">
-          <option value="">全て</option>
-          <option value="長時間作業">長時間作業</option>
-          <option value="頻繁中断">頻繁中断</option>
-          <option value="工数超過">工数超過</option>
-          <option value="データ不整合">データ不整合</option>
-          <option value="入力値エラー">入力値エラー</option>
-          <option value="必須項目エラー">必須項目エラー</option>
-          <option value="データ形式エラー">データ形式エラー</option>
-        </select>
-      </div>
-      <div>
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">重要度</label>
-        <select id="severity-filter" data-testid="severity-filter" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; width: 100%;">
-          <option value="">全て</option>
-          <option value="高">高</option>
-          <option value="中">中</option>
-          <option value="低">低</option>
-        </select>
-      </div>
-      <div style="display: flex; gap: 8px;">
-        <button id="btn-filter" data-testid="filter-button" class="action-btn secondary" style="padding: 6px 12px; font-size: 13px;">絞り込み</button>
-        <button id="btn-clear-filter" data-testid="clear-filter-button" class="action-btn secondary" style="padding: 6px 12px; font-size: 13px;">クリア</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 一括操作エリア -->
-  <div class="card" style="margin-bottom: 16px; padding: 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
-          <input type="checkbox" id="select-all" data-testid="select-all-checkbox" style="accent-color: var(--primary);">
-          全選択
-        </label>
-        <span id="selected-count" style="font-size: 12px; color: var(--text-muted);">0件選択</span>
-      </div>
-      <div style="display: flex; gap: 8px;">
-        <button id="btn-bulk-approve" data-testid="bulk-approve-button" class="action-btn" style="padding: 6px 14px; font-size: 13px;">一括承認</button>
-        <button id="btn-export-log" data-testid="export-log-button" class="action-btn secondary" style="padding: 6px 14px; font-size: 13px;">ログ出力</button>
-        <button id="btn-revalidate" data-testid="revalidate-button" class="action-btn secondary" style="padding: 6px 14px; font-size: 13px;">再検証</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 検証結果一覧 -->
-  <div class="card" style="padding: 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h2 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0;">異常値検出結果</h2>
-      <span id="result-count" style="font-size: 12px; color: var(--text-muted);">0件</span>
-    </div>
-    
-    <div class="table-wrap">
-      <table data-testid="validation-results-table">
-        <thead>
-          <tr>
-            <th style="width: 40px; padding: 6px 10px; font-size: 12px; color: var(--text);">選択</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出日時</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">作業員</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">異常種別</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出項目</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">検出値</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">閾値</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">重要度</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">確認状況</th>
-            <th style="padding: 6px 10px; font-size: 12px; color: var(--text);">操作</th>
-          </tr>
-        </thead>
-        <tbody id="validation-results-tbody">
-          <!-- 動的に生成 -->
-        </tbody>
-      </table>
-    </div>
+    <button id="btn-re-validate" data-testid="re-validate" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">再検証</button>
   </div>
 </div>
 
 <!-- データ修正モーダル -->
-<div id="edit-modal" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-  <div class="card" style="width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto; padding: 16px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0;">データ修正</h3>
-      <button id="modal-close" style="background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px;">×</button>
-    </div>
+<div id="correction-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+  <div class="card" style="padding: 16px; width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto;">
+    <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">データ修正</h3>
     
-    <div id="edit-form">
-      <div style="margin-bottom: 12px;">
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">異常種別</label>
-        <input type="text" id="edit-error-type" data-testid="edit-error-type" readonly style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; width: 100%;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業開始時刻</label>
+        <input type="datetime-local" id="edit-start-time" data-testid="edit-start-time" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
       </div>
-      
-      <div style="margin-bottom: 12px;">
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">検出項目</label>
-        <input type="text" id="edit-detection-item" data-testid="edit-detection-item" readonly style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; width: 100%;">
+      <div>
+        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業終了時刻</label>
+        <input type="datetime-local" id="edit-end-time" data-testid="edit-end-time" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%;">
       </div>
-      
-      <div style="margin-bottom: 12px;">
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">修正値</label>
-        <input type="text" id="edit-correction-value" data-testid="edit-correction-value" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; width: 100%;">
-      </div>
-      
-      <div style="margin-bottom: 16px;">
-        <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">対応メモ</label>
-        <textarea id="edit-memo" data-testid="edit-memo" rows="3" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; width: 100%; resize: vertical;"></textarea>
-      </div>
-      
-      <div style="display: flex; gap: 8px; justify-content: flex-end;">
-        <button id="modal-cancel" data-testid="modal-cancel-button" class="action-btn secondary" style="padding: 6px 14px; font-size: 13px;">キャンセル</button>
-        <button id="modal-save" data-testid="modal-save-button" class="action-btn" style="padding: 6px 14px; font-size: 13px;">保存</button>
-      </div>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">作業内容</label>
+      <textarea id="edit-work-content" data-testid="edit-work-content" rows="3" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%; resize: vertical;"></textarea>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">修正理由</label>
+      <textarea id="edit-reason" data-testid="edit-reason" rows="2" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100%; resize: vertical;"></textarea>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      <button id="btn-cancel-edit" data-testid="cancel-edit" style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">キャンセル</button>
+      <button id="btn-save-edit" data-testid="save-edit" style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s;">保存</button>
     </div>
   </div>
 </div></div>

@@ -32,6 +32,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
       background-image: 
         radial-gradient(circle at 20% 80%, rgba(139, 0, 0, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(139, 0, 0, 0.05) 0%, transparent 50%);
@@ -40,46 +41,45 @@
     .login-container {
       width: 100%;
       max-width: 400px;
-      padding: 20px;
-    }
-
-    .login-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 40px 32px;
       box-shadow: 
-        0 4px 24px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(139, 0, 0, 0.1);
+        0 20px 25px -5px rgba(0, 0, 0, 0.3),
+        0 10px 10px -5px rgba(0, 0, 0, 0.1);
       position: relative;
       overflow: hidden;
     }
 
-    .login-card::before {
+    .login-container::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 2px;
+      height: 1px;
       background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      opacity: 0.6;
+      opacity: 0.5;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
     }
 
     .login-title {
       font-size: 24px;
       font-weight: 600;
-      text-align: center;
-      margin-bottom: 8px;
       color: var(--text);
-      text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+      margin-bottom: 8px;
+      letter-spacing: -0.025em;
     }
 
     .login-subtitle {
       font-size: 14px;
       color: var(--text-muted);
-      text-align: center;
-      margin-bottom: 32px;
+      font-weight: 400;
     }
 
     .form-group {
@@ -97,11 +97,11 @@
     .form-input {
       width: 100%;
       padding: 12px 16px;
+      font-size: 16px;
       background: var(--bg-main);
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
-      font-size: 16px;
       transition: all 0.2s ease;
     }
 
@@ -117,13 +117,13 @@
 
     .login-button {
       width: 100%;
-      padding: 14px 16px;
-      background: var(--primary);
-      border: none;
-      border-radius: 8px;
-      color: white;
+      padding: 12px 24px;
       font-size: 16px;
       font-weight: 600;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
       margin-top: 8px;
@@ -131,74 +131,74 @@
 
     .login-button:hover {
       background: var(--primary-hover);
+      transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
     }
 
     .login-button:active {
-      transform: translateY(1px);
+      transform: translateY(0);
+    }
+
+    .login-footer {
+      margin-top: 32px;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
     }
 
     .sample-notice {
-      margin-top: 24px;
-      padding: 16px;
-      background: rgba(139, 0, 0, 0.1);
-      border: 1px solid rgba(139, 0, 0, 0.2);
-      border-radius: 8px;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
-      text-align: center;
+      font-style: italic;
     }
 
     @media (max-width: 480px) {
       .login-container {
-        padding: 16px;
-      }
-      
-      .login-card {
         padding: 32px 24px;
+        margin: 0 16px;
       }
     }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="login-card">
+    <div class="login-header">
       <h1 class="login-title" data-testid="login-title">ログイン</h1>
-      <p class="login-subtitle">現場作業員向け工数記録システム</p>
-      
-      <form data-testid="login-form" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="username">ユーザー名</label>
-          <input 
-            type="text" 
-            id="username" 
-            name="username"
-            class="form-input" 
-            data-testid="username"
-            placeholder="ユーザー名を入力"
-          >
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="password">パスワード</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password"
-            class="form-input" 
-            data-testid="password"
-            placeholder="パスワードを入力"
-          >
-        </div>
-        
-        <button type="submit" class="login-button" data-testid="login-button">
-          ログイン
-        </button>
-      </form>
-      
-      <div class="sample-notice">
-        サンプル実装ではどの入力でもログインできます
+      <p class="login-subtitle">現場作業員向け工数記録アプリ</p>
+    </div>
+
+    <form data-testid="login-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">ユーザー名</label>
+        <input 
+          type="text" 
+          id="username"
+          name="username"
+          class="form-input" 
+          data-testid="username"
+          placeholder="ユーザー名を入力"
+        >
       </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">パスワード</label>
+        <input 
+          type="password" 
+          id="password"
+          name="password"
+          class="form-input" 
+          data-testid="password"
+          placeholder="パスワードを入力"
+        >
+      </div>
+
+      <button type="submit" class="login-button" data-testid="login-button">
+        ログイン
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p class="sample-notice">サンプル実装ではどの入力でもログインできます</p>
     </div>
   </div>
 

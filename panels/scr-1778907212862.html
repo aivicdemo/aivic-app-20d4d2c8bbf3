@@ -15,7 +15,7 @@ window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発"
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907212862";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 自動保存の状態管理\n  let autoSaveInterval = null;\n  let saveIntervalSeconds = 30;\n  let isOnline = navigator.onLine;\n  let pendingData = [];\n  let localStorageKey = 'workRecordAutoSave';\n  \n  // DOM要素の取得\n  const autoSaveStatus = container.querySelector('#auto-save-status');\n  const autoSaveIndicator = container.querySelector('#auto-save-indicator');\n  const networkStatus = container.querySelector('#network-status');\n  const networkIndicator = container.querySelector('#network-indicator');\n  const pendingCountEl = container.querySelector('#pending-count');\n  const lastSaveTimeEl = container.querySelector('#last-save-time');\n  const saveIntervalInput = container.querySelector('#save-interval');\n  const localDataTbody = container.querySelector('#local-data-tbody');\n  const errorNotification = container.querySelector('#error-notification');\n  const errorMessage = container.querySelector('#error-message');\n  const recoverableCountEl = container.querySelector('#recoverable-count');\n  const lastBackupTimeEl = container.querySelector('#last-backup-time');\n  const recoveryDialog = container.querySelector('#recovery-dialog');\n  const recoveryPreview = container.querySelector('#recovery-preview');\n\n  // ローカルストレージからデータを取得\n  function getLocalData() {\n    try {\n      const data = localStorage.getItem(localStorageKey);\n      return data ? JSON.parse(data) : [];\n    } catch (e) {\n      console.error('ローカルデータの取得に失敗:', e);\n      return [];\n    }\n  }\n\n  // ローカルストレージにデータを保存\n  function saveLocalData(data) {\n    try {\n      localStorage.setItem(localStorageKey, JSON.stringify(data));\n      return true;\n    } catch (e) {\n      console.error('ローカルデータの保存に失敗:', e);\n      showError('ストレージ容量不足のため保存に失敗しました。不要なデータを削除してください。');\n      return false;\n    }\n  }\n\n  // エラー表示\n  function showError(message) {\n    errorMessage.textContent = message;\n    errorNotification.classList.remove('hidden');\n  }\n\n  // エラー非表示\n  function hideError() {\n    errorNotification.classList.add('hidden');\n  }\n\n  // ネットワーク状態の更新\n  function updateNetworkStatus() {\n    isOnline = navigator.onLine;\n    networkStatus.textContent = isOnline ? 'オンライン' : 'オフライン';\n    networkIndicator.style.background = isOnline ? '#22c55e' : '#ef4444';\n    \n    if (isOnline && pendingData.length > 0) {\n      // オンライン復旧時の自動同期\n      setTimeout(() => syncPendingData(), 1000);\n    }\n  }\n\n  // 同期待ちデータの更新\n  function updatePendingCount() {\n    pendingData = getLocalData().filter(item => !item.synced);\n    pendingCountEl.textContent = pendingData.length;\n    \n    // 上限チェック（100件）\n    if (pendingData.length >= 100) {\n      showError('同期待ちデータが上限（100件）に達しました。手動同期を実行してください。');\n    }\n  }\n\n  // 最終保存時刻の更新\n  function updateLastSaveTime() {\n    const now = new Date();\n    lastSaveTimeEl.textContent = now.toLocaleTimeString('ja-JP', { \n      hour: '2-digit', \n      minute: '2-digit',\n      second: '2-digit'\n    });\n  }\n\n  // ローカルデータ一覧の描画\n  function renderLocalData() {\n    const localData = getLocalData();\n    \n    if (localData.length === 0) {\n      localDataTbody.innerHTML = '<tr><td colspan=\"5\" style=\"text-align: center; color: var(--text-muted); padding: 20px;\">ローカルデータはありません</td></tr>';\n      return;\n    }\n\n    localDataTbody.innerHTML = localData.map(item => `\n      <tr data-id=\"${item.id}\">\n        <td>${new Date(item.timestamp).toLocaleString('ja-JP')}</td>\n        <td style=\"max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;\">${item.content || '作業記録'}</td>\n        <td>\n          <span style=\"padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; \n                       background: ${item.synced ? '#22c55e' : '#f59e0b'}; color: #fff;\">\n            ${item.synced ? '同期済み' : '未同期'}\n          </span>\n        </td>\n        <td>${Math.round(JSON.stringify(item).length / 1024 * 100) / 100} KB</td>\n        <td>\n          <button class=\"action-btn secondary delete-local-btn\" data-id=\"${item.id}\" style=\"font-size: 11px; padding: 4px 8px;\">削除</button>\n        </td>\n      </tr>\n    `).join('');\n  }\n\n  // 自動保存の実行\n  async function performAutoSave() {\n    try {\n      // 現在の入力データを取得（実際の実装では工数記録画面から取得）\n      const currentData = {\n        id: Date.now().toString(),\n        timestamp: new Date().toISOString(),\n        content: '自動保存データ',\n        workDate: new Date().toISOString().split('T')[0],\n        startTime: new Date().toISOString(),\n        projectName: 'サンプルプロジェクト',\n        workType: '作業',\n        workContent: '自動保存されたデータ',\n        status: '作業中',\n        synced: false\n      };\n\n      const localData = getLocalData();\n      \n      // 上限チェック\n      if (localData.length >= 100) {\n        showError('ローカルストレージの上限に達しました。');\n        return;\n      }\n\n      localData.push(currentData);\n      \n      if (saveLocalData(localData)) {\n        updateLastSaveTime();\n        updatePendingCount();\n        renderLocalData();\n        \n        // オンライン時はサーバー同期を試行\n        if (isOnline) {\n          await syncDataToServer(currentData);\n        }\n      }\n    } catch (error) {\n      console.error('自動保存エラー:', error);\n      showError('自動保存に失敗しました: ' + error.message);\n    }\n  }\n\n  // サーバーとの同期\n  async function syncDataToServer(data) {\n    try {\n      const saved = await window.aivicApi.save(1, {\n        作業員ID: 'user-001',\n        作業日: data.workDate,\n        作業開始時刻: data.startTime,\n        プロジェクト名: data.projectName,\n        作業種別: data.workType,\n        作業内容: data.workContent,\n        進捗状況: data.status,\n        承認状態: '未承認',\n        作成者ID: 'user-001'\n      });\n\n      if (saved) {\n        // 同期成功時はローカルデータを更新\n        const localData = getLocalData();\n        const index = localData.findIndex(item => item.id === data.id);\n        if (index !== -1) {\n          localData[index].synced = true;\n          saveLocalData(localData);\n          updatePendingCount();\n          renderLocalData();\n        }\n      }\n    } catch (error) {\n      console.error('サーバー同期エラー:', error);\n      showError('サーバーとの同期に失敗しました: ' + error.message);\n    }\n  }\n\n  // 未同期データの一括同期\n  async function syncPendingData() {\n    const unsyncedData = getLocalData().filter(item => !item.synced);\n    \n    if (unsyncedData.length === 0) {\n      return;\n    }\n\n    let successCount = 0;\n    let failCount = 0;\n\n    for (const data of unsyncedData) {\n      try {\n        await syncDataToServer(data);\n        successCount++;\n      } catch (error) {\n        failCount++;\n      }\n    }\n\n    if (failCount > 0) {\n      showError(`同期完了: 成功${successCount}件、失敗${failCount}件`);\n    }\n  }\n\n  // 自動保存の開始\n  function startAutoSave() {\n    if (autoSaveInterval) {\n      clearInterval(autoSaveInterval);\n    }\n    \n    autoSaveInterval = setInterval(performAutoSave, saveIntervalSeconds * 1000);\n    autoSaveStatus.textContent = '有効';\n    autoSaveIndicator.style.background = '#22c55e';\n  }\n\n  // 自動保存の停止\n  function stopAutoSave() {\n    if (autoSaveInterval) {\n      clearInterval(autoSaveInterval);\n      autoSaveInterval = null;\n    }\n    autoSaveStatus.textContent = '無効';\n    autoSaveIndicator.style.background = '#ef4444';\n  }\n\n  // 復旧可能データの更新\n  function updateRecoverableData() {\n    const localData = getLocalData();\n    const recoverableData = localData.filter(item => !item.synced);\n    recoverableCountEl.textContent = `${recoverableData.length}件`;\n    \n    if (recoverableData.length > 0) {\n      const lastData = recoverableData[recoverableData.length - 1];\n      lastBackupTimeEl.textContent = new Date(lastData.timestamp).toLocaleTimeString('ja-JP');\n    } else {\n      lastBackupTimeEl.textContent = '--:--';\n    }\n  }\n\n  // データ復旧ダイアログの表示\n  function showRecoveryDialog() {\n    const recoverableData = getLocalData().filter(item => !item.synced);\n    \n    if (recoverableData.length === 0) {\n      showError('復旧可能なデータがありません。');\n      return;\n    }\n\n    recoveryPreview.innerHTML = recoverableData.map(item => `\n      <div style=\"padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px;\">\n        <div style=\"font-weight: 500; color: var(--text);\">${new Date(item.timestamp).toLocaleString('ja-JP')}</div>\n        <div style=\"color: var(--text-muted); margin-top: 2px;\">${item.content}</div>\n      </div>\n    `).join('');\n\n    recoveryDialog.classList.remove('hidden');\n  }\n\n  // イベントリスナーの設定\n  \n  // 保存間隔の適用\n  container.querySelector('#btn-apply-interval').addEventListener('click', () => {\n    const newInterval = parseInt(saveIntervalInput.value);\n    \n    if (newInterval < 1) {\n      showError('保存間隔は1秒以上で設定してください。');\n      return;\n    }\n    \n    if (newInterval > 86400) {\n      showError('保存間隔は86400秒（24時間）以下で設定してください。');\n      return;\n    }\n    \n    saveIntervalSeconds = newInterval;\n    startAutoSave();\n    hideError();\n  });\n\n  // 手動同期\n  container.querySelector('#btn-manual-sync').addEventListener('click', async () => {\n    if (!isOnline) {\n      showError('オフライン状態では同期できません。');\n      return;\n    }\n    \n    await syncPendingData();\n  });\n\n  // 強制保存\n  container.querySelector('#btn-force-save').addEventListener('click', () => {\n    performAutoSave();\n  });\n\n  // ローカルデータクリア\n  container.querySelector('#btn-clear-local').addEventListener('click', () => {\n    if (confirm('すべてのローカルデータを削除しますか？未同期のデータは失われます。')) {\n      localStorage.removeItem(localStorageKey);\n      renderLocalData();\n      updatePendingCount();\n      updateRecoverableData();\n    }\n  });\n\n  // ローカルデータ更新\n  container.querySelector('#btn-refresh-local').addEventListener('click', () => {\n    renderLocalData();\n    updatePendingCount();\n    updateRecoverableData();\n  });\n\n  // データ復旧\n  container.querySelector('#btn-recover-data').addEventListener('click', () => {\n    showRecoveryDialog();\n  });\n\n  // 復旧ダイアログのキャンセル\n  container.querySelector('#btn-cancel-recovery').addEventListener('click', () => {\n    recoveryDialog.classList.add('hidden');\n  });\n\n  // 復旧実行\n  container.querySelector('#btn-confirm-recovery').addEventListener('click', () => {\n    // 実際の復旧処理（工数記録画面にデータを復元）\n    recoveryDialog.classList.add('hidden');\n    window.showScreen('scr-1778907133295'); // 工数記録画面に戻る\n  });\n\n  // エラー再試行\n  container.querySelector('#btn-retry').addEventListener('click', () => {\n    hideError();\n    if (isOnline) {\n      syncPendingData();\n    } else {\n      performAutoSave();\n    }\n  });\n\n  // ローカルデータの個別削除\n  container.addEventListener('click', (e) => {\n    const deleteBtn = e.target.closest('.delete-local-btn');\n    if (deleteBtn) {\n      const id = deleteBtn.dataset.id;\n      if (confirm('このローカルデータを削除しますか？')) {\n        const localData = getLocalData();\n        const filteredData = localData.filter(item => item.id !== id);\n        saveLocalData(filteredData);\n        renderLocalData();\n        updatePendingCount();\n        updateRecoverableData();\n      }\n    }\n  });\n\n  // ネットワーク状態の監視\n  window.addEventListener('online', updateNetworkStatus);\n  window.addEventListener('offline', updateNetworkStatus);\n\n  // 初期化\n  updateNetworkStatus();\n  updatePendingCount();\n  renderLocalData();\n  updateRecoverableData();\n  startAutoSave();\n\n  // ページ離脱時の自動保存\n  window.addEventListener('beforeunload', () => {\n    performAutoSave();\n  });\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let autoSaveInterval = null;\n  let currentSaveInterval = 30; // デフォルト30秒\n  let localData = JSON.parse(localStorage.getItem('workRecordsLocal') || '[]');\n  let isOnline = navigator.onLine;\n  let retryCount = 0;\n  const maxRetries = 3;\n\n  // ローカルデータ再描画関数\n  function renderLocalData() {\n    const tbody = container.querySelector('#local-data-tbody');\n    if (localData.length === 0) {\n      tbody.innerHTML = `\n        <tr>\n          <td colspan=\"4\" style=\"padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;\">\n            ローカル保存データはありません\n          </td>\n        </tr>\n      `;\n    } else {\n      tbody.innerHTML = localData.map(item => `\n        <tr data-id=\"${item.id}\">\n          <td style=\"padding: 6px 10px; font-size: 12px; color: var(--text);\">${new Date(item.作業日).toLocaleString()}</td>\n          <td style=\"padding: 6px 10px; font-size: 12px; color: var(--text);\">${(item.作業内容 || '').substring(0, 30)}${(item.作業内容 || '').length > 30 ? '...' : ''}</td>\n          <td style=\"padding: 6px 10px; font-size: 12px;\">\n            <span style=\"background: ${item.synced ? 'rgba(106,255,106,0.2)' : 'rgba(255,165,0,0.2)'}; color: ${item.synced ? '#6aff6a' : '#ffa500'}; padding: 2px 6px; border-radius: 4px; font-size: 11px;\">\n              ${item.synced ? '同期済み' : '未同期'}\n            </span>\n          </td>\n          <td style=\"padding: 6px 10px;\">\n            <button class=\"delete-local-btn\" data-id=\"${item.id}\" style=\"background: transparent; color: #ff6a6a; border: 1px solid #ff6a6a; padding: 2px 6px; border-radius: 4px; font-size: 11px; cursor: pointer;\">削除</button>\n          </td>\n        </tr>\n      `).join('');\n    }\n    updatePendingSyncCount();\n  }\n\n  // 同期待ち件数更新\n  function updatePendingSyncCount() {\n    const pendingCount = localData.filter(item => !item.synced).length;\n    container.querySelector('#pending-sync-count').textContent = `${pendingCount}件`;\n    \n    // 上限チェック（100件）\n    if (pendingCount >= 100) {\n      showError('同期待ちデータが上限（100件）に達しています。手動同期を実行してください。');\n    }\n  }\n\n  // ネットワーク状態更新\n  function updateNetworkStatus() {\n    const statusEl = container.querySelector('#network-status');\n    statusEl.textContent = isOnline ? 'オンライン' : 'オフライン';\n    statusEl.style.color = isOnline ? '#6aff6a' : '#ff6a6a';\n  }\n\n  // エラー表示\n  function showError(message) {\n    const errorEl = container.querySelector('#error-notification');\n    const messageEl = container.querySelector('#error-message');\n    messageEl.textContent = message;\n    errorEl.style.display = 'block';\n  }\n\n  // エラー非表示\n  function hideError() {\n    container.querySelector('#error-notification').style.display = 'none';\n  }\n\n  // 最終保存時刻更新\n  function updateLastSaveTime() {\n    const now = new Date();\n    container.querySelector('#last-save-time').textContent = \n      `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;\n  }\n\n  // 自動保存処理\n  function startAutoSave() {\n    if (autoSaveInterval) {\n      clearInterval(autoSaveInterval);\n    }\n    \n    autoSaveInterval = setInterval(async () => {\n      try {\n        // 未同期データがある場合は同期を試行\n        const pendingData = localData.filter(item => !item.synced);\n        if (pendingData.length > 0 && isOnline) {\n          await syncPendingData();\n        }\n        updateLastSaveTime();\n      } catch (error) {\n        console.error('Auto save error:', error);\n        showError('自動保存中にエラーが発生しました: ' + error.message);\n      }\n    }, currentSaveInterval * 1000);\n  }\n\n  // 未同期データの同期\n  async function syncPendingData() {\n    const pendingData = localData.filter(item => !item.synced);\n    let syncedCount = 0;\n    \n    for (const item of pendingData) {\n      try {\n        // ストレージ容量チェック\n        if (localStorage.length > 5000000) { // 約5MB\n          throw new Error('ストレージ容量不足');\n        }\n        \n        const result = await window.aivicApi.save(1, {\n          作業員ID: item.作業員ID,\n          作業日: item.作業日,\n          作業開始時刻: item.作業開始時刻,\n          作業終了時刻: item.作業終了時刻,\n          作業時間: item.作業時間,\n          プロジェクト名: item.プロジェクト名,\n          作業場所: item.作業場所,\n          作業種別: item.作業種別,\n          作業内容: item.作業内容,\n          進捗状況: item.進捗状況,\n          備考: item.備考,\n          承認状態: '未承認',\n          作成者ID: item.作業員ID\n        });\n        \n        if (result) {\n          // 同期成功\n          const index = localData.findIndex(d => d.id === item.id);\n          if (index !== -1) {\n            localData[index].synced = true;\n            syncedCount++;\n          }\n        }\n      } catch (error) {\n        console.error('Sync error for item:', item.id, error);\n        if (error.message.includes('容量不足')) {\n          showError('保存に失敗しました。端末の容量不足が原因の可能性があります。不要なファイルを削除してから再度お試しください。');\n        } else {\n          showError('データの同期に失敗しました: ' + error.message);\n        }\n        break;\n      }\n    }\n    \n    if (syncedCount > 0) {\n      localStorage.setItem('workRecordsLocal', JSON.stringify(localData));\n      renderLocalData();\n      hideError();\n      retryCount = 0; // 成功時はリトライカウントをリセット\n    }\n    \n    return syncedCount;\n  }\n\n  // 手動同期\n  async function manualSync() {\n    if (!isOnline) {\n      showError('オフライン状態のため同期できません。ネットワーク接続を確認してください。');\n      return;\n    }\n    \n    const btn = container.querySelector('#btn-manual-sync');\n    btn.disabled = true;\n    btn.textContent = '同期中...';\n    \n    try {\n      const syncedCount = await syncPendingData();\n      if (syncedCount > 0) {\n        alert(`${syncedCount}件のデータを同期しました。`);\n      } else {\n        alert('同期対象のデータがありません。');\n      }\n    } catch (error) {\n      showError('手動同期に失敗しました: ' + error.message);\n    } finally {\n      btn.disabled = false;\n      btn.textContent = '手動同期実行';\n    }\n  }\n\n  // データ復旧\n  function dataRecovery() {\n    const unsavedData = JSON.parse(localStorage.getItem('unsavedWorkData') || 'null');\n    if (unsavedData) {\n      if (confirm('未保存のデータが見つかりました。復旧しますか？')) {\n        // 復旧処理\n        localData.push({\n          id: Date.now().toString(),\n          ...unsavedData,\n          synced: false\n        });\n        localStorage.setItem('workRecordsLocal', JSON.stringify(localData));\n        localStorage.removeItem('unsavedWorkData');\n        renderLocalData();\n        alert('データを復旧しました。');\n      }\n    } else {\n      alert('復旧可能なデータが見つかりません。');\n    }\n  }\n\n  // 初期化\n  renderLocalData();\n  updateNetworkStatus();\n  updateLastSaveTime();\n  startAutoSave();\n\n  // 保存間隔設定\n  container.querySelector('#save-interval').value = currentSaveInterval;\n\n  // イベントリスナー\n  container.querySelector('#btn-save-settings').addEventListener('click', () => {\n    const interval = parseInt(container.querySelector('#save-interval').value);\n    const errorEl = container.querySelector('#settings-error');\n    \n    if (interval < 1) {\n      errorEl.textContent = '保存間隔は1秒以上で設定してください';\n      errorEl.style.display = 'block';\n      return;\n    }\n    \n    if (interval > 86400) {\n      errorEl.textContent = '保存間隔は86400秒以下で設定してください';\n      errorEl.style.display = 'block';\n      return;\n    }\n    \n    currentSaveInterval = interval;\n    localStorage.setItem('autoSaveInterval', interval.toString());\n    startAutoSave();\n    errorEl.style.display = 'none';\n    alert('保存間隔を更新しました。');\n  });\n\n  container.querySelector('#btn-manual-sync').addEventListener('click', manualSync);\n  container.querySelector('#btn-data-recovery').addEventListener('click', dataRecovery);\n\n  container.querySelector('#btn-retry').addEventListener('click', async () => {\n    hideError();\n    if (retryCount < maxRetries) {\n      retryCount++;\n      try {\n        await syncPendingData();\n      } catch (error) {\n        showError(`再試行に失敗しました (${retryCount}/${maxRetries}): ` + error.message);\n      }\n    } else {\n      showError('最大再試行回数に達しました。しばらく時間をおいてから手動同期をお試しください。');\n    }\n  });\n\n  container.querySelector('#btn-clear-local').addEventListener('click', () => {\n    if (confirm('ローカル保存データをすべて削除しますか？未同期のデータも削除されます。')) {\n      localData = [];\n      localStorage.setItem('workRecordsLocal', JSON.stringify(localData));\n      renderLocalData();\n    }\n  });\n\n  // ローカルデータ削除\n  container.addEventListener('click', (e) => {\n    const deleteBtn = e.target.closest('.delete-local-btn');\n    if (deleteBtn) {\n      const id = deleteBtn.dataset.id;\n      if (confirm('このデータを削除しますか？')) {\n        localData = localData.filter(item => item.id !== id);\n        localStorage.setItem('workRecordsLocal', JSON.stringify(localData));\n        renderLocalData();\n      }\n    }\n  });\n\n  // ネットワーク状態監視\n  window.addEventListener('online', () => {\n    isOnline = true;\n    updateNetworkStatus();\n    hideError();\n    // オンライン復旧時の自動同期\n    setTimeout(async () => {\n      try {\n        await syncPendingData();\n      } catch (error) {\n        showError('自動同期に失敗しました: ' + error.message);\n      }\n    }, 1000);\n  });\n\n  window.addEventListener('offline', () => {\n    isOnline = false;\n    updateNetworkStatus();\n  });\n\n  // 保存間隔の復元\n  const savedInterval = localStorage.getItem('autoSaveInterval');\n  if (savedInterval) {\n    currentSaveInterval = parseInt(savedInterval);\n    container.querySelector('#save-interval').value = currentSaveInterval;\n    startAutoSave();\n  }\n\n  // ページ離脱時の未保存データ保護\n  window.addEventListener('beforeunload', () => {\n    // 現在編集中のデータがあれば保存\n    const currentForm = document.querySelector('form');\n    if (currentForm) {\n      const formData = new FormData(currentForm);\n      const data = Object.fromEntries(formData.entries());\n      if (Object.values(data).some(value => value.trim())) {\n        localStorage.setItem('unsavedWorkData', JSON.stringify(data));\n      }\n    }\n  });\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </script>
@@ -409,141 +409,115 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 自動�
           <div data-aivic-panel="scr-1778907170814" style="display:none"></div>
           <div data-aivic-panel="scr-1778907187615" style="display:none"></div>
           <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
-          <div data-aivic-panel="scr-1778907212862"><div class="auto-save-container" style="padding: 12px; max-width: 1200px;">
-  <!-- ヘッダー -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h1 style="font-size: 18px; font-weight: 600; color: var(--text); margin: 0;">データ自動保存処理</h1>
-    <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" data-testid="back-button" onclick="window.showScreen('scr-1778907133295')">工数記録に戻る</button>
-      <button class="action-btn" data-testid="settings-button" id="btn-settings">保存設定変更</button>
+          <div data-aivic-panel="scr-1778907212862"><div class="card" style="padding: 14px; margin-bottom: 12px;">
+  <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">データ自動保存処理</h2>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <!-- 自動保存ステータス -->
+    <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">自動保存ステータス</div>
+      <div id="auto-save-status" data-testid="auto-save-status" style="font-size: 13px; font-weight: 500; color: var(--text);">有効</div>
+    </div>
+    
+    <!-- ネットワーク接続状態 -->
+    <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ネットワーク接続状態</div>
+      <div id="network-status" data-testid="network-status" style="font-size: 13px; font-weight: 500; color: var(--text);">オンライン</div>
+    </div>
+    
+    <!-- 同期待ちデータ件数 -->
+    <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">同期待ちデータ件数</div>
+      <div id="pending-sync-count" data-testid="pending-sync-count" style="font-size: 13px; font-weight: 500; color: var(--text);">0件</div>
+    </div>
+    
+    <!-- 最終保存時刻 -->
+    <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+      <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">最終保存時刻</div>
+      <div id="last-save-time" data-testid="last-save-time" style="font-size: 13px; font-weight: 500; color: var(--text);">--:--</div>
     </div>
   </div>
 
-  <!-- ステータス概要カード -->
-  <div class="card" style="margin-bottom: 12px; padding: 14px;">
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+  <!-- 保存設定 -->
+  <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 16px;">
+    <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 12px 0; color: var(--text);">保存設定</h3>
+    <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;">
       <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">自動保存ステータス</div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <div id="auto-save-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
-          <span id="auto-save-status" style="font-size: 13px; font-weight: 500; color: var(--text);">有効</span>
-        </div>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ネットワーク状態</div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <div id="network-indicator" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></div>
-          <span id="network-status" style="font-size: 13px; font-weight: 500; color: var(--text);">オンライン</span>
-        </div>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">同期待ち件数</div>
-        <span id="pending-count" style="font-size: 16px; font-weight: 600; color: var(--primary);" data-testid="pending-count">0</span>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">最終保存時刻</div>
-        <span id="last-save-time" style="font-size: 13px; color: var(--text);" data-testid="last-save-time">--:--</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 設定・操作パネル -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-    <!-- 保存設定 -->
-    <div class="card" style="padding: 14px;">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">保存設定</h3>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">保存間隔（秒）</label>
+        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">保存間隔（秒）</label>
         <input type="number" id="save-interval" data-testid="save-interval" min="1" max="86400" value="30" 
                style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; width: 100px;">
       </div>
-      <button class="action-btn" id="btn-apply-interval" data-testid="apply-interval-button" style="font-size: 13px;">適用</button>
+      <button id="btn-save-settings" data-testid="save-settings-button" class="action-btn" 
+              style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+        設定保存
+      </button>
     </div>
-
-    <!-- 手動操作 -->
-    <div class="card" style="padding: 14px;">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">手動操作</h3>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="action-btn" id="btn-manual-sync" data-testid="manual-sync-button" style="font-size: 13px;">手動同期実行</button>
-        <button class="action-btn secondary" id="btn-force-save" data-testid="force-save-button" style="font-size: 13px;">強制保存</button>
-        <button class="action-btn secondary" id="btn-clear-local" data-testid="clear-local-button" style="font-size: 13px;">ローカルデータクリア</button>
-      </div>
-    </div>
+    <div id="settings-error" data-testid="settings-error" style="font-size: 11px; color: #ff6a6a; margin-top: 8px; display: none;"></div>
   </div>
 
-  <!-- エラー通知エリア -->
-  <div id="error-notification" class="card hidden" style="padding: 12px; margin-bottom: 12px; border-left: 3px solid #ef4444; background: var(--bg-card);" data-testid="error-notification">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <div style="width: 16px; height: 16px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-        <span style="color: #fff; font-size: 10px; font-weight: bold;">!</span>
-      </div>
-      <div>
-        <div style="font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px;">保存エラーが発生しました</div>
-        <div id="error-message" style="font-size: 12px; color: var(--text-muted);"></div>
-      </div>
-      <button class="action-btn secondary" id="btn-retry" data-testid="retry-button" style="margin-left: auto; font-size: 12px;">再試行</button>
-    </div>
+  <!-- 手動操作 -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+    <button id="btn-manual-sync" data-testid="manual-sync-button" class="action-btn" 
+            style="background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+      手動同期実行
+    </button>
+    <button id="btn-data-recovery" data-testid="data-recovery-button" class="action-btn secondary" 
+            style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+      データ復旧
+    </button>
+  </div>
+
+  <!-- 保存エラー通知エリア -->
+  <div id="error-notification" data-testid="error-notification" style="background: rgba(255,106,106,0.1); border: 1px solid #ff6a6a; border-radius: 6px; padding: 12px; margin-bottom: 16px; display: none;">
+    <div style="font-size: 13px; font-weight: 500; color: #ff6a6a; margin-bottom: 4px;">保存エラー</div>
+    <div id="error-message" style="font-size: 12px; color: var(--text);"></div>
+    <button id="btn-retry" data-testid="retry-button" style="background: transparent; color: #ff6a6a; border: 1px solid #ff6a6a; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-top: 8px;">
+      再試行
+    </button>
   </div>
 
   <!-- ローカル保存データ一覧 -->
-  <div class="card" style="padding: 14px; margin-bottom: 12px;">
+  <div style="background: var(--bg-main); padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0;">ローカル保存データ一覧</h3>
-      <button class="action-btn secondary" id="btn-refresh-local" data-testid="refresh-local-button" style="font-size: 12px;">更新</button>
+      <h3 style="font-size: 14px; font-weight: 600; margin: 0; color: var(--text);">ローカル保存データ一覧</h3>
+      <button id="btn-clear-local" data-testid="clear-local-button" class="action-btn secondary" 
+              style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+        クリア
+      </button>
     </div>
+    
     <div class="table-wrap">
-      <table data-testid="local-data-table">
+      <table data-testid="local-data-list" style="width: 100%;">
         <thead>
           <tr>
-            <th style="color: var(--text);">作業日時</th>
-            <th style="color: var(--text);">作業内容</th>
-            <th style="color: var(--text);">保存状態</th>
-            <th style="color: var(--text);">データサイズ</th>
-            <th style="color: var(--text);">操作</th>
+            <th style="padding: 6px 10px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border);">作業日時</th>
+            <th style="padding: 6px 10px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border);">作業内容</th>
+            <th style="padding: 6px 10px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border);">状態</th>
+            <th style="padding: 6px 10px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border);">操作</th>
           </tr>
         </thead>
         <tbody id="local-data-tbody">
-          <!-- ローカルデータが動的に挿入される -->
+          <tr>
+            <td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+              ローカル保存データはありません
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
   </div>
-
-  <!-- データ復旧オプション -->
-  <div class="card" style="padding: 14px;">
-    <h3 style="font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 12px 0;">データ復旧オプション</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">復旧可能データ</div>
-        <div style="font-size: 16px; font-weight: 600; color: var(--primary);" id="recoverable-count" data-testid="recoverable-count">0件</div>
-      </div>
-      <div>
-        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">最終バックアップ</div>
-        <div style="font-size: 13px; color: var(--text);" id="last-backup-time">--:--</div>
-      </div>
-      <div style="display: flex; align-items: end;">
-        <button class="action-btn secondary" id="btn-recover-data" data-testid="recover-data-button" style="font-size: 13px;">データ復旧実行</button>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- データ復旧ダイアログ -->
-<div id="recovery-dialog" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;" data-testid="recovery-dialog">
-  <div class="card" style="padding: 20px; max-width: 500px; width: 90%;">
-    <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 16px 0;">データ復旧の確認</h3>
-    <p style="font-size: 13px; color: var(--text); margin-bottom: 16px;">
-      未保存の作業データが検出されました。復旧しますか？<br>
-      復旧すると現在の入力内容は上書きされます。
-    </p>
-    <div id="recovery-preview" style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.25);">
-      <!-- 復旧データのプレビューが表示される -->
-    </div>
-    <div style="display: flex; gap: 8px; justify-content: flex-end;">
-      <button class="action-btn secondary" id="btn-cancel-recovery" data-testid="cancel-recovery-button">キャンセル</button>
-      <button class="action-btn" id="btn-confirm-recovery" data-testid="confirm-recovery-button">復旧する</button>
-    </div>
-  </div>
+<!-- 操作ボタン -->
+<div style="display: flex; gap: 12px; margin-top: 16px;">
+  <button onclick="window.showScreen('scr-1778907133295')" class="action-btn" 
+          style="background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+    工数記録画面へ
+  </button>
+  <button onclick="window.showScreen('scr-1778907145716')" class="action-btn secondary" 
+          style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+    作業履歴一覧
+  </button>
 </div></div>
           <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
           <div data-aivic-panel="scr-1778907238439" style="display:none"></div>

@@ -15,7 +15,7 @@ window.AIVIC_SYSTEM_NAME = "現場作業員向け工数記録アプリの開発"
 window.AIVIC_TABLES = [{"tableName":"ユーザー","purpose":"現場作業員のアカウント情報と認証情報を管理する","columns":[{"name":"ユーザーID","type":"uuid","required":true,"description":"ユーザーの一意識別子（主キー）"},{"name":"ユーザー名","type":"varchar(100)","required":true,"description":"ログイン用のユーザー名"},{"name":"パスワードハッシュ","type":"varchar(100)","required":true,"description":"ハッシュ化されたパスワード"},{"name":"氏名","type":"varchar(100)","required":true,"description":"作業員の実名"},{"name":"所属部署","type":"varchar(100)","required":false,"description":"作業員が所属する部署名"},{"name":"職種","type":"varchar(100)","required":false,"description":"作業員の職種・役職"},{"name":"権限レベル","type":"varchar(100)","required":true,"description":"システム内での権限（一般作業員、管理者等）"},{"name":"有効フラグ","type":"boolean","required":true,"description":"アカウントの有効/無効状態"},{"name":"最終ログイン日時","type":"timestamp","required":false,"description":"最後にログインした日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者","type":"varchar(100)","required":true,"description":"レコード作成者"}]},{"tableName":"作業記録","purpose":"現場作業員の日々の作業時間と内容を記録し、工数管理と実績分析を行うためのトランザクションテーブル","columns":[{"name":"作業記録ID","type":"uuid","required":true,"description":"作業記録の一意識別子（主キー）"},{"name":"作業員ID","type":"uuid","required":true,"description":"作業を行った作業員のID（ユーザーテーブル外部キー）"},{"name":"作業日","type":"timestamp","required":true,"description":"作業を実施した日付"},{"name":"作業開始時刻","type":"timestamp","required":true,"description":"作業開始の日時"},{"name":"作業終了時刻","type":"timestamp","required":false,"description":"作業終了の日時（作業中の場合はnull）"},{"name":"作業時間","type":"integer","required":false,"description":"実際の作業時間（分単位、終了時に自動計算）"},{"name":"プロジェクト名","type":"varchar(100)","required":true,"description":"作業対象のプロジェクト名"},{"name":"作業場所","type":"varchar(100)","required":true,"description":"作業を実施した現場・場所"},{"name":"作業種別","type":"varchar(100)","required":true,"description":"作業の種類（設置、点検、修理等）"},{"name":"作業内容","type":"text","required":true,"description":"具体的な作業内容の詳細"},{"name":"進捗状況","type":"varchar(100)","required":true,"description":"作業の進捗状態（作業中、完了、中断等）"},{"name":"備考","type":"text","required":false,"description":"特記事項や注意点等の補足情報"},{"name":"承認状態","type":"varchar(100)","required":true,"description":"記録の承認状況（未承認、承認済み、差し戻し）"},{"name":"承認者ID","type":"uuid","required":false,"description":"記録を承認した管理者のID"},{"name":"承認日時","type":"timestamp","required":false,"description":"承認が行われた日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"}]},{"tableName":"中断記録","purpose":"作業中断の発生理由、時間、影響を記録し、作業効率分析と改善に活用する","columns":[{"name":"中断記録ID","type":"uuid","required":true,"description":"中断記録の一意識別子（主キー）"},{"name":"作業記録ID","type":"uuid","required":true,"description":"中断が発生した作業記録への外部キー"},{"name":"中断開始日時","type":"timestamp","required":true,"description":"作業を中断した日時"},{"name":"中断終了日時","type":"timestamp","required":false,"description":"作業を再開した日時"},{"name":"中断理由区分","type":"varchar(100)","required":true,"description":"中断理由の分類（機械故障、材料不足、天候、休憩等）"},{"name":"中断理由詳細","type":"text","required":false,"description":"中断理由の具体的な内容"},{"name":"中断時間","type":"integer","required":false,"description":"中断時間（分）"},{"name":"影響度","type":"varchar(100)","required":false,"description":"作業への影響度（軽微、中程度、重大）"},{"name":"対応状況","type":"varchar(100)","required":true,"description":"中断への対応状況（対応中、解決済み、未対応）"},{"name":"記録者ID","type":"uuid","required":true,"description":"中断を記録した作業員のユーザーID"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]},{"tableName":"作業項目マスタ","purpose":"現場作業員が工数記録時に選択する作業項目の定義と管理を行う","columns":[{"name":"作業項目ID","type":"uuid","required":true,"description":"作業項目の一意識別子（主キー）"},{"name":"作業項目コード","type":"varchar(100)","required":true,"description":"作業項目の業務コード（検索・表示用）"},{"name":"作業項目名","type":"varchar(100)","required":true,"description":"作業項目の名称"},{"name":"作業項目説明","type":"text","required":false,"description":"作業項目の詳細説明"},{"name":"カテゴリ","type":"varchar(100)","required":false,"description":"作業項目の分類カテゴリ（絞り込み検索用）"},{"name":"標準工数時間","type":"integer","required":false,"description":"標準的な作業時間（分単位）"},{"name":"表示順序","type":"integer","required":true,"description":"画面表示時の並び順"},{"name":"有効フラグ","type":"boolean","required":true,"description":"作業項目の有効/無効状態"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"},{"name":"作成者ID","type":"uuid","required":true,"description":"レコード作成者のユーザーID"},{"name":"更新者ID","type":"uuid","required":true,"description":"レコード最終更新者のユーザーID"}]},{"tableName":"異常値検出ログ","purpose":"作業記録や中断記録の異常値を自動検出し、管理者への通知や確認を行うためのログテーブル","columns":[{"name":"異常値検出ログID","type":"uuid","required":true,"description":"異常値検出ログの一意識別子"},{"name":"検出対象テーブル","type":"varchar(100)","required":true,"description":"異常値が検出されたテーブル名（作業記録、中断記録等）"},{"name":"検出対象レコードID","type":"uuid","required":true,"description":"異常値が検出されたレコードのID"},{"name":"ユーザーID","type":"uuid","required":true,"description":"異常値を発生させた作業員のユーザーID"},{"name":"異常値種別","type":"varchar(100)","required":true,"description":"異常値の種類（長時間作業、頻繁中断、工数超過等）"},{"name":"検出項目","type":"varchar(100)","required":true,"description":"異常値が検出された項目名（作業時間、中断回数等）"},{"name":"検出値","type":"varchar(100)","required":true,"description":"実際に検出された異常値"},{"name":"閾値","type":"varchar(100)","required":true,"description":"異常判定の基準となる閾値"},{"name":"重要度","type":"varchar(100)","required":true,"description":"異常値の重要度レベル（高、中、低）"},{"name":"確認状況","type":"varchar(100)","required":true,"description":"管理者による確認状況（未確認、確認済み、対応済み）"},{"name":"通知送信フラグ","type":"boolean","required":true,"description":"管理者への通知が送信されたかのフラグ"},{"name":"確認者ID","type":"uuid","required":false,"description":"異常値を確認した管理者のユーザーID"},{"name":"確認日時","type":"timestamp","required":false,"description":"管理者が確認した日時"},{"name":"対応メモ","type":"text","required":false,"description":"管理者による対応内容や備考"},{"name":"検出日時","type":"timestamp","required":true,"description":"異常値が検出された日時"},{"name":"作成日時","type":"timestamp","required":true,"description":"レコード作成日時"},{"name":"更新日時","type":"timestamp","required":true,"description":"レコード最終更新日時"}]}];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-1778907238439";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let mediaRecorder = null;\n  let audioChunks = [];\n  let isRecording = false;\n  let currentAudioBlob = null;\n\n  // DOM要素の取得\n  const startTimeInput = container.querySelector('#start-time');\n  const endTimeInput = container.querySelector('#end-time');\n  const reasonSelect = container.querySelector('#reason');\n  const locationInput = container.querySelector('#location');\n  const detailsTextarea = container.querySelector('#details');\n  const charCount = container.querySelector('#char-count');\n  const durationDisplay = container.querySelector('#duration-display');\n  const photoInput = container.querySelector('#photo-input');\n  const photoBtn = container.querySelector('#photo-btn');\n  const photoName = container.querySelector('#photo-name');\n  const photoPreview = container.querySelector('#photo-preview');\n  const recordBtn = container.querySelector('#record-btn');\n  const recordStatus = container.querySelector('#record-status');\n  const audioPreview = container.querySelector('#audio-preview');\n  const selectAllImpact = container.querySelector('#select-all-impact');\n  const impactCheckboxes = container.querySelectorAll('input[name=\"impact\"]');\n  const relatedWork = container.querySelector('#related-work');\n  const errorMessage = container.querySelector('#error-message');\n  const tempSaveBtn = container.querySelector('#btn-temp-save');\n  const completeBtn = container.querySelector('#btn-complete');\n\n  // 現在時刻を初期値として設定\n  const now = new Date();\n  now.setSeconds(0, 0);\n  startTimeInput.value = now.toISOString().slice(0, 16);\n\n  // 文字数カウント\n  detailsTextarea.addEventListener('input', () => {\n    const count = detailsTextarea.value.length;\n    charCount.textContent = `${count}/1000`;\n    if (count > 1000) {\n      charCount.style.color = '#fca5a5';\n    } else {\n      charCount.style.color = 'var(--text-muted)';\n    }\n  });\n\n  // 中断時間の自動計算\n  function updateDuration() {\n    const start = startTimeInput.value;\n    const end = endTimeInput.value;\n    \n    if (start && end) {\n      const startDate = new Date(start);\n      const endDate = new Date(end);\n      const diffMs = endDate - startDate;\n      \n      if (diffMs > 0) {\n        const hours = Math.floor(diffMs / (1000 * 60 * 60));\n        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));\n        durationDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;\n      } else {\n        durationDisplay.textContent = '--:--';\n      }\n    } else {\n      durationDisplay.textContent = '--:--';\n    }\n  }\n\n  startTimeInput.addEventListener('change', updateDuration);\n  endTimeInput.addEventListener('change', updateDuration);\n\n  // 写真添付\n  photoBtn.addEventListener('click', () => {\n    photoInput.click();\n  });\n\n  photoInput.addEventListener('change', (e) => {\n    const file = e.target.files[0];\n    if (!file) return;\n\n    // ファイルサイズチェック (10MB)\n    if (file.size > 10 * 1024 * 1024) {\n      showError('ファイルサイズは10MB以下にしてください');\n      return;\n    }\n\n    // ファイル形式チェック\n    if (!file.type.startsWith('image/')) {\n      showError('画像ファイルのみ添付可能です');\n      return;\n    }\n\n    photoName.textContent = file.name;\n    \n    // プレビュー表示\n    const reader = new FileReader();\n    reader.onload = (e) => {\n      photoPreview.innerHTML = `<img src=\"${e.target.result}\" style=\"max-width: 200px; max-height: 150px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.18);\">`;\n    };\n    reader.readAsDataURL(file);\n  });\n\n  // 音声録音\n  recordBtn.addEventListener('click', async () => {\n    if (!isRecording) {\n      try {\n        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });\n        mediaRecorder = new MediaRecorder(stream);\n        audioChunks = [];\n\n        mediaRecorder.ondataavailable = (event) => {\n          audioChunks.push(event.data);\n        };\n\n        mediaRecorder.onstop = () => {\n          currentAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });\n          const audioUrl = URL.createObjectURL(currentAudioBlob);\n          audioPreview.src = audioUrl;\n          audioPreview.style.display = 'block';\n          stream.getTracks().forEach(track => track.stop());\n        };\n\n        mediaRecorder.start();\n        isRecording = true;\n        recordBtn.textContent = '⏹️ 録音停止';\n        recordStatus.textContent = '録音中...';\n      } catch (error) {\n        showError('マイクへのアクセスが拒否されました。録音機能を使用するには、マイクの使用を許可してください。');\n      }\n    } else {\n      mediaRecorder.stop();\n      isRecording = false;\n      recordBtn.textContent = '🎤 録音開始';\n      recordStatus.textContent = '録音完了';\n    }\n  });\n\n  // 影響範囲の全選択・全解除\n  selectAllImpact.addEventListener('change', () => {\n    impactCheckboxes.forEach(checkbox => {\n      checkbox.checked = selectAllImpact.checked;\n    });\n  });\n\n  // 個別選択時の全選択チェックボックス連動\n  impactCheckboxes.forEach(checkbox => {\n    checkbox.addEventListener('change', () => {\n      const allChecked = Array.from(impactCheckboxes).every(cb => cb.checked);\n      const noneChecked = Array.from(impactCheckboxes).every(cb => !cb.checked);\n      \n      if (allChecked) {\n        selectAllImpact.checked = true;\n        selectAllImpact.indeterminate = false;\n      } else if (noneChecked) {\n        selectAllImpact.checked = false;\n        selectAllImpact.indeterminate = false;\n      } else {\n        selectAllImpact.checked = false;\n        selectAllImpact.indeterminate = true;\n      }\n    });\n  });\n\n  // 関連作業項目の表示（現在進行中の作業を取得）\n  async function loadRelatedWork() {\n    try {\n      const workRecords = await window.aivicApi.list(1); // 作業記録テーブル\n      if (workRecords) {\n        const activeWork = workRecords.find(record => record.進捗状況 === '作業中');\n        if (activeWork) {\n          relatedWork.textContent = `${activeWork.プロジェクト名} - ${activeWork.作業種別}`;\n        }\n      }\n    } catch (error) {\n      console.error('関連作業項目の取得に失敗:', error);\n    }\n  }\n\n  loadRelatedWork();\n\n  // エラーメッセージ表示\n  function showError(message) {\n    errorMessage.textContent = message;\n    errorMessage.style.display = 'block';\n    setTimeout(() => {\n      errorMessage.style.display = 'none';\n    }, 5000);\n  }\n\n  // バリデーション\n  function validateForm() {\n    const errors = [];\n\n    // 必須項目チェック\n    if (!startTimeInput.value) {\n      errors.push('中断開始時刻は必須です');\n    }\n    if (!reasonSelect.value) {\n      errors.push('中断理由は必須です');\n    }\n\n    // 未来時刻チェック\n    if (startTimeInput.value) {\n      const startDate = new Date(startTimeInput.value);\n      const now = new Date();\n      if (startDate > now) {\n        errors.push('中断開始時刻に未来の時刻は入力できません');\n      }\n    }\n\n    if (endTimeInput.value) {\n      const endDate = new Date(endTimeInput.value);\n      const now = new Date();\n      if (endDate > now) {\n        errors.push('中断終了時刻に未来の時刻は入力できません');\n      }\n    }\n\n    // 時刻の前後関係チェック\n    if (startTimeInput.value && endTimeInput.value) {\n      const startDate = new Date(startTimeInput.value);\n      const endDate = new Date(endTimeInput.value);\n      if (endDate <= startDate) {\n        errors.push('中断終了時刻は開始時刻より後の時刻を入力してください');\n      }\n    }\n\n    // 文字数チェック\n    if (detailsTextarea.value.length > 1000) {\n      errors.push('中断詳細は1000文字以内で入力してください');\n    }\n\n    return errors;\n  }\n\n  // フォームデータ収集\n  function collectFormData() {\n    const urgencyRadio = container.querySelector('input[name=\"urgency\"]:checked');\n    const impactValues = Array.from(container.querySelectorAll('input[name=\"impact\"]:checked')).map(cb => cb.value);\n    \n    // 中断時間計算（分単位）\n    let interruptionTime = null;\n    if (startTimeInput.value && endTimeInput.value) {\n      const startDate = new Date(startTimeInput.value);\n      const endDate = new Date(endTimeInput.value);\n      const diffMs = endDate - startDate;\n      if (diffMs > 0) {\n        interruptionTime = Math.floor(diffMs / (1000 * 60));\n      }\n    }\n\n    return {\n      中断開始日時: startTimeInput.value ? new Date(startTimeInput.value).toISOString() : null,\n      中断終了日時: endTimeInput.value ? new Date(endTimeInput.value).toISOString() : null,\n      中断理由区分: reasonSelect.value,\n      中断理由詳細: detailsTextarea.value,\n      中断時間: interruptionTime,\n      影響度: urgencyRadio ? urgencyRadio.value : null,\n      対応状況: '対応中',\n      作業記録ID: 'temp-work-id', // 実際の実装では関連する作業記録IDを設定\n      記録者ID: 'current-user-id', // 実際の実装では現在のユーザーIDを設定\n      作成日時: new Date().toISOString(),\n      更新日時: new Date().toISOString()\n    };\n  }\n\n  // 一時保存\n  tempSaveBtn.addEventListener('click', async () => {\n    try {\n      const formData = collectFormData();\n      \n      // ローカルストレージに保存\n      localStorage.setItem('interruptionDraft', JSON.stringify({\n        ...formData,\n        影響範囲: Array.from(container.querySelectorAll('input[name=\"impact\"]:checked')).map(cb => cb.value),\n        中断場所: locationInput.value,\n        写真ファイル名: photoName.textContent,\n        音声メモ有無: currentAudioBlob ? true : false\n      }));\n\n      // 成功メッセージ\n      const successMsg = container.querySelector('#error-message');\n      successMsg.style.background = 'rgba(34, 197, 94, 0.1)';\n      successMsg.style.borderColor = 'rgba(34, 197, 94, 0.3)';\n      successMsg.style.color = '#86efac';\n      successMsg.textContent = '一時保存しました';\n      successMsg.style.display = 'block';\n      \n      setTimeout(() => {\n        successMsg.style.display = 'none';\n        successMsg.style.background = 'rgba(220, 38, 38, 0.1)';\n        successMsg.style.borderColor = 'rgba(220, 38, 38, 0.3)';\n        successMsg.style.color = '#fca5a5';\n      }, 3000);\n\n    } catch (error) {\n      showError('一時保存に失敗しました');\n    }\n  });\n\n  // 記録完了\n  completeBtn.addEventListener('click', async () => {\n    const errors = validateForm();\n    if (errors.length > 0) {\n      showError(errors.join('\\n'));\n      return;\n    }\n\n    try {\n      const formData = collectFormData();\n      const saved = await window.aivicApi.save(2, formData); // 中断記録テーブル\n\n      if (saved) {\n        // 一時保存データを削除\n        localStorage.removeItem('interruptionDraft');\n        \n        // 作業再開記録画面に遷移\n        window.showScreen(\"scr-1778907251446\");\n      } else {\n        showError('記録の保存に失敗しました');\n      }\n    } catch (error) {\n      if (navigator.onLine === false) {\n        showError('ネットワークに接続できません。接続を確認してから再度お試しください。');\n      } else {\n        showError('記録の保存中にエラーが発生しました');\n      }\n    }\n  });\n\n  // 一時保存データの復元\n  function restoreDraft() {\n    const draft = localStorage.getItem('interruptionDraft');\n    if (draft) {\n      try {\n        const data = JSON.parse(draft);\n        \n        if (data.中断開始日時) {\n          startTimeInput.value = new Date(data.中断開始日時).toISOString().slice(0, 16);\n        }\n        if (data.中断終了日時) {\n          endTimeInput.value = new Date(data.中断終了日時).toISOString().slice(0, 16);\n        }\n        if (data.中断理由区分) {\n          reasonSelect.value = data.中断理由区分;\n        }\n        if (data.中断理由詳細) {\n          detailsTextarea.value = data.中断理由詳細;\n          detailsTextarea.dispatchEvent(new Event('input'));\n        }\n        if (data.中断場所) {\n          locationInput.value = data.中断場所;\n        }\n        if (data.影響度) {\n          const urgencyRadio = container.querySelector(`input[name=\"urgency\"][value=\"${data.影響度}\"]`);\n          if (urgencyRadio) urgencyRadio.checked = true;\n        }\n        if (data.影響範囲 && Array.isArray(data.影響範囲)) {\n          data.影響範囲.forEach(value => {\n            const checkbox = container.querySelector(`input[name=\"impact\"][value=\"${value}\"]`);\n            if (checkbox) checkbox.checked = true;\n          });\n          // 全選択チェックボックスの状態更新\n          impactCheckboxes[0].dispatchEvent(new Event('change'));\n        }\n        \n        updateDuration();\n      } catch (error) {\n        console.error('一時保存データの復元に失敗:', error);\n      }\n    }\n  }\n\n  // 初期化時に一時保存データを復元\n  restoreDraft();\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let mediaRecorder = null;\n  let audioChunks = [];\n  let isRecording = false;\n  let selectedFile = null;\n  let audioBlob = null;\n\n  // DOM要素の取得\n  const form = container.querySelector('#interruption-form');\n  const startTimeInput = container.querySelector('#start-time');\n  const endTimeInput = container.querySelector('#end-time');\n  const reasonSelect = container.querySelector('#interruption-reason');\n  const locationInput = container.querySelector('#interruption-location');\n  const detailsTextarea = container.querySelector('#interruption-details');\n  const durationDiv = container.querySelector('#interruption-duration');\n  const charCountSpan = container.querySelector('#char-count');\n  const photoUpload = container.querySelector('#photo-upload');\n  const photoBtn = container.querySelector('#photo-btn');\n  const photoPreview = container.querySelector('#photo-preview');\n  const recordBtn = container.querySelector('#record-btn');\n  const recordingStatus = container.querySelector('#recording-status');\n  const audioPlayback = container.querySelector('#audio-playback');\n  const selectAllCheckbox = container.querySelector('#select-all');\n  const impactCheckboxes = container.querySelectorAll('input[name=\"impact\"]');\n  const tempSaveBtn = container.querySelector('#temp-save-btn');\n  const completeBtn = container.querySelector('#complete-btn');\n  const errorMessage = container.querySelector('#error-message');\n  const relatedWork = container.querySelector('#related-work');\n\n  // 現在時刻を中断開始時刻にセット\n  const now = new Date();\n  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());\n  startTimeInput.value = now.toISOString().slice(0, 16);\n\n  // 関連作業項目の表示（仮データ）\n  relatedWork.textContent = '設備点検作業 - A棟3階';\n\n  // 文字数カウント\n  detailsTextarea.addEventListener('input', () => {\n    const count = detailsTextarea.value.length;\n    charCountSpan.textContent = count;\n    if (count > 1000) {\n      charCountSpan.style.color = '#dc2626';\n    } else {\n      charCountSpan.style.color = 'var(--text-muted)';\n    }\n  });\n\n  // 中断時間の自動計算\n  function updateDuration() {\n    const startTime = startTimeInput.value;\n    const endTime = endTimeInput.value;\n    \n    if (startTime && endTime) {\n      const start = new Date(startTime);\n      const end = new Date(endTime);\n      const diff = end - start;\n      \n      if (diff > 0) {\n        const hours = Math.floor(diff / (1000 * 60 * 60));\n        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));\n        durationDiv.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;\n      } else {\n        durationDiv.textContent = '無効な時間';\n      }\n    } else {\n      durationDiv.textContent = '--:--';\n    }\n  }\n\n  startTimeInput.addEventListener('change', updateDuration);\n  endTimeInput.addEventListener('change', updateDuration);\n\n  // 写真添付\n  photoBtn.addEventListener('click', () => {\n    photoUpload.click();\n  });\n\n  photoUpload.addEventListener('change', (e) => {\n    const file = e.target.files[0];\n    if (file) {\n      // ファイルサイズチェック (10MB)\n      if (file.size > 10 * 1024 * 1024) {\n        showError('ファイルサイズは10MB以下にしてください');\n        return;\n      }\n      \n      // ファイル形式チェック\n      if (!file.type.startsWith('image/')) {\n        showError('画像ファイルのみアップロード可能です');\n        return;\n      }\n      \n      selectedFile = file;\n      photoPreview.textContent = `選択済み: ${file.name}`;\n      photoBtn.textContent = '📷 ' + file.name;\n    }\n  });\n\n  // 音声録音\n  recordBtn.addEventListener('click', async () => {\n    if (!isRecording) {\n      try {\n        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });\n        mediaRecorder = new MediaRecorder(stream);\n        audioChunks = [];\n        \n        mediaRecorder.ondataavailable = (event) => {\n          audioChunks.push(event.data);\n        };\n        \n        mediaRecorder.onstop = () => {\n          audioBlob = new Blob(audioChunks, { type: 'audio/wav' });\n          const audioUrl = URL.createObjectURL(audioBlob);\n          audioPlayback.src = audioUrl;\n          audioPlayback.style.display = 'block';\n          recordingStatus.textContent = '録音完了 - 再生して確認できます';\n        };\n        \n        mediaRecorder.start();\n        isRecording = true;\n        recordBtn.textContent = '⏹️ 録音停止';\n        recordingStatus.textContent = '録音中...';\n      } catch (error) {\n        showError('マイクにアクセスできません。ブラウザの設定を確認してください。');\n      }\n    } else {\n      mediaRecorder.stop();\n      mediaRecorder.stream.getTracks().forEach(track => track.stop());\n      isRecording = false;\n      recordBtn.textContent = '🎤 録音開始';\n    }\n  });\n\n  // 全選択チェックボックス\n  selectAllCheckbox.addEventListener('change', () => {\n    impactCheckboxes.forEach(checkbox => {\n      checkbox.checked = selectAllCheckbox.checked;\n    });\n  });\n\n  // 個別チェックボックスの変更で全選択の状態を更新\n  impactCheckboxes.forEach(checkbox => {\n    checkbox.addEventListener('change', () => {\n      const allChecked = Array.from(impactCheckboxes).every(cb => cb.checked);\n      const noneChecked = Array.from(impactCheckboxes).every(cb => !cb.checked);\n      \n      if (allChecked) {\n        selectAllCheckbox.checked = true;\n        selectAllCheckbox.indeterminate = false;\n      } else if (noneChecked) {\n        selectAllCheckbox.checked = false;\n        selectAllCheckbox.indeterminate = false;\n      } else {\n        selectAllCheckbox.checked = false;\n        selectAllCheckbox.indeterminate = true;\n      }\n    });\n  });\n\n  // エラー表示\n  function showError(message) {\n    errorMessage.textContent = message;\n    errorMessage.style.display = 'block';\n    setTimeout(() => {\n      errorMessage.style.display = 'none';\n    }, 5000);\n  }\n\n  // バリデーション\n  function validateForm() {\n    const startTime = startTimeInput.value;\n    const reason = reasonSelect.value;\n    const details = detailsTextarea.value;\n    \n    if (!startTime) {\n      showError('中断開始時刻は必須です');\n      return false;\n    }\n    \n    if (!reason) {\n      showError('中断理由は必須です');\n      return false;\n    }\n    \n    // 未来時刻チェック\n    const startDate = new Date(startTime);\n    const now = new Date();\n    if (startDate > now) {\n      showError('未来の時刻は入力できません');\n      return false;\n    }\n    \n    // 文字数チェック\n    if (details.length > 1000) {\n      showError('中断詳細は1000文字以内で入力してください');\n      return false;\n    }\n    \n    return true;\n  }\n\n  // フォームデータ収集\n  function collectFormData() {\n    const urgencyRadio = container.querySelector('input[name=\"urgency\"]:checked');\n    const impactValues = Array.from(impactCheckboxes)\n      .filter(cb => cb.checked)\n      .map(cb => cb.value);\n    \n    return {\n      中断開始日時: startTimeInput.value,\n      中断終了日時: endTimeInput.value || null,\n      中断理由区分: reasonSelect.value,\n      中断理由詳細: detailsTextarea.value,\n      中断時間: calculateDurationMinutes(),\n      影響度: urgencyRadio ? urgencyRadio.value : '低',\n      対応状況: '対応中',\n      記録者ID: 'current-user-id', // 実際の実装では認証情報から取得\n      作業記録ID: 'current-work-record-id' // 実際の実装では現在の作業記録から取得\n    };\n  }\n\n  function calculateDurationMinutes() {\n    const startTime = startTimeInput.value;\n    const endTime = endTimeInput.value;\n    \n    if (startTime && endTime) {\n      const start = new Date(startTime);\n      const end = new Date(endTime);\n      const diff = end - start;\n      return Math.floor(diff / (1000 * 60));\n    }\n    return null;\n  }\n\n  // 一時保存\n  tempSaveBtn.addEventListener('click', async () => {\n    if (!validateForm()) return;\n    \n    const formData = collectFormData();\n    formData.対応状況 = '一時保存';\n    \n    try {\n      const saved = await window.aivicApi.save(2, formData); // 中断記録テーブル\n      if (saved) {\n        alert('一時保存しました');\n      } else {\n        showError('一時保存に失敗しました');\n      }\n    } catch (error) {\n      showError('ネットワークエラーが発生しました');\n    }\n  });\n\n  // 記録完了\n  completeBtn.addEventListener('click', async () => {\n    if (!validateForm()) return;\n    \n    const formData = collectFormData();\n    \n    try {\n      const saved = await window.aivicApi.save(2, formData); // 中断記録テーブル\n      if (saved) {\n        alert('中断記録を完了しました');\n        window.showScreen(\"scr-1778907251446\"); // 作業再開記録画面\n      } else {\n        showError('記録の保存に失敗しました');\n      }\n    } catch (error) {\n      showError('ネットワークエラーが発生しました');\n    }\n  });\n\n  // 一時保存データの復元（ページ読み込み時）\n  async function loadTempData() {\n    try {\n      const records = await window.aivicApi.list(2);\n      if (records) {\n        const tempRecord = records.find(r => r.対応状況 === '一時保存');\n        if (tempRecord) {\n          startTimeInput.value = tempRecord.中断開始日時 || '';\n          endTimeInput.value = tempRecord.中断終了日時 || '';\n          reasonSelect.value = tempRecord.中断理由区分 || '';\n          detailsTextarea.value = tempRecord.中断理由詳細 || '';\n          locationInput.value = tempRecord.中断場所 || '';\n          \n          // 緊急度の復元\n          const urgencyRadio = container.querySelector(`input[name=\"urgency\"][value=\"${tempRecord.影響度}\"]`);\n          if (urgencyRadio) urgencyRadio.checked = true;\n          \n          updateDuration();\n        }\n      }\n    } catch (error) {\n      console.log('一時保存データの読み込みに失敗しました');\n    }\n  }\n\n  // 初期化\n  loadTempData();\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </script>
@@ -411,32 +411,33 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let mediaR
           <div data-aivic-panel="scr-1778907199709" style="display:none"></div>
           <div data-aivic-panel="scr-1778907212862" style="display:none"></div>
           <div data-aivic-panel="scr-1778907226171" style="display:none"></div>
-          <div data-aivic-panel="scr-1778907238439"><div class="card" style="margin: 8px 0; padding: 14px;">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-    <h2 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text);">中断記録入力</h2>
-    <div style="display: flex; gap: 8px;">
-      <button class="action-btn secondary" data-testid="temp-save-button" id="btn-temp-save" style="font-size: 13px; padding: 6px 12px;">一時保存</button>
-      <button class="action-btn" data-testid="complete-button" id="btn-complete" style="font-size: 13px; padding: 6px 12px;">記録完了</button>
+          <div data-aivic-panel="scr-1778907238439"><div class="card" style="margin: 12px; padding: 14px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h2 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 0;">中断記録入力</h2>
+    <div style="font-size: 11px; color: var(--text-muted);">
+      作業中断の詳細を記録してください
     </div>
   </div>
 
   <form id="interruption-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px;">
-    <!-- 基本情報 -->
+    <!-- 中断開始時刻 -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断開始時刻 *</label>
-      <input type="datetime-local" data-testid="start-time-input" id="start-time" required 
+      <input type="datetime-local" id="start-time" data-testid="start-time" required
              style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
     </div>
 
+    <!-- 中断終了時刻 -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断終了時刻</label>
-      <input type="datetime-local" data-testid="end-time-input" id="end-time"
+      <input type="datetime-local" id="end-time" data-testid="end-time"
              style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
     </div>
 
+    <!-- 中断理由 -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断理由 *</label>
-      <select data-testid="reason-select" id="reason" required
+      <select id="interruption-reason" data-testid="interruption-reason" required
               style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
         <option value="">選択してください</option>
         <option value="機械故障">機械故障</option>
@@ -449,100 +450,126 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let mediaR
       </select>
     </div>
 
+    <!-- 中断場所 -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断場所</label>
-      <input type="text" data-testid="location-input" id="location" placeholder="例: A棟3階"
+      <input type="text" id="interruption-location" data-testid="interruption-location" maxlength="100"
              style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4;">
     </div>
 
-    <!-- 緊急度・影響範囲 -->
+    <!-- 緊急度 -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">緊急度</label>
-      <div style="display: flex; gap: 12px; margin-top: 6px;">
-        <label style="display: flex; align-items: center; font-size: 13px; color: var(--text);">
-          <input type="radio" name="urgency" value="高" data-testid="urgency-high" style="accent-color: var(--primary); margin-right: 4px;">
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text);">
+          <input type="radio" name="urgency" value="高" data-testid="urgency-high" style="accent-color: var(--primary);">
           高
         </label>
-        <label style="display: flex; align-items: center; font-size: 13px; color: var(--text);">
-          <input type="radio" name="urgency" value="中" data-testid="urgency-medium" style="accent-color: var(--primary); margin-right: 4px;">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text);">
+          <input type="radio" name="urgency" value="中" data-testid="urgency-medium" style="accent-color: var(--primary);">
           中
         </label>
-        <label style="display: flex; align-items: center; font-size: 13px; color: var(--text);">
-          <input type="radio" name="urgency" value="低" data-testid="urgency-low" style="accent-color: var(--primary); margin-right: 4px;">
+        <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text);">
+          <input type="radio" name="urgency" value="低" data-testid="urgency-low" style="accent-color: var(--primary);" checked>
           低
         </label>
       </div>
     </div>
 
+    <!-- 関連作業項目 -->
     <div>
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">関連作業項目</label>
+      <div id="related-work" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text-muted); font-size: 13px; min-height: 32px; display: flex; align-items: center;">
+        現在の作業項目が表示されます
+      </div>
+    </div>
+
+    <!-- 中断詳細 -->
+    <div style="grid-column: 1 / -1;">
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断詳細 <span style="color: var(--text-muted);">(最大1000文字)</span></label>
+      <textarea id="interruption-details" data-testid="interruption-details" maxlength="1000" rows="3"
+                style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
+      <div style="text-align: right; font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+        <span id="char-count">0</span>/1000文字
+      </div>
+    </div>
+
+    <!-- 影響範囲 -->
+    <div style="grid-column: 1 / -1;">
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">影響範囲</label>
-      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;">
-        <label style="display: flex; align-items: center; font-size: 12px; color: var(--text);">
-          <input type="checkbox" id="select-all-impact" data-testid="select-all-impact" style="accent-color: var(--primary); margin-right: 4px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px;">
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
+          <input type="checkbox" id="select-all" data-testid="select-all" style="accent-color: var(--primary);">
           全選択
         </label>
-        <label style="display: flex; align-items: center; font-size: 12px; color: var(--text);">
-          <input type="checkbox" name="impact" value="自分のみ" data-testid="impact-self" style="accent-color: var(--primary); margin-right: 4px;">
-          自分のみ
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
+          <input type="checkbox" name="impact" value="自分の作業" data-testid="impact-self" style="accent-color: var(--primary);">
+          自分の作業
         </label>
-        <label style="display: flex; align-items: center; font-size: 12px; color: var(--text);">
-          <input type="checkbox" name="impact" value="チーム" data-testid="impact-team" style="accent-color: var(--primary); margin-right: 4px;">
-          チーム
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
+          <input type="checkbox" name="impact" value="チーム作業" data-testid="impact-team" style="accent-color: var(--primary);">
+          チーム作業
         </label>
-        <label style="display: flex; align-items: center; font-size: 12px; color: var(--text);">
-          <input type="checkbox" name="impact" value="プロジェクト全体" data-testid="impact-project" style="accent-color: var(--primary); margin-right: 4px;">
-          プロジェクト全体
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
+          <input type="checkbox" name="impact" value="後続作業" data-testid="impact-subsequent" style="accent-color: var(--primary);">
+          後続作業
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text);">
+          <input type="checkbox" name="impact" value="全体スケジュール" data-testid="impact-schedule" style="accent-color: var(--primary);">
+          全体スケジュール
         </label>
       </div>
     </div>
 
     <!-- 中断時間表示 -->
-    <div style="grid-column: 1 / -1;">
-      <div style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
-        <span style="font-size: 12px; color: var(--text-muted);">中断時間:</span>
-        <span id="duration-display" data-testid="duration-display" style="font-size: 14px; font-weight: 600; color: var(--text);">--:--</span>
+    <div>
+      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断時間</label>
+      <div id="interruption-duration" style="padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.15); color: var(--text); font-size: 13px; min-height: 32px; display: flex; align-items: center; font-weight: 500;">
+        --:--
       </div>
     </div>
 
-    <!-- 詳細入力 -->
-    <div style="grid-column: 1 / -1;">
-      <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">中断詳細 <span style="font-size: 10px;">(1000文字以内)</span></label>
-      <textarea data-testid="details-textarea" id="details" rows="3" maxlength="1000" placeholder="中断の詳細な状況や対応内容を入力してください"
-                style="width: 100%; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; line-height: 1.4; resize: vertical;"></textarea>
-      <div style="text-align: right; margin-top: 2px;">
-        <span id="char-count" style="font-size: 10px; color: var(--text-muted);">0/1000</span>
-      </div>
-    </div>
-
-    <!-- 添付・録音 -->
+    <!-- 添付ファイル -->
     <div>
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">写真添付</label>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <input type="file" id="photo-input" data-testid="photo-input" accept="image/*" style="display: none;">
-        <button type="button" class="action-btn secondary" id="photo-btn" data-testid="photo-button" style="font-size: 12px; padding: 4px 8px;">写真選択</button>
-        <span id="photo-name" style="font-size: 11px; color: var(--text-muted);"></span>
+      <div style="position: relative;">
+        <input type="file" id="photo-upload" data-testid="photo-upload" accept="image/*" style="display: none;">
+        <button type="button" id="photo-btn" data-testid="photo-btn"
+                style="width: 100%; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; cursor: pointer; text-align: left;">
+          📷 写真を選択
+        </button>
+        <div id="photo-preview" style="margin-top: 4px; font-size: 11px; color: var(--text-muted);"></div>
       </div>
-      <div id="photo-preview" style="margin-top: 6px;"></div>
     </div>
 
-    <div>
+    <!-- 音声メモ -->
+    <div style="grid-column: 1 / -1;">
       <label style="display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">音声メモ</label>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button type="button" class="action-btn secondary" id="record-btn" data-testid="record-button" style="font-size: 12px; padding: 4px 8px;">🎤 録音開始</button>
-        <span id="record-status" style="font-size: 11px; color: var(--text-muted);"></span>
+        <button type="button" id="record-btn" data-testid="record-btn"
+                style="padding: 6px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; background: rgba(0,0,0,0.25); color: var(--text); font-size: 13px; cursor: pointer;">
+          🎤 録音開始
+        </button>
+        <div id="recording-status" style="font-size: 11px; color: var(--text-muted);"></div>
+        <audio id="audio-playback" controls style="display: none; height: 32px;"></audio>
       </div>
-      <audio id="audio-preview" controls style="width: 100%; margin-top: 6px; display: none;"></audio>
     </div>
   </form>
 
-  <!-- 関連作業項目表示 -->
-  <div style="margin-top: 16px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
-    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">関連作業項目</div>
-    <div id="related-work" data-testid="related-work" style="font-size: 13px; color: var(--text);">作業項目が選択されていません</div>
-  </div>
-
   <!-- エラーメッセージ -->
-  <div id="error-message" data-testid="error-message" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.3); border-radius: 6px; color: #fca5a5; font-size: 12px;"></div>
+  <div id="error-message" style="display: none; margin-top: 12px; padding: 8px 12px; border-radius: 6px; background: rgba(220, 38, 38, 0.1); border-left: 3px solid #dc2626; color: var(--text); font-size: 13px;"></div>
+
+  <!-- ボタン -->
+  <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);">
+    <button type="button" id="temp-save-btn" data-testid="temp-save-btn"
+            style="background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+      一時保存
+    </button>
+    <button type="button" id="complete-btn" data-testid="complete-btn"
+            style="background: var(--primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+      記録完了
+    </button>
+  </div>
 </div></div>
           <div data-aivic-panel="scr-1778907251446" style="display:none"></div>
           <div data-aivic-panel="scr-1778907263518" style="display:none"></div>
