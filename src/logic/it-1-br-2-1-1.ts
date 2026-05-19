@@ -8,18 +8,25 @@
 //   → WorkRecordResult = { workRecordId: string; startTime: string; status: string }
 // - 関数名: isRecordActive
 //   呼び出し例 (テスト中): isRecordActive(userId, activeRecord)
-//     ※ userId = "USER-002", activeRecord = { workRecordId, userId, startTime, status }
+//     ※ userId = "USER-002", activeRecord = { workRecordId: "WR-002", userId: "USER-002", startTime: "2024-01-15T08:30:00Z", status: "ACTIVE" }
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: 戻り値は boolean
-//   → 結論: function isRecordActive(userId: string, activeRecord: ActiveRecord): boolean
-//   → ActiveRecord = { workRecordId: string; userId: string; startTime: string; status: string }
+//   → 結論: function isRecordActive(userId: string, activeRecord: WorkRecord): boolean
+//   → WorkRecord = { workRecordId: string; userId: string; startTime: string; status: string }
 // - 関数名: validateWorkStartOperation
 //   呼び出し例 (テスト中): validateWorkStartOperation(userId, activeRecord)
-//     ※ userId = "USER-002", activeRecord = { workRecordId, userId, startTime, status }
+//     ※ userId = "USER-002", activeRecord = { workRecordId: "WR-002", userId: "USER-002", startTime: "2024-01-15T08:30:00Z", status: "ACTIVE" }
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: result.isValid, result.errorMessage, result.existingRecord
-//   → 結論: function validateWorkStartOperation(userId: string, activeRecord: ActiveRecord): ValidationResult
-//   → ValidationResult = { isValid: boolean; errorMessage: string; existingRecord: ActiveRecord }
+//   → 結論: function validateWorkStartOperation(userId: string, activeRecord: WorkRecord): ValidationResult
+//   → ValidationResult = { isValid: boolean; errorMessage: string; existingRecord: WorkRecord }
+
+interface WorkRecord {
+  workRecordId: string;
+  userId: string;
+  startTime: string;
+  status: string;
+}
 
 interface WorkRecordResult {
   workRecordId: string;
@@ -27,17 +34,10 @@ interface WorkRecordResult {
   status: string;
 }
 
-interface ActiveRecord {
-  workRecordId: string;
-  userId: string;
-  startTime: string;
-  status: string;
-}
-
 interface ValidationResult {
   isValid: boolean;
   errorMessage: string;
-  existingRecord: ActiveRecord;
+  existingRecord: WorkRecord;
 }
 
 export async function startWorkRecord(
@@ -45,10 +45,7 @@ export async function startWorkRecord(
   workItemId: string,
   currentTime: Date
 ): Promise<WorkRecordResult> {
-  // 前提: 現場作業員がスマートフォンアプリを使用している状態で
-  // 発生条件: 工数記録開始ボタンがタップされたとき
-  // 結果: 現在時刻を作業開始時刻として自動記録し、記録状態をアクティブに変更する
-  
+  // 作業開始時刻を自動記録し、記録状態をアクティブに変更する
   const requestBody = {
     userId,
     workItemId,
@@ -65,11 +62,10 @@ export async function startWorkRecord(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to start work record: ${response.status}`);
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
 
   const result = await response.json();
-  
   return {
     workRecordId: result.workRecordId,
     startTime: result.startTime,
@@ -77,29 +73,21 @@ export async function startWorkRecord(
   };
 }
 
-export function isRecordActive(userId: string, activeRecord: ActiveRecord): boolean {
-  // 前提: 作業開始記録が既にアクティブ状態で
-  // 発生条件: 重複して開始ボタンがタップされたとき
-  // 結果: エラーメッセージを表示し、既存の記録を継続する
-  
+export function isRecordActive(userId: string, activeRecord: WorkRecord): boolean {
+  // 指定されたユーザーの作業記録がアクティブ状態かどうかを判定
   if (!activeRecord) {
     return false;
   }
-
+  
   return activeRecord.userId === userId && activeRecord.status === "ACTIVE";
 }
 
 export function validateWorkStartOperation(
   userId: string,
-  activeRecord: ActiveRecord
+  activeRecord: WorkRecord
 ): ValidationResult {
-  // 前提: 作業開始記録が既にアクティブ状態で
-  // 発生条件: 重複して開始ボタンがタップされたとき
-  // 結果: エラーメッセージを表示し、既存の記録を継続する
-  
-  const isActive = isRecordActive(userId, activeRecord);
-  
-  if (isActive) {
+  // 重複して開始ボタンがタップされた場合のバリデーション
+  if (isRecordActive(userId, activeRecord)) {
     return {
       isValid: false,
       errorMessage: "作業記録が既にアクティブ状態です。既存の記録を継続してください。",

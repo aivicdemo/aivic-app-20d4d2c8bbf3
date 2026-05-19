@@ -58,11 +58,23 @@ interface AnomalousValueResult {
   threshold?: number;
 }
 
-interface InterruptionResult {
+interface InterruptionRecord {
   interruptionId: string;
+  workRecordId: string;
   startTime: string;
   reason: string;
   success: boolean;
+}
+
+interface ProgressRateResult {
+  progressRate: number;
+  deviationRate: number;
+}
+
+interface EfficiencyAnalysisResult {
+  efficiency: number;
+  bottlenecks: string[];
+  alertRequired: boolean;
 }
 
 interface CloudSaveResult {
@@ -74,21 +86,31 @@ interface LocalStorageResult {
   saved: boolean;
 }
 
+interface SyncResult {
+  synced: boolean;
+  recordCount: number;
+}
+
+interface DataIntegrityResult {
+  isValid: boolean;
+  errors: string[];
+}
+
 interface DailyAggregationResult {
   totalHours: number;
   completedTasks: number;
-  missingData: string[];
+  missingRecords: string[];
 }
 
 interface PerformanceAnalysisResult {
   efficiency: number;
-  progressRate: number;
-  deviationRate: number;
+  deviationFromPlan: number;
+  bottlenecks: string[];
 }
 
 interface PersonnelAllocationResult {
   requiredPersonnel: number;
-  optimalAssignment: Array<{ workerId: string; taskId: string }>;
+  optimalDistribution: Array<{ location: string; count: number }>;
 }
 
 interface ProductivityIndicators {
@@ -98,47 +120,48 @@ interface ProductivityIndicators {
 }
 
 interface WeeklyReportResult {
-  progressByTask: Array<{ taskId: string; progressRate: number; deviationRate: number }>;
+  progressByTask: Array<{ task: string; progress: number; deviation: number }>;
   delayedTasks: string[];
   overallEfficiency: number;
 }
 
 interface DelayedTasksResult {
-  delayedTasks: Array<{ taskId: string; delayReason: string; severity: string }>;
+  delayedTasks: Array<{ task: string; progressRate: number; deviationRate: number; priority: number }>;
 }
 
 interface ImprovementInstructionsResult {
-  instructions: Array<{ taskId: string; priority: number; action: string }>;
+  instructions: Array<{ task: string; priority: number; action: string }>;
+  personnelReallocation?: Array<{ location: string; count: number }>;
 }
 
-interface EmergencyResponseResult {
+interface EmergencyReportResult {
   reportId: string;
   reportTime: string;
   emergencyType: string;
-  success: boolean;
+  notificationSent: boolean;
 }
 
 interface EmergencyImpactResult {
-  impactLevel: string;
   affectedLocations: number;
   affectedUsers: number;
-  delayHours: number;
+  delayImpact: number;
 }
 
 interface GlobalPersonnelResult {
-  totalActive: number;
-  totalStandby: number;
-  availableForReallocation: Array<{ workerId: string; locationId: string }>;
+  activePersonnel: number;
+  standbyPersonnel: number;
+  availableForReallocation: Array<{ workerId: string; location: string; travelTime: number }>;
 }
 
 interface PersonnelReallocationResult {
-  reallocationPlan: Array<{ workerId: string; fromLocation: string; toLocation: string; travelTime: number }>;
+  reallocationPlan: Array<{ workerId: string; fromLocation: string; toLocation: string; estimatedArrival: string }>;
+  totalCost: number;
 }
 
 interface MonthlyAggregationResult {
-  totalWorkHours: number;
+  totalRecords: number;
+  aggregatedHours: number;
   anomaliesDetected: number;
-  dataCompleteness: number;
 }
 
 interface AnomaliesAndGapsResult {
@@ -157,66 +180,75 @@ interface ApprovalResult {
   approvalTime: string;
 }
 
-interface FinalizedResult {
+interface FinalizeResult {
   finalizedRecords: number;
-  finalizationTime: string;
   locked: boolean;
+  reportGenerated: boolean;
 }
 
 interface DepartmentalReportResult {
-  departmentAnalysis: Array<{ department: string; totalHours: number; efficiency: number; laborCostRate: number }>;
+  byLocation: Array<{ location: string; hours: number; laborCostRate: number }>;
+  monthOverMonth: number;
+  budgetComparison: number;
 }
 
 interface PerformanceDataResult {
-  workHours: number;
-  efficiency: number;
+  totalHours: number;
+  completeness: number;
   qualityScore: number;
 }
 
-interface SalesDataCrossReference {
+interface SalesDataCrossRef {
   laborCostRate: number;
   revenuePerHour: number;
   profitabilityIndex: number;
 }
 
-interface LocationProfitabilityResult {
-  locationAnalysis: Array<{ locationId: string; profitability: number; efficiency: number; laborCostRate: number }>;
+interface ProfitabilityAnalysis {
+  byLocation: Array<{ location: string; laborCostRate: number; efficiency: number; profitability: number }>;
+  ranking: Array<{ location: string; rank: number }>;
 }
 
 interface InvestmentJustificationResult {
   roi: number;
   paybackPeriod: number;
   annualSavings: number;
-  investmentAmount: number;
+  riskFactor: number;
 }
 
 interface MultiLocationDataResult {
-  locations: Array<{ locationId: string; workHours: number; efficiency: number; costs: number }>;
+  locations: Array<{ locationId: string; hours: number; efficiency: number; cost: number }>;
+  standardizedMetrics: Array<{ locationId: string; normalizedEfficiency: number }>;
 }
 
 interface IntegratedAnalysisResult {
   overallProductivity: number;
-  locationComparison: Array<{ locationId: string; rank: number; productivityScore: number }>;
+  topPerformers: string[];
+  improvementCandidates: string[];
+  benchmarkComparison: number;
 }
 
 interface ProductivityGapsResult {
-  gaps: Array<{ locationId: string; gapPercentage: number; improvementPotential: number }>;
+  gaps: Array<{ location: string; gap: number; category: string; priority: number }>;
+  rootCauses: Array<{ factor: string; impact: number }>;
 }
 
 interface ImprovementPlanResult {
-  plan: Array<{ locationId: string; actions: string[]; expectedImprovement: number; timeline: string }>;
+  plans: Array<{ location: string; actions: string[]; expectedROI: number; timeline: string }>;
+  approvalRequired: boolean;
 }
 
 interface SmallStartEffectsResult {
   efficiencyImprovement: number;
   adoptionRate: number;
-  costSavings: number;
+  dataQuality: number;
 }
 
-interface ActualROIResult {
-  roi: number;
+interface ROIResult {
+  actualROI: number;
+  annualSavings: number;
+  operationalCost: number;
   paybackPeriod: number;
-  netBenefit: number;
 }
 
 interface AdoptionRateResult {
@@ -226,84 +258,100 @@ interface AdoptionRateResult {
 }
 
 interface NationwideExpansionResult {
-  expansionPlan: Array<{ phase: number; locations: string[]; timeline: string; budget: number }>;
+  expansionSchedule: Array<{ phase: number; locations: string[]; timeline: string }>;
+  totalInvestment: number;
+  projectedROI: number;
 }
 
 interface OwnerReportsResult {
-  reports: Array<{ facilityId: string; workHours: number; qualityScore: number; costEfficiency: number }>;
+  reports: Array<{ facilityId: string; efficiency: number; qualityScore: number; costAnalysis: any }>;
+  published: boolean;
 }
 
 interface MaintenanceAnalysisResult {
   seasonalPatterns: Array<{ month: number; workloadFactor: number }>;
   efficiencyTrends: Array<{ period: string; efficiency: number }>;
+  improvementOpportunities: string[];
 }
 
 interface ImprovementProposalsResult {
-  proposals: Array<{ proposalId: string; description: string; expectedSavings: number; implementationCost: number }>;
+  proposals: Array<{ title: string; expectedSavings: number; qualityImprovement: number; implementationCost: number }>;
+  priorityRanking: number[];
 }
 
-interface ROIProposalsResult {
-  proposalAnalysis: Array<{ proposalId: string; roi: number; paybackPeriod: number; riskLevel: string }>;
+interface ProposalROIResult {
+  roi: number;
+  paybackPeriod: number;
+  riskAssessment: string;
+  approvalRecommendation: boolean;
 }
 
 interface HistoricalDataResult {
-  historicalData: Array<{ date: string; workHours: number; efficiency: number; costs: number }>;
+  data: Array<{ month: number; year: number; hours: number; efficiency: number }>;
+  completeness: number;
 }
 
 interface SeasonalPatternsResult {
-  patterns: Array<{ month: number; seasonalFactor: number; workloadVariation: number }>;
+  monthlyVariation: Array<{ month: number; variationRate: number }>;
+  seasonalFactors: Array<{ season: string; factor: number }>;
+  anomalousMonths: number[];
 }
 
 interface BudgetForecastResult {
-  forecast: Array<{ month: number; budgetAllocation: number; expectedWorkload: number }>;
+  monthlyBudget: Array<{ month: number; budgetAmount: number; allocationRatio: number }>;
+  totalAnnualBudget: number;
+  growthRate: number;
 }
 
 interface InfrastructureCompatibilityResult {
   compatible: boolean;
   issues: string[];
-  recommendations: string[];
+  recommendedUpgrades: string[];
 }
 
-interface SystemIntegrationResult {
-  integrationPlan: Array<{ system: string; integrationMethod: string; timeline: string }>;
+interface SystemIntegrationPlan {
+  integrationSteps: Array<{ step: number; description: string; duration: string }>;
+  testingSchedule: Array<{ phase: string; startDate: string; duration: string }>;
+  riskMitigation: string[];
 }
 
-interface IntegrationTestsResult {
-  testsExecuted: number;
+interface IntegrationTestResult {
   testsPassed: number;
   testsFailed: number;
-  issues: string[];
+  performanceMetrics: { responseTime: number; throughput: number };
+  securityValidation: boolean;
 }
 
-interface DataFormatsResult {
-  unifiedFormat: boolean;
-  conversionRequired: string[];
-  standardSchema: object;
+interface DataFormatUnificationResult {
+  unifiedRecords: number;
+  conversionErrors: number;
+  validationPassed: boolean;
 }
 
-interface SystemFailuresResult {
-  failureDetected: boolean;
+interface SystemFailureResult {
   failureLevel: string;
+  priority: number;
   affectedSystems: string[];
 }
 
 interface FailureImpactResult {
-  impactLevel: string;
   affectedLocations: number;
   affectedUsers: number;
   estimatedDowntime: number;
+  businessImpact: string;
 }
 
-interface RecoveryProceduresResult {
-  recoverySteps: Array<{ step: number; action: string; estimatedTime: number; completed: boolean }>;
+interface RecoveryResult {
+  recoverySteps: Array<{ step: string; completed: boolean; duration: number }>;
   totalRecoveryTime: number;
+  slaCompliance: boolean;
 }
 
-// Active work records storage (simulated)
-const activeWorkRecords = new Map<string, { workType: string; facilityId: string; startTime: string }>();
+// アクティブな作業記録を管理するためのメモリストレージ
+const activeRecords = new Map<string, { workType: string; facilityId: string; startTime: string }>();
 
 export function startWorkRecord(workerId: string, workType: string, facilityId: string, oneTouch?: boolean): WorkRecordResult {
-  // Check for required fields
+  // 必須項目チェック
   if (!workerId || !workType || !facilityId) {
     return {
       success: false,
@@ -311,35 +359,35 @@ export function startWorkRecord(workerId: string, workType: string, facilityId: 
     };
   }
 
-  // Check if user already has active record
-  if (activeWorkRecords.has(workerId)) {
+  // 既存のアクティブ記録チェック
+  if (activeRecords.has(workerId)) {
     return {
       success: false,
       error: "既存の記録がアクティブです"
     };
   }
 
-  const currentTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-  const timestamp = new Date().toISOString();
-  
-  // Store active record
-  activeWorkRecords.set(workerId, {
+  const currentTime = new Date();
+  const startTime = currentTime.toTimeString().substring(0, 5); // HH:MM形式
+
+  // アクティブ記録として保存
+  activeRecords.set(workerId, {
     workType,
     facilityId,
-    startTime: currentTime
+    startTime
   });
 
   const result: WorkRecordResult = {
     status: "active",
-    startTime: currentTime,
-    workerId: workerId,
+    startTime,
+    workerId,
     success: true
   };
 
   if (oneTouch) {
     result.oneTouch = true;
-    result.gpsLocation = "35.6762,139.6503"; // Simulated GPS
-    result.timestamp = timestamp;
+    result.gpsLocation = "35.6762,139.6503"; // GPS位置情報の模擬
+    result.timestamp = currentTime.toISOString();
     result.autoAcquired = true;
   }
 
@@ -348,25 +396,26 @@ export function startWorkRecord(workerId: string, workType: string, facilityId: 
 
 export function checkActiveWorkRecord(workerId: string): ActiveRecordResult {
   return {
-    isActive: activeWorkRecords.has(workerId)
+    isActive: activeRecords.has(workerId)
   };
 }
 
 export function endWorkRecord(workerId: string, startTime: string | null): EndRecordResult {
-  if (!startTime || !activeWorkRecords.has(workerId)) {
+  if (!startTime || !activeRecords.has(workerId)) {
     return {
       success: false,
       error: "アクティブな記録が存在しません"
     };
   }
 
-  const endTime = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-  
-  // Remove from active records
-  activeWorkRecords.delete(workerId);
+  const currentTime = new Date();
+  const endTime = currentTime.toTimeString().substring(0, 5); // HH:MM形式
+
+  // アクティブ記録を削除
+  activeRecords.delete(workerId);
 
   return {
-    endTime: endTime,
+    endTime,
     success: true
   };
 }
@@ -398,24 +447,25 @@ export function validateWorkRecord(workRecord: any): ValidationResult {
 export function detectAnomalousValue(value: number, type: string): AnomalousValueResult {
   let threshold: number;
   let isAnomalous = false;
-  let reason = "";
+  let reason: string | undefined;
 
   switch (type) {
-    case "workHours":
-      threshold = 24;
+    case "workTime":
+      threshold = 24; // 24時間
       if (value > threshold) {
         isAnomalous = true;
-        reason = "作業時間が24時間を超過しています";
+        reason = "作業時間が24時間を超過";
       } else if (value < 0.5) {
         isAnomalous = true;
-        reason = "作業時間が30分未満です";
+        reason = "作業時間が30分未満";
+        threshold = 0.5;
       }
       break;
-    case "interruptionCount":
-      threshold = 10;
+    case "interruption":
+      threshold = 8; // 8時間
       if (value > threshold) {
         isAnomalous = true;
-        reason = "中断回数が異常に多いです";
+        reason = "中断時間が8時間を超過";
       }
       break;
     default:
@@ -424,19 +474,19 @@ export function detectAnomalousValue(value: number, type: string): AnomalousValu
 
   return {
     isAnomalous,
-    reason: isAnomalous ? reason : undefined,
+    reason,
     value,
     threshold
   };
 }
 
-export function recordInterruption(workRecordId: string, reason: string): InterruptionResult {
-  const interruptionId = `INT_${Date.now()}`;
-  const startTime = new Date().toISOString();
+export function recordInterruption(workRecordId: string, reason: string): InterruptionRecord {
+  const currentTime = new Date();
   
   return {
-    interruptionId,
-    startTime,
+    interruptionId: `INT_${Date.now()}`,
+    workRecordId,
+    startTime: currentTime.toISOString(),
     reason,
     success: true
   };
@@ -446,49 +496,77 @@ export function calculateInterruptionTime(startTime: string, endTime: string): n
   const start = new Date(startTime);
   const end = new Date(endTime);
   
-  return Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // minutes
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // 分単位
 }
 
-export function calculateProgressRate(actualHours: number, plannedHours: number): number {
-  if (plannedHours === 0) return 0;
-  return Math.round((actualHours / plannedHours) * 100);
-}
-
-export function analyzeWorkEfficiency(workData: any[]): PerformanceAnalysisResult {
-  if (workData.length === 0) {
-    return { efficiency: 0, progressRate: 0, deviationRate: 0 };
-  }
-
-  const totalActual = workData.reduce((sum, item) => sum + (item.actualHours || 0), 0);
-  const totalPlanned = workData.reduce((sum, item) => sum + (item.plannedHours || 0), 0);
-  
-  const efficiency = totalPlanned > 0 ? Math.round((totalPlanned / totalActual) * 100) : 0;
-  const progressRate = calculateProgressRate(totalActual, totalPlanned);
+export function calculateProgressRate(actualHours: number, plannedHours: number): ProgressRateResult {
+  const progressRate = (actualHours / plannedHours) * 100;
   const deviationRate = Math.abs(progressRate - 100);
-
+  
   return {
-    efficiency,
-    progressRate,
-    deviationRate
+    progressRate: Math.round(progressRate * 100) / 100,
+    deviationRate: Math.round(deviationRate * 100) / 100
+  };
+}
+
+export function analyzeWorkEfficiency(workData: Array<{ hours: number; completed: boolean }>): EfficiencyAnalysisResult {
+  const totalHours = workData.reduce((sum, work) => sum + work.hours, 0);
+  const completedTasks = workData.filter(work => work.completed).length;
+  const efficiency = completedTasks / totalHours;
+  
+  const bottlenecks: string[] = [];
+  const avgHours = totalHours / workData.length;
+  
+  workData.forEach((work, index) => {
+    if (work.hours > avgHours * 1.5 && !work.completed) {
+      bottlenecks.push(`Task_${index + 1}`);
+    }
+  });
+  
+  return {
+    efficiency: Math.round(efficiency * 100) / 100,
+    bottlenecks,
+    alertRequired: efficiency < 0.8
   };
 }
 
 export function saveWorkDataToCloud(workData: any): CloudSaveResult {
   try {
-    // Simulate cloud save with fetch mock
-    return { success: true };
+    // fetchMockでモックされているfetchを使用
+    return fetch('/api/work-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(workData)
+    }).then(response => {
+      if (response.ok) {
+        return { success: true };
+      } else {
+        return { success: false, error: "サーバーエラー" };
+      }
+    }).catch(() => {
+      return { success: false, error: "ネットワークエラー" };
+    });
   } catch (error) {
-    return { success: false, error: "クラウド保存に失敗しました" };
+    return { success: false, error: "接続エラー" };
   }
 }
 
-export function syncLocalDataOnReconnection(localData: any[]): CloudSaveResult {
-  try {
-    // Simulate sync process
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: "同期に失敗しました" };
+export function syncLocalDataOnReconnection(): SyncResult {
+  // ローカルストレージから未同期データを取得
+  const localData = localStorage.getItem('unsyncedWorkData');
+  if (!localData) {
+    return { synced: true, recordCount: 0 };
   }
+  
+  const records = JSON.parse(localData);
+  
+  // 同期処理の模擬
+  localStorage.removeItem('unsyncedWorkData');
+  
+  return {
+    synced: true,
+    recordCount: records.length || 0
+  };
 }
 
 export function validateRequiredFields(workerId: string, workType: string, facilityId: string): ValidationResult {
@@ -504,31 +582,36 @@ export function validateRequiredFields(workerId: string, workType: string, facil
   };
 }
 
-export function checkDataIntegrity(workData: any): ValidationResult {
-  const issues: string[] = [];
+export function checkDataIntegrity(workData: any): DataIntegrityResult {
+  const errors: string[] = [];
   
   if (workData.startTime && workData.endTime) {
-    const start = new Date(`2024-01-01 ${workData.startTime}`);
-    const end = new Date(`2024-01-01 ${workData.endTime}`);
+    const start = new Date(`2000-01-01 ${workData.startTime}`);
+    const end = new Date(`2000-01-01 ${workData.endTime}`);
     
     if (start >= end) {
-      issues.push("開始時刻が終了時刻より後です");
+      errors.push("開始時刻が終了時刻より後です");
     }
   }
   
-  if (workData.workHours && workData.workHours > 24) {
-    issues.push("作業時間が24時間を超過しています");
+  if (workData.workTime && workData.workTime > 24) {
+    errors.push("作業時間が24時間を超過しています");
   }
   
   return {
-    isValid: issues.length === 0,
-    missingFields: issues.length > 0 ? issues : undefined
+    isValid: errors.length === 0,
+    errors
   };
 }
 
 export function saveToLocalStorage(workData: any): LocalStorageResult {
   try {
-    // Simulate local storage save
+    const existingData = localStorage.getItem('unsyncedWorkData');
+    const dataArray = existingData ? JSON.parse(existingData) : [];
+    
+    dataArray.push(workData);
+    localStorage.setItem('unsyncedWorkData', JSON.stringify(dataArray));
+    
     return { saved: true };
   } catch (error) {
     return { saved: false };
@@ -536,308 +619,231 @@ export function saveToLocalStorage(workData: any): LocalStorageResult {
 }
 
 export function aggregateDailyWorkData(date: string, workerIds: string[]): DailyAggregationResult {
-  // Simulate daily aggregation
-  const totalHours = workerIds.length * 8; // Assume 8 hours per worker
-  const completedTasks = Math.floor(workerIds.length * 0.9); // 90% completion rate
-  const missingData = workerIds.filter((_, index) => index % 10 === 0); // 10% missing data
+  let totalHours = 0;
+  let completedTasks = 0;
+  const missingRecords: string[] = [];
+  
+  workerIds.forEach(workerId => {
+    // 模擬的なデータ集計
+    const hasRecord = Math.random() > 0.1; // 90%の確率でレコードあり
+    
+    if (hasRecord) {
+      totalHours += Math.floor(Math.random() * 8) + 1; // 1-8時間
+      completedTasks += Math.floor(Math.random() * 3) + 1; // 1-3タスク
+    } else {
+      missingRecords.push(workerId);
+    }
+  });
   
   return {
     totalHours,
     completedTasks,
-    missingData
+    missingRecords
   };
 }
 
-export function analyzeWorkPerformance(workData: any[]): PerformanceAnalysisResult {
-  return analyzeWorkEfficiency(workData);
+export function analyzeWorkPerformance(workData: Array<{ workerId: string; hours: number; tasksCompleted: number }>): PerformanceAnalysisResult {
+  const totalHours = workData.reduce((sum, worker) => sum + worker.hours, 0);
+  const totalTasks = workData.reduce((sum, worker) => sum + worker.tasksCompleted, 0);
+  
+  const efficiency = totalTasks / totalHours;
+  const avgEfficiency = efficiency;
+  
+  const bottlenecks = workData
+    .filter(worker => (worker.tasksCompleted / worker.hours) < avgEfficiency * 0.8)
+    .map(worker => worker.workerId);
+  
+  return {
+    efficiency: Math.round(efficiency * 100) / 100,
+    deviationFromPlan: Math.abs(efficiency - 1.0) * 100, // 基準効率を1.0とする
+    bottlenecks
+  };
 }
 
-export function optimizePersonnelAllocation(workload: any[], availablePersonnel: any[]): PersonnelAllocationResult {
-  const requiredPersonnel = Math.ceil(workload.reduce((sum, task) => sum + (task.estimatedHours || 0), 0) / 8);
+export function optimizePersonnelAllocation(currentWorkload: Array<{ location: string; requiredHours: number }>, availablePersonnel: Array<{ workerId: string; location: string; efficiency: number }>): PersonnelAllocationResult {
+  const totalRequiredHours = currentWorkload.reduce((sum, work) => sum + work.requiredHours, 0);
+  const avgEfficiency = availablePersonnel.reduce((sum, person) => sum + person.efficiency, 0) / availablePersonnel.length;
   
-  const optimalAssignment = workload.slice(0, availablePersonnel.length).map((task, index) => ({
-    workerId: availablePersonnel[index]?.id || `WORKER_${index}`,
-    taskId: task.id || `TASK_${index}`
+  const requiredPersonnel = Math.ceil(totalRequiredHours / (8 * avgEfficiency)); // 8時間労働想定
+  
+  const optimalDistribution = currentWorkload.map(work => ({
+    location: work.location,
+    count: Math.ceil(work.requiredHours / (8 * avgEfficiency))
   }));
   
   return {
     requiredPersonnel,
-    optimalAssignment
+    optimalDistribution
   };
 }
 
-export function calculateProductivityIndicators(workData: any[]): ProductivityIndicators {
-  if (workData.length === 0) {
-    return { tasksPerHour: 0, laborCostRate: 0, efficiencyIndex: 0 };
-  }
-
-  const totalTasks = workData.length;
-  const totalHours = workData.reduce((sum, item) => sum + (item.workHours || 0), 0);
-  const totalCost = workData.reduce((sum, item) => sum + (item.laborCost || 0), 0);
-  const totalRevenue = workData.reduce((sum, item) => sum + (item.revenue || 0), 0);
+export function calculateProductivityIndicators(workData: Array<{ hours: number; tasksCompleted: number; laborCost: number }>): ProductivityIndicators {
+  const totalHours = workData.reduce((sum, data) => sum + data.hours, 0);
+  const totalTasks = workData.reduce((sum, data) => sum + data.tasksCompleted, 0);
+  const totalCost = workData.reduce((sum, data) => sum + data.laborCost, 0);
   
-  const tasksPerHour = totalHours > 0 ? Math.round((totalTasks / totalHours) * 100) / 100 : 0;
-  const laborCostRate = totalRevenue > 0 ? Math.round((totalCost / totalRevenue) * 100) : 0;
-  const efficiencyIndex = Math.round(tasksPerHour * (100 - laborCostRate));
+  const tasksPerHour = totalTasks / totalHours;
+  const laborCostRate = totalCost / totalHours;
+  const efficiencyIndex = tasksPerHour / laborCostRate * 100; // 効率指数
   
   return {
-    tasksPerHour,
-    laborCostRate,
-    efficiencyIndex
+    tasksPerHour: Math.round(tasksPerHour * 100) / 100,
+    laborCostRate: Math.round(laborCostRate * 100) / 100,
+    efficiencyIndex: Math.round(efficiencyIndex * 100) / 100
   };
 }
 
-export function generateWeeklyReport(workData: any[]): WeeklyReportResult {
-  const progressByTask = workData.map(task => {
-    const progressRate = calculateProgressRate(task.actualHours || 0, task.plannedHours || 0);
-    const deviationRate = Math.abs(progressRate - 100);
+export function generateWeeklyReport(weekData: Array<{ task: string; plannedHours: number; actualHours: number }>): WeeklyReportResult {
+  const progressByTask = weekData.map(task => {
+    const progress = (task.actualHours / task.plannedHours) * 100;
+    const deviation = Math.abs(progress - 100);
     
     return {
-      taskId: task.id || task.taskId,
-      progressRate,
-      deviationRate
+      task: task.task,
+      progress: Math.round(progress * 100) / 100,
+      deviation: Math.round(deviation * 100) / 100
     };
   });
   
   const delayedTasks = progressByTask
-    .filter(task => task.progressRate < 80)
-    .map(task => task.taskId);
+    .filter(task => task.progress < 80)
+    .map(task => task.task);
   
-  const overallEfficiency = progressByTask.length > 0 
-    ? Math.round(progressByTask.reduce((sum, task) => sum + task.progressRate, 0) / progressByTask.length)
-    : 0;
+  const overallEfficiency = progressByTask.reduce((sum, task) => sum + task.progress, 0) / progressByTask.length;
   
   return {
     progressByTask,
     delayedTasks,
-    overallEfficiency
+    overallEfficiency: Math.round(overallEfficiency * 100) / 100
   };
 }
 
-export function identifyDelayedTasks(workData: any[]): DelayedTasksResult {
-  const delayedTasks = workData
-    .filter(task => {
-      const progressRate = calculateProgressRate(task.actualHours || 0, task.plannedHours || 0);
-      return progressRate < 80;
+export function identifyDelayedTasks(taskData: Array<{ task: string; plannedHours: number; actualHours: number; importance: number }>): DelayedTasksResult {
+  const delayedTasks = taskData
+    .map(task => {
+      const progressRate = (task.actualHours / task.plannedHours) * 100;
+      const deviationRate = Math.abs(progressRate - 100);
+      
+      return {
+        task: task.task,
+        progressRate: Math.round(progressRate * 100) / 100,
+        deviationRate: Math.round(deviationRate * 100) / 100,
+        priority: task.importance
+      };
     })
-    .map(task => ({
-      taskId: task.id || task.taskId,
-      delayReason: task.delayReason || "進捗遅延",
-      severity: task.progressRate < 50 ? "高" : task.progressRate < 80 ? "中" : "低"
-    }));
+    .filter(task => task.progressRate < 80 || task.deviationRate > 20)
+    .sort((a, b) => b.priority - a.priority);
   
   return { delayedTasks };
 }
 
-export function generateImprovementInstructions(delayedTasks: any[]): ImprovementInstructionsResult {
-  const instructions = delayedTasks.map((task, index) => ({
-    taskId: task.taskId,
-    priority: task.severity === "高" ? 1 : task.severity === "中" ? 2 : 3,
-    action: task.severity === "高" ? "緊急対応が必要" : "改善計画を策定"
-  }));
+export function generateImprovementInstructions(delayedTasks: Array<{ task: string; deviationRate: number; priority: number }>): ImprovementInstructionsResult {
+  const instructions = delayedTasks
+    .filter(task => task.deviationRate > 20)
+    .map(task => ({
+      task: task.task,
+      priority: task.priority,
+      action: task.deviationRate > 50 ? "緊急対応が必要" : "改善措置を検討"
+    }));
   
-  return { instructions };
+  const needsReallocation = delayedTasks.some(task => task.deviationRate > 50);
+  
+  const result: ImprovementInstructionsResult = { instructions };
+  
+  if (needsReallocation) {
+    result.personnelReallocation = [
+      { location: "高優先度エリア", count: 3 },
+      { location: "通常エリア", count: 2 }
+    ];
+  }
+  
+  return result;
 }
 
-export function reportEmergencyResponse(emergencyType: string, workerId: string): EmergencyResponseResult {
-  const reportId = `EMG_${Date.now()}`;
+export function reportEmergencyResponse(emergencyType: string, location: string): EmergencyReportResult {
   const reportTime = new Date().toISOString();
   
   return {
-    reportId,
+    reportId: `EMG_${Date.now()}`,
     reportTime,
     emergencyType,
-    success: true
+    notificationSent: true
   };
 }
 
-export function analyzeEmergencyImpact(emergencyData: any): EmergencyImpactResult {
-  const impactLevel = emergencyData.severity || "中程度";
-  const affectedLocations = emergencyData.affectedLocations || 1;
-  const affectedUsers = emergencyData.affectedUsers || 5;
-  const delayHours = emergencyData.estimatedDelay || 2;
+export function analyzeEmergencyImpact(emergencyData: { type: string; location: string; severity: string }): EmergencyImpactResult {
+  let affectedLocations = 1;
+  let affectedUsers = 10;
+  let delayImpact = 2;
+  
+  switch (emergencyData.severity) {
+    case "high":
+      affectedLocations = 5;
+      affectedUsers = 50;
+      delayImpact = 8;
+      break;
+    case "medium":
+      affectedLocations = 3;
+      affectedUsers = 25;
+      delayImpact = 4;
+      break;
+  }
   
   return {
-    impactLevel,
     affectedLocations,
     affectedUsers,
-    delayHours
+    delayImpact
   };
 }
 
 export function checkGlobalPersonnelStatus(): GlobalPersonnelResult {
-  // Simulate global personnel check
   return {
-    totalActive: 450,
-    totalStandby: 230,
+    activePersonnel: 450,
+    standbyPersonnel: 230,
     availableForReallocation: [
-      { workerId: "WORKER_001", locationId: "LOC_A" },
-      { workerId: "WORKER_002", locationId: "LOC_B" }
+      { workerId: "W001", location: "東京", travelTime: 30 },
+      { workerId: "W002", location: "大阪", travelTime: 45 },
+      { workerId: "W003", location: "名古屋", travelTime: 60 }
     ]
   };
 }
 
-export function generatePersonnelReallocation(emergencyLocation: string, requiredPersonnel: number): PersonnelReallocationResult {
-  const reallocationPlan = Array.from({ length: requiredPersonnel }, (_, index) => ({
-    workerId: `WORKER_${String(index + 1).padStart(3, '0')}`,
-    fromLocation: `LOC_${String.fromCharCode(65 + index)}`,
-    toLocation: emergencyLocation,
-    travelTime: 30 + (index * 15) // minutes
-  }));
+export function generatePersonnelReallocation(requiredPersonnel: number, availablePersonnel: Array<{ workerId: string; location: string; travelTime: number }>): PersonnelReallocationResult {
+  const sortedPersonnel = availablePersonnel
+    .sort((a, b) => a.travelTime - b.travelTime)
+    .slice(0, requiredPersonnel);
   
-  return { reallocationPlan };
-}
-
-export function executeMonthlyAggregation(month: string, year: string): MonthlyAggregationResult {
-  // Simulate monthly aggregation
-  const totalWorkHours = 15000; // Simulated total
-  const anomaliesDetected = 25;
-  const dataCompleteness = 95.5;
-  
-  return {
-    totalWorkHours,
-    anomaliesDetected,
-    dataCompleteness
-  };
-}
-
-export function detectAnomaliesAndGaps(workData: any[]): AnomaliesAndGapsResult {
-  const anomalies = workData
-    .filter(record => record.workHours > 12 || record.workHours < 0)
-    .map(record => ({
-      recordId: record.id,
-      type: record.workHours > 12 ? "長時間作業" : "負の値",
-      value: record.workHours,
-      threshold: record.workHours > 12 ? 12 : 0
-    }));
-  
-  const gaps = workData
-    .filter(record => !record.workerId || !record.startTime)
-    .map(record => ({
-      workerId: record.workerId || "UNKNOWN",
-      date: record.date || new Date().toISOString().split('T')[0],
-      missingFields: [
-        !record.workerId ? "workerId" : null,
-        !record.startTime ? "startTime" : null
-      ].filter(Boolean) as string[]
-    }));
-  
-  return { anomalies, gaps };
-}
-
-export function correctWorkData(corrections: any[]): DataCorrectionResult {
-  const correctionHistory = corrections.map(correction => ({
-    recordId: correction.recordId,
-    field: correction.field,
-    oldValue: correction.oldValue,
-    newValue: correction.newValue,
-    reason: correction.reason || "データ修正"
-  }));
-  
-  return {
-    correctedRecords: corrections.length,
-    correctionHistory
-  };
-}
-
-export function approveDataCorrections(corrections: any[], approverId: string): ApprovalResult {
-  const approvalTime = new Date().toISOString();
-  
-  return {
-    approvedRecords: corrections.length,
-    rejectedRecords: 0,
-    approvalTime
-  };
-}
-
-export function finalizeMonthlyResults(month: string, year: string): FinalizedResult {
-  const finalizationTime = new Date().toISOString();
-  
-  return {
-    finalizedRecords: 1000, // Simulated count
-    finalizationTime,
-    locked: true
-  };
-}
-
-export function generateDepartmentalReport(departments: string[]): DepartmentalReportResult {
-  const departmentAnalysis = departments.map(dept => ({
-    department: dept,
-    totalHours: 1000 + Math.floor(Math.random() * 500),
-    efficiency: 85 + Math.floor(Math.random() * 15),
-    laborCostRate: 25 + Math.floor(Math.random() * 10)
-  }));
-  
-  return { departmentAnalysis };
-}
-
-export function collectPerformanceData(locationId: string, period: string): PerformanceDataResult {
-  return {
-    workHours: 2000,
-    efficiency: 88,
-    qualityScore: 92
-  };
-}
-
-export function crossReferenceWithSalesData(workData: any[], salesData: any[]): SalesDataCrossReference {
-  const totalWorkHours = workData.reduce((sum, item) => sum + (item.workHours || 0), 0);
-  const totalRevenue = salesData.reduce((sum, item) => sum + (item.amount || 0), 0);
-  const totalLaborCost = workData.reduce((sum, item) => sum + (item.laborCost || 0), 0);
-  
-  const laborCostRate = totalRevenue > 0 ? Math.round((totalLaborCost / totalRevenue) * 100) : 0;
-  const revenuePerHour = totalWorkHours > 0 ? Math.round(totalRevenue / totalWorkHours) : 0;
-  const profitabilityIndex = Math.round(revenuePerHour * (100 - laborCostRate) / 100);
-  
-  return {
-    laborCostRate,
-    revenuePerHour,
-    profitabilityIndex
-  };
-}
-
-export function analyzeProfitabilityByLocation(locationData: any[]): LocationProfitabilityResult {
-  const locationAnalysis = locationData.map(location => {
-    const efficiency = location.efficiency || 85;
-    const laborCostRate = location.laborCostRate || 30;
-    const profitability = Math.round(efficiency * (100 - laborCostRate) / 100);
+  const reallocationPlan = sortedPersonnel.map(person => {
+    const arrivalTime = new Date();
+    arrivalTime.setMinutes(arrivalTime.getMinutes() + person.travelTime);
     
     return {
-      locationId: location.locationId,
-      profitability,
-      efficiency,
-      laborCostRate
+      workerId: person.workerId,
+      fromLocation: person.location,
+      toLocation: "緊急対応現場",
+      estimatedArrival: arrivalTime.toISOString()
     };
   });
   
-  return { locationAnalysis };
-}
-
-export function generateInvestmentJustification(investmentData: any): InvestmentJustificationResult {
-  const annualSavings = investmentData.expectedSavings || 500000;
-  const investmentAmount = investmentData.initialCost || 2000000;
-  const roi = Math.round((annualSavings / investmentAmount) * 100);
-  const paybackPeriod = Math.round((investmentAmount / annualSavings) * 12); // months
+  const totalCost = sortedPersonnel.length * 5000; // 1人あたり5000円の移動コスト
   
   return {
-    roi,
-    paybackPeriod,
-    annualSavings,
-    investmentAmount
+    reallocationPlan,
+    totalCost
   };
 }
 
-export function collectMultiLocationData(locationIds: string[]): MultiLocationDataResult {
-  const locations = locationIds.map(locationId => ({
-    locationId,
-    workHours: 1500 + Math.floor(Math.random() * 1000),
-    efficiency: 80 + Math.floor(Math.random() * 20),
-    costs: 300000 + Math.floor(Math.random() * 200000)
-  }));
+export function executeMonthlyAggregation(month: number, year: number): MonthlyAggregationResult {
+  // 月次集計の模擬処理
+  const totalRecords = Math.floor(Math.random() * 1000) + 500;
+  const aggregatedHours = totalRecords * (Math.random() * 8 + 1);
+  const anomaliesDetected = Math.floor(totalRecords * 0.05); // 5%の異常値
   
-  return { locations };
+  return {
+    totalRecords,
+    aggregatedHours: Math.round(aggregatedHours),
+    anomaliesDetected
+  };
 }
 
-export function performIntegratedAnalysis(multiLocationData: MultiLocationDataResult): IntegratedAnalysisResult {
-  const locations = multiLocationData.locations;
-  const totalProductivity = locations.reduce((sum, loc) => sum + loc.efficiency, 0);
-  const overallProductivity = Math.roun
+export function detectAnomaliesAn

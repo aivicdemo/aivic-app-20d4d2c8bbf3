@@ -18,7 +18,7 @@
 // - 関数名: checkActiveWorkRecord
 //   呼び出し例 (テスト中): checkActiveWorkRecord("EMP001")
 //   await されてる?: いいえ
-//   戻り値の使用: expect(isActive).toBe(true)
+//   戻り値: boolean
 //   → 結論: function checkActiveWorkRecord(employeeId: string): boolean
 
 interface WorkData {
@@ -42,61 +42,83 @@ interface ValidationResult {
   missingFields: string[];
 }
 
-// アクティブな作業記録を管理するためのインメモリストレージ
-const activeWorkRecords: Map<string, { workRecordId: string; status: string; startTime: string }> = new Map();
+// アクティブな作業記録を管理するためのメモリストレージ
+const activeWorkRecords = new Map<string, { workRecordId: string; status: string; startTime: string }>();
 
-export async function startWorkRecording(workData: WorkData, currentTime: string): Promise<WorkRecordResult> {
-  // 前提: 現場作業員がスマートフォンアプリを使用している状態で
-  // 発生条件: 工数記録開始ボタンがタップされたとき
-  // 結果: 現在時刻を作業開始時刻として自動記録し、記録状態をアクティブに変更する
-  
-  // 既にアクティブな作業があるかチェック
-  if (checkActiveWorkRecord(workData.employeeId)) {
-    throw {
-      code: "WORK_ALREADY_ACTIVE",
-      message: "既に作業が開始されています。既存の記録を継続してください。"
-    };
-  }
+export function validateWorkRecordingStart(workData: WorkData): ValidationResult {
+  const errors: string[] = [];
+  const missingFields: string[] = [];
 
   // 必須項目のバリデーション
+  if (!workData.employeeId || workData.employeeId.trim() === "") {
+    errors.push("作業員IDが未入力です");
+    missingFields.push("employeeId");
+  }
+
+  if (!workData.workType || workData.workType.trim() === "") {
+    errors.push("作業種別が未入力です");
+    missingFields.push("workType");
+  }
+
+  if (!workData.facilityId || workData.facilityId.trim() === "") {
+    errors.push("施設IDが未入力です");
+    missingFields.push("facilityId");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    missingFields
+  };
+}
+
+export function checkActiveWorkRecord(employeeId: string): boolean {
+  const activeRecord = activeWorkRecords.get(employeeId);
+  return activeRecord !== undefined && activeRecord.status === "active";
+}
+
+export async function startWorkRecording(workData: WorkData, currentTime: string): Promise<WorkRecordResult> {
+  // バリデーションチェック
   const validation = validateWorkRecordingStart(workData);
   if (!validation.isValid) {
-    throw {
-      code: "VALIDATION_ERROR",
-      message: "必須項目が未入力です",
-      errors: validation.errors
-    };
+    throw new Error(`バリデーションエラー: ${validation.errors.join(", ")}`);
+  }
+
+  // アクティブな作業記録の重複チェック
+  if (checkActiveWorkRecord(workData.employeeId)) {
+    const error = new Error("既に作業が開始されています。既存の記録を継続してください。") as any;
+    error.code = "WORK_ALREADY_ACTIVE";
+    throw error;
   }
 
   try {
-    const response = await fetch('/api/work-records', {
-      method: 'POST',
+    // クラウドAPIに工数記録開始を送信
+    const response = await fetch("/api/work-records/start", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         employeeId: workData.employeeId,
         workType: workData.workType,
         facilityId: workData.facilityId,
-        startTime: currentTime,
-        status: 'active'
+        startTime: currentTime
       })
     });
 
     if (!response.ok) {
       if (response.status === 409) {
         const errorData = await response.json();
-        throw {
-          code: errorData.error,
-          message: errorData.message
-        };
+        const error = new Error(errorData.message) as any;
+        error.code = errorData.error;
+        throw error;
       }
-      throw new Error(`HTTP ${response.status}`);
+      throw new Error(`HTTP Error: ${response.status}`);
     }
 
     const result = await response.json();
-    
-    // アクティブな作業記録として記録
+
+    // アクティブ記録をメモリに保存
     activeWorkRecords.set(workData.employeeId, {
       workRecordId: result.workRecordId,
       status: result.status,
@@ -111,55 +133,11 @@ export async function startWorkRecording(workData: WorkData, currentTime: string
       workType: result.workType,
       facilityId: result.facilityId
     };
+
   } catch (error: any) {
     if (error.code) {
       throw error;
     }
-    throw {
-      code: "NETWORK_ERROR",
-      message: "ネットワークエラーが発生しました"
-    };
+    throw new Error(`工数記録開始に失敗しました: ${error.message}`);
   }
-}
-
-export function validateWorkRecordingStart(workData: WorkData): ValidationResult {
-  // 前提: 現場作業員がスマートフォンアプリで工数記録を開始する状態で
-  // 発生条件: 工数記録開始ボタンがタップされたとき
-  // 結果: 作業開始時刻を自動的に記録し、必須項目（作業員ID、作業種別、施設ID）の入力状態をチェックする
-  
-  const errors: string[] = [];
-  const missingFields: string[] = [];
-
-  // 作業員IDのチェック
-  if (!workData.employeeId || workData.employeeId.trim() === '') {
-    errors.push("作業員IDが未入力です");
-    missingFields.push("employeeId");
-  }
-
-  // 作業種別のチェック
-  if (!workData.workType || workData.workType.trim() === '') {
-    errors.push("作業種別が未入力です");
-    missingFields.push("workType");
-  }
-
-  // 施設IDのチェック
-  if (!workData.facilityId || workData.facilityId.trim() === '') {
-    errors.push("施設IDが未入力です");
-    missingFields.push("facilityId");
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    missingFields
-  };
-}
-
-export function checkActiveWorkRecord(employeeId: string): boolean {
-  // 前提: 作業開始記録が既にアクティブ状態で
-  // 発生条件: 重複して開始ボタンがタップされたとき
-  // 結果: エラーメッセージを表示し、既存の記録を継続する
-  
-  const activeRecord = activeWorkRecords.get(employeeId);
-  return activeRecord !== undefined && activeRecord.status === 'active';
 }

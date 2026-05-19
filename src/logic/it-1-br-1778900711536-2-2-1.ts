@@ -88,14 +88,14 @@ function calculateWorkHours(startTime: string, endTime: string): number {
   const start = new Date(startTime);
   const end = new Date(endTime);
   const diffMs = end.getTime() - start.getTime();
-  return diffMs / (1000 * 60 * 60);
+  return diffMs / (1000 * 60 * 60); // ミリ秒を時間に変換
 }
 
 function calculateWorkMinutes(startTime: string, endTime: string): number {
   const start = new Date(startTime);
   const end = new Date(endTime);
   const diffMs = end.getTime() - start.getTime();
-  return diffMs / (1000 * 60);
+  return diffMs / (1000 * 60); // ミリ秒を分に変換
 }
 
 export function detectAbnormalWorkTime(startTime: string, endTime: string): AbnormalWorkTimeResult {
@@ -195,13 +195,11 @@ export async function notifyAbnormalValueToManager(workData: WorkData): Promise<
       startTime: workData.startTime,
       endTime: workData.endTime,
       workHours: workData.workHours,
-      anomalyType: workData.workHours > 24 ? "長時間作業" : "異常値",
-      message: `作業員${workData.workerId}の工数に異常値を検出しました。作業時間: ${workData.workHours}時間`
+      anomalyType: workData.workHours > 24 ? "長時間作業" : "異常値検出"
     })
   });
   
   const result = await response.json();
-  
   return {
     notificationSent: result.notificationSent || true,
     managerId: result.managerId || "MGR001"
@@ -212,7 +210,7 @@ export function showConfirmationDialog(abnormalData: AbnormalData): Confirmation
   return {
     show: true,
     title: "異常値検出",
-    message: `${abnormalData.reason}が検出されました。作業時間: ${abnormalData.workHours}時間\n${abnormalData.recommendedAction}`,
+    message: `${abnormalData.reason}。${abnormalData.recommendedAction}`,
     buttons: ["確認", "修正"]
   };
 }
