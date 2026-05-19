@@ -52,173 +52,149 @@ export interface WorkItemMaster {
   更新者ID: string;
 }
 
-// ボトルネック検出結果の型定義
-export interface BottleneckResult {
-  workType: string;
+// 効率ランキング結果の型定義
+export interface EfficiencyRanking {
+  workerId: string;
   efficiency: number;
+  rank: number;
 }
 
-/** 対応ルール: 実績工数と標準工数が存在する状態で → 実績工数÷標準工数×100で効率率を計算 */
-export function calculateEfficiencyRate(actualTime: number, standardTime: number): number {
-  if (standardTime <= 0) {
-    return 0;
-  }
-  return (actualTime / standardTime) * 100;
+// 季節変動分析結果の型定義
+export interface SeasonalVariation {
+  period: string;
+  variationRate: number;
 }
 
-/** 対応ルール: 効率率が算出された状態で → 閾値を下回る場合はアラート通知する */
-export function isEfficiencyBelowThreshold(efficiencyRate: number, threshold: number): boolean {
-  return efficiencyRate < threshold;
+// ボトルネック検出の閾値設定
+export interface BottleneckThresholds {
+  progressRate: number;
+  deviationRate: number;
 }
 
-/** 対応ルール: 作業実績データが存在する状態で → 進捗率が80%未満または乖離率が20%以上の作業をボトルネックとして自動検出 */
-export function identifyBottlenecks(workRecords: WorkRecord[]): BottleneckResult[] {
-  const bottlenecks: BottleneckResult[] = [];
-  const workTypeStats = new Map<string, { totalActual: number; totalStandard: number; count: number }>();
+/** 対応ルール: 過去データとの比較により効率低下を検出し → 閾値を下回る場合はアラート通知する */
+export function detectEfficiencyDecline(
+  currentEfficiency: number,
+  historicalAverage: number,
+  threshold: number
+): boolean {
+  const efficiencyDeclineRate = (historicalAverage - currentEfficiency) / historicalAverage;
+  return efficiencyDeclineRate > threshold;
+}
 
-  // 作業種別ごとの統計を計算
-  workRecords.forEach(record => {
-    if (record.作業時間 === null || record.作業時間 <= 0) {
-      return;
+/** 対応ルール: 進捗率が80%未満または乖離率が20%以上の作業を → ボトルネックとして自動検出する */
+export function identifyBottlenecks(
+  records: WorkRecord[],
+  thresholds: BottleneckThresholds
+): WorkRecord[] {
+  return records.filter(record => {
+    // 作業時間が記録されていない場合はスキップ
+    if (!record.作業時間) {
+      return false;
     }
 
-    const workType = record.作業種別;
-    const actualTime = record.作業時間;
+    // 進捗率の計算（作業時間 / 標準工数時間 * 100）
+    // 標準工数時間は作業項目マスタから取得する想定だが、ここでは8時間（480分）を基準とする
+    const standardWorkTime = 480; // 8時間を分単位で表現
+    const progressRate = (record.作業時間 / standardWorkTime) * 100;
     
-    // 標準工数時間は作業項目マスタから取得する想定だが、ここでは平均値を使用
-    if (!workTypeStats.has(workType)) {
-      workTypeStats.set(workType, { totalActual: 0, totalStandard: 0, count: 0 });
-    }
-    
-    const stats = workTypeStats.get(workType)!;
-    stats.totalActual += actualTime;
-    stats.count += 1;
+    // 乖離率の計算（|実績 - 標準| / 標準 * 100）
+    const deviationRate = Math.abs(record.作業時間 - standardWorkTime) / standardWorkTime * 100;
+
+    // 進捗率が閾値未満または乖離率が閾値以上の場合にボトルネックと判定
+    return progressRate < thresholds.progressRate || deviationRate >= thresholds.deviationRate;
   });
-
-  // 各作業種別の平均を標準時間として使用し、効率を計算
-  workTypeStats.forEach((stats, workType) => {
-    if (stats.count === 0) return;
-    
-    const averageTime = stats.totalActual / stats.count;
-    const standardTime = averageTime * 0.8; // 平均の80%を標準とする
-    const efficiency = calculateEfficiencyRate(averageTime, standardTime);
-    
-    // 効率が80%未満（進捗率が80%未満に相当）または乖離率が20%以上の場合
-    if (efficiency < 80 || Math.abs(efficiency - 100) >= 20) {
-      bottlenecks.push({
-        workType: workType,
-        efficiency: efficiency
-      });
-    }
-  });
-
-  return bottlenecks.sort((a, b) => a.efficiency - b.efficiency);
 }
 
-/** 対応ルール: 作業完了件数と総作業時間が存在する状態で → 時間当たり作業完了件数を算出 */
-export function calculateProductivityIndex(completedTasks: number, totalTime: number): number {
-  if (totalTime <= 0) {
-    return 0;
-  }
-  return completedTasks / totalTime;
-}
-
-/** 対応ルール: 工数データが蓄積されている状態で → 中断理由別の発生頻度と平均時間を集計し、ボトルネック要因を特定 */
-export function analyzeInterruptionPatterns(interruptions: InterruptionRecord[]): { reason: string; frequency: number; averageTime: number }[] {
-  const reasonStats = new Map<string, { count: number; totalTime: number }>();
-
-  interruptions.forEach(interruption => {
-    if (interruption.中断時間 === null || interruption.中断時間 <= 0) {
-      return;
-    }
-
-    const reason = interruption.中断理由区分;
-    if (!reasonStats.has(reason)) {
-      reasonStats.set(reason, { count: 0, totalTime: 0 });
-    }
-
-    const stats = reasonStats.get(reason)!;
-    stats.count += 1;
-    stats.totalTime += interruption.中断時間;
-  });
-
-  const results = Array.from(reasonStats.entries()).map(([reason, stats]) => ({
-    reason: reason,
-    frequency: stats.count,
-    averageTime: stats.totalTime / stats.count
-  }));
-
-  return results.sort((a, b) => b.frequency - a.frequency);
-}
-
-/** 対応ルール: 作業記録データが存在する状態で → 作業時間が8時間を超過している場合は異常値として警告を表示 */
-export function detectAnomalousWorkTime(workRecords: WorkRecord[]): WorkRecord[] {
-  const EIGHT_HOURS_IN_MINUTES = 8 * 60;
+/** 対応ルール: 各拠点の時間当たり作業完了件数を算出し → 平均値からの乖離率で生産性ランキングを作成する */
+export function calculateEfficiencyRanking(records: WorkRecord[]): EfficiencyRanking[] {
+  // 作業員別の効率を計算
+  const workerEfficiencies = new Map<string, number>();
   
-  return workRecords.filter(record => {
-    return record.作業時間 !== null && record.作業時間 > EIGHT_HOURS_IN_MINUTES;
-  });
-}
-
-/** 対応ルール: 作業記録データが存在する状態で → 作業時間が30分未満の場合は短時間作業として確認が必要 */
-export function detectShortWorkTime(workRecords: WorkRecord[]): WorkRecord[] {
-  const THIRTY_MINUTES = 30;
-  
-  return workRecords.filter(record => {
-    return record.作業時間 !== null && record.作業時間 > 0 && record.作業時間 < THIRTY_MINUTES;
-  });
-}
-
-/** 対応ルール: 拠点別工数データが存在する状態で → 拠点別生産性指標を算出し、標準偏差による異常値を検出 */
-export function calculateLocationProductivity(workRecords: WorkRecord[]): { location: string; productivity: number; isAnomaly: boolean }[] {
-  const locationStats = new Map<string, { completedTasks: number; totalTime: number }>();
-
-  // 完了した作業のみを対象とする
-  const completedRecords = workRecords.filter(record => 
-    record.進捗状況 === '完了' && record.作業時間 !== null && record.作業時間 > 0
-  );
-
-  completedRecords.forEach(record => {
-    const location = record.作業場所;
-    if (!locationStats.has(location)) {
-      locationStats.set(location, { completedTasks: 0, totalTime: 0 });
+  records.forEach(record => {
+    if (record.作業時間 && record.進捗状況 === '完了') {
+      const workerId = record.作業員ID;
+      const efficiency = 60 / record.作業時間; // 時間当たり作業完了件数（1時間 = 60分）
+      
+      if (workerEfficiencies.has(workerId)) {
+        const currentEfficiency = workerEfficiencies.get(workerId)!;
+        workerEfficiencies.set(workerId, (currentEfficiency + efficiency) / 2);
+      } else {
+        workerEfficiencies.set(workerId, efficiency);
+      }
     }
-
-    const stats = locationStats.get(location)!;
-    stats.completedTasks += 1;
-    stats.totalTime += record.作業時間!;
   });
 
-  // 各拠点の生産性を計算
-  const productivityData = Array.from(locationStats.entries()).map(([location, stats]) => ({
-    location: location,
-    productivity: calculateProductivityIndex(stats.completedTasks, stats.totalTime)
+  // 効率の配列を作成
+  const efficiencyArray = Array.from(workerEfficiencies.entries()).map(([workerId, efficiency]) => ({
+    workerId,
+    efficiency
   }));
 
-  // 平均と標準偏差を計算
-  const productivityValues = productivityData.map(data => data.productivity);
-  const mean = productivityValues.reduce((sum, val) => sum + val, 0) / productivityValues.length;
-  const variance = productivityValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / productivityValues.length;
-  const standardDeviation = Math.sqrt(variance);
+  // 効率でソート（降順）
+  efficiencyArray.sort((a, b) => b.efficiency - a.efficiency);
 
-  // 異常値判定（平均±2σを超える場合）
-  return productivityData.map(data => ({
-    ...data,
-    isAnomaly: Math.abs(data.productivity - mean) > 2 * standardDeviation
+  // ランキングを付与
+  return efficiencyArray.map((item, index) => ({
+    workerId: item.workerId,
+    efficiency: item.efficiency,
+    rank: index + 1
   }));
 }
 
-/** 対応ルール: 工数データが存在する状態で → 実績工数と計画工数を比較し、進捗率と乖離率を自動算出 */
-export function calculateProgressAndDeviation(actualHours: number, plannedHours: number): { progressRate: number; deviationRate: number } {
-  if (plannedHours <= 0) {
-    return { progressRate: 0, deviationRate: 0 };
-  }
+/** 対応ルール: 月別・四半期別の工数変動率を算出し → 前年同期比±20%を超える変動を異常値として検出する */
+export function analyzeSeasonalVariation(
+  records: WorkRecord[],
+  period: 'monthly' | 'quarterly'
+): SeasonalVariation[] {
+  const periodMap = new Map<string, number[]>();
+  
+  records.forEach(record => {
+    if (record.作業時間) {
+      const date = new Date(record.作業日);
+      let periodKey: string;
+      
+      if (period === 'monthly') {
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        const quarter = Math.floor(date.getMonth() / 3) + 1;
+        periodKey = `${date.getFullYear()}-Q${quarter}`;
+      }
+      
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, []);
+      }
+      periodMap.get(periodKey)!.push(record.作業時間);
+    }
+  });
 
-  const progressRate = (actualHours / plannedHours) * 100;
-  const deviationRate = Math.abs(progressRate - 100);
+  // 各期間の平均工数を計算
+  const periodAverages = new Map<string, number>();
+  periodMap.forEach((workTimes, periodKey) => {
+    const average = workTimes.reduce((sum, time) => sum + time, 0) / workTimes.length;
+    periodAverages.set(periodKey, average);
+  });
 
-  return {
-    progressRate: progressRate,
-    deviationRate: deviationRate
-  };
+  // 前年同期比の変動率を計算
+  const variations: SeasonalVariation[] = [];
+  
+  periodAverages.forEach((currentAverage, periodKey) => {
+    const [year, periodPart] = periodKey.split('-');
+    const previousYear = String(parseInt(year) - 1);
+    const previousPeriodKey = `${previousYear}-${periodPart}`;
+    
+    if (periodAverages.has(previousPeriodKey)) {
+      const previousAverage = periodAverages.get(previousPeriodKey)!;
+      const variationRate = ((currentAverage - previousAverage) / previousAverage) * 100;
+      
+      // ±20%を超える変動を記録
+      if (Math.abs(variationRate) > 20) {
+        variations.push({
+          period: periodKey,
+          variationRate: variationRate
+        });
+      }
+    }
+  });
+
+  return variations;
 }

@@ -1,5 +1,27 @@
+// 作業記録の型定義
+export interface WorkRecord {
+  作業記録ID: string;
+  作業員ID: string;
+  作業日: Date;
+  作業開始時刻: Date;
+  作業終了時刻: Date | null;
+  作業時間: number | null;
+  プロジェクト名: string;
+  作業場所: string;
+  作業種別: string;
+  作業内容: string;
+  進捗状況: string;
+  備考: string | null;
+  承認状態: string;
+  承認者ID: string | null;
+  承認日時: Date | null;
+  作成日時: Date;
+  更新日時: Date;
+  作成者ID: string;
+}
+
 // 中断記録の型定義
-export interface BreakRecord {
+export interface InterruptionRecord {
   中断記録ID: string;
   作業記録ID: string;
   中断開始日時: Date;
@@ -35,193 +57,145 @@ export interface AnomalyDetectionLog {
   更新日時: Date;
 }
 
-/** 対応ルール: 工数データで異常値（24時間超過、負の値等）が検出された場合 → アラートを表示する */
-export function detectWorkTimeAnomaly(workDuration: number, threshold: number): boolean {
-  // 負の値または閾値を超える場合は異常値
-  return workDuration < 0 || workDuration > threshold;
+/** 対応ルール: 工数データが記録される際に異常値（24時間超過）が検出されたとき → 異常値アラートを表示し、データの確認を求める */
+export function detectOvertimeAnomaly(workDuration: number): boolean {
+  return workDuration > 24 * 60; // 24時間を分単位で計算（1440分）
 }
 
-/** 対応ルール: 待機時間が8時間を超える場合 → アラートを表示し承認者の確認を必須とする */
-export function detectBreakTimeAnomaly(breakDuration: number): boolean {
-  const BREAK_TIME_THRESHOLD = 8 * 60; // 8時間を分単位で表現
-  return breakDuration > BREAK_TIME_THRESHOLD;
+/** 対応ルール: 工数データが記録される際に異常値（負の値等）が検出されたとき → 異常値アラートを表示し、データの確認を求める */
+export function detectNegativeValue(value: number): boolean {
+  return value < 0;
 }
 
-/** 対応ルール: 頻繁な中断が発生している場合 → 異常値として検出する */
-export function detectFrequentBreaks(breakRecords: BreakRecord[]): boolean {
-  // 1日あたりの中断回数が5回以上の場合を頻繁な中断とする
-  const FREQUENT_BREAK_THRESHOLD = 5;
-  
-  // 日付別に中断回数をカウント
-  const breakCountByDate = new Map<string, number>();
-  
-  breakRecords.forEach(record => {
-    const dateKey = record.中断開始日時.toISOString().split('T')[0];
-    const currentCount = breakCountByDate.get(dateKey) || 0;
-    breakCountByDate.set(dateKey, currentCount + 1);
-  });
-  
-  // いずれかの日で閾値を超えている場合は異常
-  for (const count of breakCountByDate.values()) {
-    if (count >= FREQUENT_BREAK_THRESHOLD) {
-      return true;
-    }
+/** 対応ルール: 工数データに入力漏れや異常値が検出された状態で待機時間が8時間を超える場合 → アラートを表示し承認者の確認を必須とする */
+export function detectExcessiveInterruption(interruptionDuration: number): boolean {
+  return interruptionDuration > 8 * 60; // 8時間を分単位で計算（480分）
+}
+
+/** 対応ルール: 月末集計処理が実行される際に標準偏差の2倍を超える値 → 異常値として抽出し、必須項目の未入力を入力漏れとして一覧表示する */
+export function detectStatisticalAnomaly(value: number, mean: number, stdDev: number): boolean {
+  const threshold = 2 * stdDev;
+  return Math.abs(value - mean) > threshold;
+}
+
+/** 対応ルール: 作業効率分析が実行されたとき → 過去データとの比較により効率低下を検出し、閾値を下回る場合はアラート通知する */
+export function calculateAnomalyScore(record: WorkRecord, historicalData: WorkRecord[]): number {
+  if (!record.作業時間 || historicalData.length === 0) {
+    return 0;
   }
-  
-  return false;
-}
 
-/** 対応ルール: 標準偏差の2倍を超える値 → 異常値として抽出する */
-export function calculateAnomalyScore(value: number, mean: number, stdDev: number): number {
+  // 同じ作業種別の過去データをフィルタリング
+  const sameTypeRecords = historicalData.filter(
+    r => r.作業種別 === record.作業種別 && r.作業時間 !== null
+  );
+
+  if (sameTypeRecords.length === 0) {
+    return 0;
+  }
+
+  // 過去データの平均作業時間を計算
+  const totalTime = sameTypeRecords.reduce((sum, r) => sum + (r.作業時間 || 0), 0);
+  const meanTime = totalTime / sameTypeRecords.length;
+
+  // 標準偏差を計算
+  const variance = sameTypeRecords.reduce((sum, r) => {
+    const diff = (r.作業時間 || 0) - meanTime;
+    return sum + diff * diff;
+  }, 0) / sameTypeRecords.length;
+  const stdDev = Math.sqrt(variance);
+
+  // 異常スコアを計算（現在の作業時間が平均からどれだけ乖離しているか）
   if (stdDev === 0) {
-    return 0;
+    return record.作業時間 === meanTime ? 0 : 1;
   }
+
+  const zScore = Math.abs(record.作業時間 - meanTime) / stdDev;
   
-  // Z-scoreを計算（平均からの標準偏差倍数）
-  const zScore = Math.abs(value - mean) / stdDev;
-  return zScore;
+  // Z-scoreを0-1の範囲に正規化（3σを最大値とする）
+  return Math.min(zScore / 3, 1);
 }
 
-/** 対応ルール: 通常の1.5倍を超える工数 → 異常値として自動フラグを立てる */
-export function isEmergencyWorkTime(workDuration: number, normalThreshold: number): boolean {
-  const EMERGENCY_MULTIPLIER = 1.5;
-  return workDuration > normalThreshold * EMERGENCY_MULTIPLIER;
+/** 対応ルール: 工数データの異常値検出機能により作業時間が30分未満の場合 → 短時間作業として確認ダイアログを表示し、作業内容の詳細入力を促す */
+export function detectShortWorkAnomaly(workDuration: number): boolean {
+  return workDuration < 30; // 30分未満
 }
 
-/** 対応ルール: 工数データの整合性チェック → 作業開始時刻が終了時刻より後の場合は異常値として検出 */
-export function detectTimeSequenceAnomaly(startTime: Date, endTime: Date): boolean {
-  return startTime.getTime() >= endTime.getTime();
+/** 対応ルール: 工数データの整合性確認が実行される状態で作業時間が8時間を超過している場合 → 異常値として警告を表示し、確認ダイアログで作業員に再確認を求める */
+export function detectLongWorkAnomaly(workDuration: number): boolean {
+  return workDuration > 8 * 60; // 8時間を分単位で計算（480分）
 }
 
-/** 対応ルール: 短時間作業として確認が必要 → 作業時間が30分未満の場合 */
-export function detectShortWorkTime(workDuration: number): boolean {
-  const SHORT_WORK_THRESHOLD = 30; // 30分
-  return workDuration < SHORT_WORK_THRESHOLD && workDuration > 0;
+/** 対応ルール: 工数データの妥当性検証プロセスで作業開始時刻が終了時刻より後の場合 → 異常値として検出し、現場管理者に通知する */
+export function detectTimeSequenceAnomaly(startTime: Date, endTime: Date | null): boolean {
+  if (!endTime) {
+    return false; // 終了時刻がnullの場合（作業中）は異常ではない
+  }
+  return startTime.getTime() > endTime.getTime();
 }
 
-/** 対応ルール: 異常値の重要度レベルを判定 → 高、中、低で分類 */
-export function calculateAnomalySeverity(anomalyScore: number): string {
-  if (anomalyScore >= 3.0) {
-    return '高';
-  } else if (anomalyScore >= 2.0) {
-    return '中';
-  } else {
-    return '低';
+/** 対応ルール: 拠点間比較分析が実行されたとき → 拠点別生産性指標を算出し、標準偏差による異常値を検出する */
+export function detectProductivityAnomaly(
+  currentProductivity: number,
+  allProductivities: number[]
+): boolean {
+  if (allProductivities.length < 2) {
+    return false;
   }
+
+  const mean = allProductivities.reduce((sum, p) => sum + p, 0) / allProductivities.length;
+  const variance = allProductivities.reduce((sum, p) => {
+    const diff = p - mean;
+    return sum + diff * diff;
+  }, 0) / allProductivities.length;
+  const stdDev = Math.sqrt(variance);
+
+  return detectStatisticalAnomaly(currentProductivity, mean, stdDev);
 }
 
-/** 対応ルール: 前後3日間の平均値で異常値を補正 → データ補正処理 */
-export function calculateCorrectionValue(values: number[]): number {
-  if (values.length === 0) {
-    return 0;
-  }
-  
-  const sum = values.reduce((acc, val) => acc + val, 0);
-  return sum / values.length;
+/** 対応ルール: 緊急対応中に工数入力が行われたとき → 通常の1.5倍を超える工数は異常値として自動フラグを立て、管理者に確認を促す */
+export function detectEmergencyWorkAnomaly(
+  emergencyWorkDuration: number,
+  normalWorkDuration: number
+): boolean {
+  return emergencyWorkDuration > normalWorkDuration * 1.5;
 }
 
-/** 対応ルール: 平均±3σ超の値を異常値として除外 → 分析対象から除外 */
-export function isOutlier(value: number, mean: number, stdDev: number): boolean {
-  const OUTLIER_THRESHOLD = 3.0;
-  const zScore = Math.abs(value - mean) / stdDev;
-  return zScore > OUTLIER_THRESHOLD;
+/** 対応ルール: 効果測定分析が実行されたとき → 異常データを除外し、正常データのみで効果測定を実施する */
+export function filterAnomalousRecords(records: WorkRecord[]): WorkRecord[] {
+  return records.filter(record => {
+    if (!record.作業時間) {
+      return false;
+    }
+
+    // 基本的な異常値チェック
+    if (detectOvertimeAnomaly(record.作業時間)) {
+      return false;
+    }
+
+    if (detectNegativeValue(record.作業時間)) {
+      return false;
+    }
+
+    if (detectTimeSequenceAnomaly(record.作業開始時刻, record.作業終了時刻)) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
-/** 対応ルール: 重要な変動（前日比20%以上）を検出 → 即座に関係者に通知 */
-export function detectSignificantVariation(currentValue: number, previousValue: number): boolean {
-  if (previousValue === 0) {
-    return currentValue > 0;
+/** 対応ルール: 報告書に含まれる工数データで異常な乖離率（計画比±30%超）が検出されたとき → 該当データにアラートフラグを付与する */
+export function detectPlanDeviationAnomaly(actualHours: number, plannedHours: number): boolean {
+  if (plannedHours === 0) {
+    return actualHours > 0;
   }
-  
-  const VARIATION_THRESHOLD = 0.2; // 20%
-  const variationRate = Math.abs(currentValue - previousValue) / previousValue;
-  return variationRate >= VARIATION_THRESHOLD;
+
+  const deviationRate = Math.abs(actualHours - plannedHours) / plannedHours;
+  return deviationRate > 0.3; // 30%超
 }
 
-/** 対応ルール: 工数データの完全性チェック → 必須項目の未入力を検出 */
-export function validateRequiredFields(record: {
-  作業開始時刻?: Date;
-  作業終了時刻?: Date;
-  作業種別?: string;
-  作業員ID?: string;
-}): string[] {
-  const missingFields: string[] = [];
-  
-  if (!record.作業開始時刻) {
-    missingFields.push('作業開始時刻');
-  }
-  if (!record.作業終了時刻) {
-    missingFields.push('作業終了時刻');
-  }
-  if (!record.作業種別) {
-    missingFields.push('作業種別');
-  }
-  if (!record.作業員ID) {
-    missingFields.push('作業員ID');
-  }
-  
-  return missingFields;
-}
-
-/** 対応ルール: データ品質レベルの算出 → 異常値の割合に基づく品質評価 */
-export function calculateDataQualityScore(totalRecords: number, anomalousRecords: number): number {
-  if (totalRecords === 0) {
-    return 0;
-  }
-  
-  const qualityRate = (totalRecords - anomalousRecords) / totalRecords;
-  return Math.max(0, Math.min(100, qualityRate * 100));
-}
-
-/** 対応ルール: 異常値検出アルゴリズムの統合判定 → 複数条件での総合評価 */
-export function performComprehensiveAnomalyDetection(
-  workDuration: number,
-  breakDuration: number,
-  breakRecords: BreakRecord[],
-  historicalMean: number,
-  historicalStdDev: number
-): {
-  hasAnomaly: boolean;
-  anomalyTypes: string[];
-  severity: string;
-  score: number;
-} {
-  const anomalyTypes: string[] = [];
-  let maxScore = 0;
-  
-  // 作業時間異常チェック（24時間 = 1440分）
-  if (detectWorkTimeAnomaly(workDuration, 1440)) {
-    anomalyTypes.push('長時間作業');
-  }
-  
-  // 中断時間異常チェック
-  if (detectBreakTimeAnomaly(breakDuration)) {
-    anomalyTypes.push('長時間中断');
-  }
-  
-  // 頻繁中断チェック
-  if (detectFrequentBreaks(breakRecords)) {
-    anomalyTypes.push('頻繁中断');
-  }
-  
-  // 短時間作業チェック
-  if (detectShortWorkTime(workDuration)) {
-    anomalyTypes.push('短時間作業');
-  }
-  
-  // 統計的異常チェック
-  const anomalyScore = calculateAnomalyScore(workDuration, historicalMean, historicalStdDev);
-  if (anomalyScore > 2.0) {
-    anomalyTypes.push('統計的異常');
-    maxScore = Math.max(maxScore, anomalyScore);
-  }
-  
-  const severity = calculateAnomalySeverity(maxScore);
-  
-  return {
-    hasAnomaly: anomalyTypes.length > 0,
-    anomalyTypes,
-    severity,
-    score: maxScore
-  };
+/** 対応ルール: データ統合分析が実行されたとき → 欠損データは前月同期比で補完し、異常値（平均±3σ超）は分析対象から除外する */
+export function detectExtremeAnomaly(value: number, mean: number, stdDev: number): boolean {
+  const threshold = 3 * stdDev;
+  return Math.abs(value - mean) > threshold;
 }

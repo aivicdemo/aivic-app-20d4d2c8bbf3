@@ -36,288 +36,183 @@ export interface InterruptionRecord {
   更新日時: Date;
 }
 
-// 作業項目マスタの型定義
-export interface WorkItemMaster {
-  作業項目ID: string;
-  作業項目コード: string;
-  作業項目名: string;
-  作業項目説明: string | null;
-  カテゴリ: string | null;
-  標準工数時間: number | null;
-  表示順序: number;
-  有効フラグ: boolean;
-  作成日時: Date;
-  更新日時: Date;
-  作成者ID: string;
-  更新者ID: string;
-}
-
-// 異常値検出ログの型定義
-export interface AnomalyDetectionLog {
-  異常値検出ログID: string;
-  検出対象テーブル: string;
-  検出対象レコードID: string;
-  ユーザーID: string;
-  異常値種別: string;
-  検出項目: string;
-  検出値: string;
-  閾値: string;
-  重要度: string;
-  確認状況: string;
-  通知送信フラグ: boolean;
-  確認者ID: string | null;
-  確認日時: Date | null;
-  対応メモ: string | null;
-  検出日時: Date;
-  作成日時: Date;
-  更新日時: Date;
-}
-
 // 月次集計結果の型定義
 export interface MonthlyAggregation {
-  [workerId: string]: number;
-}
-
-// カテゴリ別集計結果の型定義
-export interface CategoryAggregation {
-  [category: string]: number;
-}
-
-// リアルタイムデータ集計結果の型定義
-export interface RealTimeAggregation {
   totalHours: number;
-  activeWorkers: number;
+  averageHours: number;
 }
 
-/** 対応ルール: 当月1日から月末日までの全工数データを対象として自動集計処理を実行する */
-export function aggregateMonthlyHours(workRecords: WorkRecord[]): MonthlyAggregation {
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth();
+// 中断理由別集計結果の型定義
+export interface InterruptionAggregation {
+  count: number;
+  totalDuration: number;
+}
+
+/** 対応ルール: 当月1日から月末日までの全工数データを対象として自動集計する → 当月の全工数データを集計し総時間と平均時間を算出する */
+export function aggregateMonthlyHours(records: WorkRecord[], targetMonth: string): MonthlyAggregation {
+  const targetDate = new Date(targetMonth);
+  const year = targetDate.getFullYear();
+  const month = targetDate.getMonth();
   
-  // 当月1日から月末日までの範囲を設定
-  const monthStart = new Date(currentYear, currentMonth, 1);
-  const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+  // 対象月の開始日と終了日を計算
+  const startOfMonth = new Date(year, month, 1);
+  const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
   
-  const aggregation: MonthlyAggregation = {};
-  
-  workRecords.forEach(record => {
+  // 対象月の作業記録をフィルタリング
+  const monthlyRecords = records.filter(record => {
     const workDate = new Date(record.作業日);
-    
-    // 当月のデータのみを対象とする
-    if (workDate >= monthStart && workDate <= monthEnd) {
-      // 作業時間が記録されている場合のみ集計
-      if (record.作業時間 !== null && record.作業時間 > 0) {
-        if (!aggregation[record.作業員ID]) {
-          aggregation[record.作業員ID] = 0;
-        }
-        aggregation[record.作業員ID] += record.作業時間;
-      }
+    return workDate >= startOfMonth && workDate <= endOfMonth && 
+           record.作業時間 !== null && record.作業時間 > 0;
+  });
+  
+  // 総工数時間を計算（分単位から時間単位に変換）
+  const totalMinutes = monthlyRecords.reduce((sum, record) => {
+    return sum + (record.作業時間 || 0);
+  }, 0);
+  
+  const totalHours = totalMinutes / 60;
+  const averageHours = monthlyRecords.length > 0 ? totalHours / monthlyRecords.length : 0;
+  
+  return {
+    totalHours: Math.round(totalHours * 100) / 100,
+    averageHours: Math.round(averageHours * 100) / 100
+  };
+}
+
+/** 対応ルール: 作業員別・作業種別・拠点別の工数合計値と平均値を算出する → カテゴリ別に工数データを集計し合計値を返す */
+export function aggregateByCategory(records: WorkRecord[], category: string): Record<string, number> {
+  const aggregation: Record<string, number> = {};
+  
+  records.forEach(record => {
+    if (record.作業時間 === null || record.作業時間 <= 0) {
+      return;
     }
+    
+    let categoryValue: string;
+    
+    // カテゴリに応じて集計キーを決定
+    switch (category) {
+      case '作業員':
+        categoryValue = record.作業員ID;
+        break;
+      case '作業種別':
+        categoryValue = record.作業種別;
+        break;
+      case '拠点':
+        categoryValue = record.作業場所;
+        break;
+      default:
+        categoryValue = 'その他';
+        break;
+    }
+    
+    // 分単位から時間単位に変換して集計
+    const hours = record.作業時間 / 60;
+    aggregation[categoryValue] = (aggregation[categoryValue] || 0) + hours;
+  });
+  
+  // 小数点以下2桁で丸める
+  Object.keys(aggregation).forEach(key => {
+    aggregation[key] = Math.round(aggregation[key] * 100) / 100;
   });
   
   return aggregation;
 }
 
-/** 対応ルール: 作業員別・作業種別・拠点別の工数合計値と平均値を算出する */
-export function aggregateByCategory(workRecords: WorkRecord[]): CategoryAggregation {
-  const categoryTotals: { [category: string]: { total: number; count: number } } = {};
-  
-  workRecords.forEach(record => {
-    // 作業時間が記録されている場合のみ集計
-    if (record.作業時間 !== null && record.作業時間 > 0) {
-      const category = record.作業種別;
-      
-      if (!categoryTotals[category]) {
-        categoryTotals[category] = { total: 0, count: 0 };
-      }
-      
-      categoryTotals[category].total += record.作業時間;
-      categoryTotals[category].count += 1;
-    }
-  });
-  
-  // 平均値を算出して返却
-  const result: CategoryAggregation = {};
-  Object.keys(categoryTotals).forEach(category => {
-    const data = categoryTotals[category];
-    result[category] = data.count > 0 ? data.total / data.count : 0;
-  });
-  
-  return result;
-}
-
-/** 対応ルール: 月別・四半期別の工数変動率を算出し、前年同期比±20%を超える変動を検出する */
-export function calculateSeasonalVariation(monthlyData: number[]): number[] {
-  if (monthlyData.length < 24) {
-    // 最低2年分のデータが必要
-    return monthlyData.map(() => 0);
+/** 対応ルール: 時間当たり作業量を算出して生産性指標を計算する → 実績工数とベースライン工数を比較して生産性指数を算出する */
+export function calculateProductivityIndex(records: WorkRecord[], baselineHours: number): number {
+  if (baselineHours <= 0) {
+    return 0;
   }
   
-  const variations: number[] = [];
-  const currentYearStart = monthlyData.length - 12;
+  // 完了した作業記録のみを対象とする
+  const completedRecords = records.filter(record => 
+    record.進捗状況 === '完了' && 
+    record.作業時間 !== null && 
+    record.作業時間 > 0
+  );
   
-  for (let i = 0; i < 12; i++) {
-    const currentMonthValue = monthlyData[currentYearStart + i];
-    const previousYearValue = monthlyData[currentYearStart + i - 12];
-    
-    if (previousYearValue > 0) {
-      const variation = ((currentMonthValue - previousYearValue) / previousYearValue) * 100;
-      
-      // ±20%を超える変動を異常値として検出
-      if (Math.abs(variation) > 20) {
-        variations.push(variation);
-      } else {
-        variations.push(0);
-      }
-    } else {
-      variations.push(0);
-    }
+  if (completedRecords.length === 0) {
+    return 0;
   }
   
-  return variations;
+  // 総実績工数を計算（分単位から時間単位に変換）
+  const totalActualHours = completedRecords.reduce((sum, record) => {
+    return sum + (record.作業時間 || 0);
+  }, 0) / 60;
+  
+  // 完了作業件数
+  const completedTaskCount = completedRecords.length;
+  
+  // 時間当たり作業完了件数を算出
+  const actualProductivity = totalActualHours > 0 ? completedTaskCount / totalActualHours : 0;
+  const baselineProductivity = 1 / baselineHours; // ベースライン時間当たりの作業完了件数
+  
+  // 生産性指数を算出（ベースラインを100とした指数）
+  const productivityIndex = baselineProductivity > 0 ? 
+    (actualProductivity / baselineProductivity) * 100 : 0;
+  
+  return Math.round(productivityIndex * 100) / 100;
 }
 
-/** 対応ルール: 当日の中断・待機時間を含む工数実績をリアルタイムで集計する */
-export function aggregateRealTimeData(workRecords: WorkRecord[]): RealTimeAggregation {
-  const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+/** 対応ルール: 中断理由別の発生頻度と平均時間を集計する → 中断理由区分ごとに発生回数と総中断時間を集計する */
+export function aggregateInterruptionsByReason(interruptions: InterruptionRecord[]): Record<string, InterruptionAggregation> {
+  const aggregation: Record<string, InterruptionAggregation> = {};
   
-  let totalHours = 0;
-  const activeWorkerIds = new Set<string>();
-  
-  workRecords.forEach(record => {
-    const workDate = new Date(record.作業日);
+  interruptions.forEach(interruption => {
+    const reason = interruption.中断理由区分;
+    const duration = interruption.中断時間 || 0;
     
-    // 当日のデータのみを対象とする
-    if (workDate >= todayStart && workDate <= todayEnd) {
-      // 作業中または完了した記録を対象
-      if (record.進捗状況 === '作業中' || record.進捗状況 === '完了') {
-        activeWorkerIds.add(record.作業員ID);
-        
-        // 作業時間が記録されている場合は合計に加算
-        if (record.作業時間 !== null && record.作業時間 > 0) {
-          totalHours += record.作業時間;
-        } else if (record.作業開始時刻 && record.進捗状況 === '作業中') {
-          // 作業中の場合は現在時刻までの経過時間を計算
-          const elapsedMinutes = Math.floor((today.getTime() - new Date(record.作業開始時刻).getTime()) / (1000 * 60));
-          if (elapsedMinutes > 0) {
-            totalHours += elapsedMinutes;
-          }
-        }
-      }
-    }
-  });
-  
-  return {
-    totalHours: Math.round(totalHours),
-    activeWorkers: activeWorkerIds.size
-  };
-}
-
-// 異常値検出関数
-export function detectAnomalies(workRecords: WorkRecord[]): AnomalyDetectionLog[] {
-  const anomalies: AnomalyDetectionLog[] = [];
-  
-  workRecords.forEach(record => {
-    // 24時間を超える作業時間の検出
-    if (record.作業時間 !== null && record.作業時間 > 1440) { // 1440分 = 24時間
-      anomalies.push({
-        異常値検出ログID: `anomaly_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        検出対象テーブル: '作業記録',
-        検出対象レコードID: record.作業記録ID,
-        ユーザーID: record.作業員ID,
-        異常値種別: '長時間作業',
-        検出項目: '作業時間',
-        検出値: record.作業時間.toString(),
-        閾値: '1440',
-        重要度: '高',
-        確認状況: '未確認',
-        通知送信フラグ: false,
-        確認者ID: null,
-        確認日時: null,
-        対応メモ: null,
-        検出日時: new Date(),
-        作成日時: new Date(),
-        更新日時: new Date()
-      });
+    // 中断時間が0以下の場合はスキップ
+    if (duration <= 0) {
+      return;
     }
     
-    // 作業開始時刻が終了時刻より後の場合の検出
-    if (record.作業開始時刻 && record.作業終了時刻) {
-      if (new Date(record.作業開始時刻) > new Date(record.作業終了時刻)) {
-        anomalies.push({
-          異常値検出ログID: `anomaly_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          検出対象テーブル: '作業記録',
-          検出対象レコードID: record.作業記録ID,
-          ユーザーID: record.作業員ID,
-          異常値種別: '時刻整合性エラー',
-          検出項目: '作業開始時刻',
-          検出値: record.作業開始時刻.toString(),
-          閾値: record.作業終了時刻.toString(),
-          重要度: '高',
-          確認状況: '未確認',
-          通知送信フラグ: false,
-          確認者ID: null,
-          確認日時: null,
-          対応メモ: null,
-          検出日時: new Date(),
-          作成日時: new Date(),
-          更新日時: new Date()
-        });
-      }
+    if (!aggregation[reason]) {
+      aggregation[reason] = {
+        count: 0,
+        totalDuration: 0
+      };
     }
+    
+    aggregation[reason].count += 1;
+    aggregation[reason].totalDuration += duration;
   });
   
-  return anomalies;
+  // 総中断時間を分単位から時間単位に変換
+  Object.keys(aggregation).forEach(reason => {
+    aggregation[reason].totalDuration = Math.round((aggregation[reason].totalDuration / 60) * 100) / 100;
+  });
+  
+  return aggregation;
 }
 
-// 進捗率と乖離率の計算
-export function calculateProgressAndDeviation(actualHours: number, plannedHours: number): { progressRate: number; deviationRate: number } {
+// 統計計算用のヘルパー関数
+export function calculateEfficiencyRate(actualHours: number, plannedHours: number): number {
   if (plannedHours <= 0) {
-    return { progressRate: 0, deviationRate: 0 };
+    return 0;
   }
-  
-  const progressRate = (actualHours / plannedHours) * 100;
-  const deviationRate = Math.abs(progressRate - 100);
-  
-  return {
-    progressRate: Math.round(progressRate * 100) / 100,
-    deviationRate: Math.round(deviationRate * 100) / 100
-  };
+  return Math.round((actualHours / plannedHours) * 10000) / 100;
 }
 
-// 作業効率分析
-export function analyzeWorkEfficiency(workRecords: WorkRecord[], standardHours: { [workType: string]: number }): { [workType: string]: number } {
-  const efficiencyMap: { [workType: string]: { totalActual: number; totalStandard: number; count: number } } = {};
+export function calculateDeviationRate(actualValue: number, plannedValue: number): number {
+  if (plannedValue <= 0) {
+    return 0;
+  }
+  const deviation = ((actualValue - plannedValue) / plannedValue) * 100;
+  return Math.round(deviation * 100) / 100;
+}
+
+export function detectAnomalousValues(values: number[], threshold: number = 2): number[] {
+  if (values.length === 0) {
+    return [];
+  }
   
-  workRecords.forEach(record => {
-    if (record.作業時間 !== null && record.作業時間 > 0) {
-      const workType = record.作業種別;
-      const standardTime = standardHours[workType] || 0;
-      
-      if (standardTime > 0) {
-        if (!efficiencyMap[workType]) {
-          efficiencyMap[workType] = { totalActual: 0, totalStandard: 0, count: 0 };
-        }
-        
-        efficiencyMap[workType].totalActual += record.作業時間;
-        efficiencyMap[workType].totalStandard += standardTime;
-        efficiencyMap[workType].count += 1;
-      }
-    }
-  });
+  const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+  const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+  const standardDeviation = Math.sqrt(variance);
   
-  const result: { [workType: string]: number } = {};
-  Object.keys(efficiencyMap).forEach(workType => {
-    const data = efficiencyMap[workType];
-    if (data.totalActual > 0) {
-      result[workType] = (data.totalStandard / data.totalActual) * 100;
-    } else {
-      result[workType] = 0;
-    }
-  });
-  
-  return result;
+  return values.filter(value => 
+    Math.abs(value - mean) > threshold * standardDeviation
+  );
 }
