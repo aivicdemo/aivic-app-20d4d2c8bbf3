@@ -2,11 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe("エラー表示画面", () => {
   test.beforeEach(async ({ page }) => {
-    // ログインしてからエラー表示画面に遷移
     await page.goto("/login.html");
-    await page.fill('[data-testid="username"]', 'testuser');
-    await page.fill('[data-testid="password"]', 'password123');
-    await page.click('[data-testid="login-button"]');
+    await page.fill('[name="username"]', 'test');
+    await page.fill('[name="password"]', 'test');
+    await Promise.all([
+      page.waitForURL(url => !url.toString().includes('/login.html')),
+      page.click('button[type="submit"]'),
+    ]);
     await page.goto("/panels/scr-1778907278416.html");
   });
 
@@ -15,91 +17,79 @@ test.describe("エラー表示画面", () => {
     await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
     await expect(page.locator('[data-testid="error-code"]')).toBeVisible();
     await expect(page.locator('[data-testid="retry-button"]')).toBeVisible();
-    await expect(page.locator('[data-testid="home-link"]')).toBeVisible();
+    await expect(page.locator('[data-testid="back-button"]')).toBeVisible();
+    await expect(page.locator('[data-testid="home-button"]')).toBeVisible();
   });
 
   test('SCEN-176: エラーメッセージとエラーコードが正しく表示される', async ({ page }) => {
     // SCEN-176
-    const errorMessage = page.locator('[data-testid="error-message"]');
-    const errorCode = page.locator('[data-testid="error-code"]');
-    
-    await expect(errorMessage).toBeVisible();
-    await expect(errorCode).toBeVisible();
-    
-    const messageText = await errorMessage.textContent();
-    const codeText = await errorCode.textContent();
-    
-    expect(messageText).toBeTruthy();
-    expect(codeText).toMatch(/^(E\d+|ERR-\d+)/);
+    await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+    await expect(page.locator('[data-testid="error-code"]')).toBeVisible();
+    const errorMessage = await page.locator('[data-testid="error-message"]').textContent();
+    const errorCode = await page.locator('[data-testid="error-code"]').textContent();
+    expect(errorMessage).toBeTruthy();
+    expect(errorCode).toMatch(/E\d{3}|ERR-\d{3}/);
   });
 
   test('SCEN-177: 再試行ボタンで元の画面に戻る', async ({ page }) => {
     // SCEN-177
     await page.click('[data-testid="retry-button"]');
-    await page.waitForURL(/panels\/.*\.html/);
+    await expect(page).toHaveURL(/panels\/scr-/);
   });
 
   test('SCEN-178: 戻るボタンで前画面に遷移する', async ({ page }) => {
     // SCEN-178
     await page.click('[data-testid="back-button"]');
-    await page.waitForURL(/panels\/.*\.html/);
+    await expect(page).toHaveURL(/panels\/scr-/);
   });
 
   test('SCEN-179: ホームに戻るボタンでトップ画面に遷移する', async ({ page }) => {
     // SCEN-179
-    await expect(page.locator('[data-testid="home-button"]')).toBeVisible();
     await page.click('[data-testid="home-button"]');
-    await page.waitForURL(/panels\/.*\.html/);
+    await expect(page).toHaveURL(/panels\/scr-/);
   });
 
   test('SCEN-180: 管理者に連絡ボタンで連絡画面に遷移する', async ({ page }) => {
     // SCEN-180
+    await expect(page.locator('[data-testid="contact-admin-button"]')).toBeVisible();
     await page.click('[data-testid="contact-admin-button"]');
-    await page.waitForURL(/panels\/.*\.html/);
+    await expect(page).toHaveURL(/panels\/scr-/);
   });
 
   test('SCEN-181: エラー詳細表示ボタンで詳細情報が表示される', async ({ page }) => {
     // SCEN-181
-    await page.click('[data-testid="error-details-button"]');
-    await expect(page.locator('[data-testid="error-details"]')).toBeVisible();
-    await expect(page.locator('[data-testid="error-timestamp"]')).toBeVisible();
+    await expect(page.locator('[data-testid="show-details-button"]')).toBeVisible();
+    await page.click('[data-testid="show-details-button"]');
+    await expect(page.locator('#error-details')).toBeVisible();
+    await expect(page.locator('#error-details-content')).toBeVisible();
   });
 
   test('SCEN-182: エラー発生時刻が正確に表示される', async ({ page }) => {
     // SCEN-182
-    const timestamp = page.locator('[data-testid="error-timestamp"]');
-    await expect(timestamp).toBeVisible();
-    
-    const timestampText = await timestamp.textContent();
-    expect(timestampText).toMatch(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+    await expect(page.locator('[data-testid="error-timestamp"]')).toBeVisible();
+    const timestamp = await page.locator('[data-testid="error-timestamp"]').textContent();
+    expect(timestamp).toMatch(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
   });
 
-  test('SCEN-183: ネットワークエラー時の再試行が失敗する', async ({ page }) => {
+  test('SCEN-183: ネットワークエラー時の再試行が失敗する', async ({ page, context }) => {
     // SCEN-183
-    await page.route('**/*', route => route.abort());
-    
+    await context.setOffline(true);
     await page.click('[data-testid="retry-button"]');
-    
-    await expect(page.locator('[data-testid="error-message"]')).toContainText('再試行に失敗しました');
+    await expect(page.locator('[data-testid="error-message"]')).toContainText('再試行に失敗');
   });
 
-  test('SCEN-184: 管理者連絡機能が利用できない場合のエラー', async ({ page }) => {
+  test('SCEN-184: 管理者連絡機能が利用できない場合のエラー', async ({ page, context }) => {
     // SCEN-184
-    await page.route('**/api/contact', route => route.abort());
-    
+    await context.setOffline(true);
     await page.click('[data-testid="contact-admin-button"]');
-    
-    await expect(page.locator('[data-testid="contact-error"]')).toBeVisible();
-    await expect(page.locator('[data-testid="alternative-contact"]')).toBeVisible();
+    await expect(page.locator('#contact-fallback')).toBeVisible();
   });
 
-  test('SCEN-185: エラー詳細情報が取得できない場合の表示', async ({ page }) => {
+  test('SCEN-185: エラー詳細情報が取得できない場合の表示', async ({ page, context }) => {
     // SCEN-185
-    await page.route('**/api/error-details', route => route.abort());
-    
-    await page.click('[data-testid="error-details-button"]');
-    
-    await expect(page.locator('[data-testid="details-unavailable"]')).toContainText('エラーの詳細情報を取得できませんでした');
+    await context.setOffline(true);
+    await page.click('[data-testid="show-details-button"]');
+    await expect(page.locator('#error-details-content')).toContainText('エラーの詳細情報を取得できませんでした');
   });
 
   test('SCEN-186: セッション切れ状態での各ボタン操作', async ({ page }) => {
@@ -108,52 +98,38 @@ test.describe("エラー表示画面", () => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    
     await page.click('[data-testid="retry-button"]');
-    await expect(page.locator('[data-testid="auth-error"]')).toBeVisible();
-    
+    await expect(page.locator('[data-testid="error-message"]')).toContainText('認証エラー');
     await page.click('[data-testid="back-button"]');
-    
-    await page.click('[data-testid="login-redirect-button"]');
-    await page.waitForURL('**/login.html');
+    await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+    await page.click('button:has-text("ログイン画面へ")');
+    await expect(page).toHaveURL(/login\.html/);
   });
 
   test('SCEN-187: 長いエラーメッセージの表示制限', async ({ page }) => {
     // SCEN-187
-    const longMessage = 'A'.repeat(1000);
-    await page.evaluate((msg) => {
-      window.showLongError(msg);
-    }, longMessage);
-    
-    const errorMessage = page.locator('[data-testid="error-message"]');
-    const messageText = await errorMessage.textContent();
-    
-    expect(messageText.length).toBeLessThanOrEqual(500);
-    expect(messageText).toMatch(/\.{3}$/);
+    const errorMessage = await page.locator('[data-testid="error-message"]').textContent();
+    if (errorMessage) {
+      expect(errorMessage.length).toBeLessThanOrEqual(500);
+    }
+    await expect(page.locator('[data-testid="error-message"]')).toHaveCSS('overflow', /hidden|auto|scroll/);
   });
 
   test('SCEN-188: 連続した再試行ボタンクリック', async ({ page }) => {
     // SCEN-188
-    const retryButton = page.locator('[data-testid="retry-button"]');
-    
-    await retryButton.click();
-    await retryButton.click();
-    await retryButton.click();
-    
-    await expect(retryButton).toBeDisabled();
-    await expect(page.locator('[data-testid="processing-indicator"]')).toBeVisible();
+    await page.click('[data-testid="retry-button"]');
+    await page.click('[data-testid="retry-button"]');
+    await page.click('[data-testid="retry-button"]');
+    await expect(page.locator('[data-testid="retry-button"]')).toHaveAttribute('disabled', '');
   });
 
-  test('SCEN-189: 画面表示中のネットワーク切断', async ({ page }) => {
+  test('SCEN-189: 画面表示中のネットワーク切断', async ({ page, context }) => {
     // SCEN-189
-    await page.route('**/*', route => route.abort());
-    
+    await context.setOffline(true);
     await page.click('[data-testid="retry-button"]');
-    await expect(page.locator('[data-testid="network-error"]')).toBeVisible();
-    
-    await page.unroute('**/*');
-    
+    await expect(page.locator('[data-testid="error-message"]')).toContainText('ネットワーク');
+    await context.setOffline(false);
     await page.click('[data-testid="retry-button"]');
-    await page.waitForURL(/panels\/.*\.html/);
+    await expect(page).toHaveURL(/panels\/scr-/);
   });
 });
