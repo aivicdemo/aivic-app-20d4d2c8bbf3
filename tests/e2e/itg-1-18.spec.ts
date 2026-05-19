@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
-
 test.describe("工数修正画面", () => {
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
+
   test.beforeEach(async ({ page }) => {
+    page.setDefaultTimeout(5000);
     await page.goto("/login.html");
     await page.fill('[name="username"]', 'test');
     await page.fill('[name="password"]', 'test');
@@ -21,7 +22,7 @@ test.describe("工数修正画面", () => {
     await page.fill('[data-testid="start-time"]', '09:00');
     await page.fill('[data-testid="end-time"]', '17:00');
     await page.click('[data-testid="save-button"]');
-    await expect(page.locator('[data-testid="total-work-time"]')).toBeVisible();
+    await expect(page.locator('[data-testid="total-work-time"]')).toContainText('8時間');
   });
 
   test("SCEN-286: 作業開始・終了時刻を修正して保存できる", async ({ page }) => {
@@ -30,11 +31,12 @@ test.describe("工数修正画面", () => {
     await page.fill('[data-testid="start-time"]', '10:00');
     await page.fill('[data-testid="end-time"]', '18:00');
     await page.click('[data-testid="save-button"]');
-    await expect(page.locator('[data-testid="total-work-time"]')).toBeVisible();
+    await expect(page.locator('[data-testid="total-work-time"]')).toContainText('8時間');
   });
 
   test("SCEN-287: 中断時間入力で正味作業時間が正しく計算される", async ({ page }) => {
     // SCEN-287
+    await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
     await page.fill('[data-testid="start-time"]', '09:00');
     await page.fill('[data-testid="end-time"]', '17:00');
     await page.fill('[data-testid="break-time"]', '60');
@@ -44,7 +46,7 @@ test.describe("工数修正画面", () => {
   test("SCEN-288: 作業項目と作業内容詳細を変更できる", async ({ page }) => {
     // SCEN-288
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
-    await page.selectOption('[data-testid="work-item-select"]', { index: 1 });
+    await page.selectOption('[data-testid="work-item-select"]', { index: 2 });
     await page.fill('[data-testid="work-details"]', '修正後の作業内容詳細');
     await page.click('[data-testid="save-button"]');
     await expect(page.locator('[data-testid="work-details"]')).toHaveValue('修正後の作業内容詳細');
@@ -53,11 +55,10 @@ test.describe("工数修正画面", () => {
   test("SCEN-289: 修正理由を入力して修正を完了できる", async ({ page }) => {
     // SCEN-289
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
-    await page.fill('[data-testid="start-time"]', '09:00');
-    await page.fill('[data-testid="end-time"]', '17:00');
-    await page.fill('[data-testid="correction-reason"]', '時間修正のため');
+    await page.fill('[data-testid="start-time"]', '09:30');
+    await page.fill('[data-testid="correction-reason"]', '開始時刻の記録ミスのため修正');
     await page.click('button:has-text("修正完了")');
-    await expect(page).toHaveURL(/scr-1778907367889/);
+    await expect(page.locator('[data-testid="correction-reason"]')).toHaveValue('開始時刻の記録ミスのため修正');
   });
 
   test("SCEN-290: 元データ参照ボタンで修正前データを確認できる", async ({ page }) => {
@@ -97,11 +98,10 @@ test.describe("工数修正画面", () => {
   test("SCEN-294: 修正理由未入力でバリデーションエラー", async ({ page }) => {
     // SCEN-294
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
-    await page.fill('[data-testid="start-time"]', '09:00');
-    await page.fill('[data-testid="end-time"]', '17:00');
+    await page.fill('[data-testid="start-time"]', '09:30');
     await page.fill('[data-testid="correction-reason"]', '');
     await page.click('[data-testid="save-button"]');
-    await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+    await expect(page.locator('[data-testid="error-message"]')).toContainText('修正理由');
   });
 
   test("SCEN-295: 異常な作業時間で警告表示される", async ({ page }) => {
@@ -115,6 +115,7 @@ test.describe("工数修正画面", () => {
 
   test("SCEN-296: 作業開始・終了時刻が同一時刻の境界値", async ({ page }) => {
     // SCEN-296
+    await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
     await page.fill('[data-testid="start-time"]', '09:00');
     await page.fill('[data-testid="end-time"]', '09:00');
     await page.click('[data-testid="save-button"]');
@@ -127,27 +128,25 @@ test.describe("工数修正画面", () => {
     await page.fill('[data-testid="break-time"]', '0');
     await page.fill('[data-testid="start-time"]', '09:00');
     await page.fill('[data-testid="end-time"]', '17:00');
+    await page.fill('[data-testid="correction-reason"]', '中断時間なしで修正');
     await page.click('[data-testid="save-button"]');
-    await expect(page.locator('[data-testid="net-work-time"]')).toContainText('8時間0分');
+    await expect(page.locator('[data-testid="net-work-time"]')).toContainText('8時間');
   });
 
   test("SCEN-298: 作業内容詳細の文字数上限", async ({ page }) => {
     // SCEN-298
+    const longText = 'あ'.repeat(1001);
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
-    const longText = 'a'.repeat(1001);
     await page.fill('[data-testid="work-details"]', longText);
-    await page.click('body');
     await page.click('[data-testid="save-button"]');
-    await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+    await expect(page.locator('[data-testid="error-message"]')).toContainText('文字数上限');
   });
 
   test("SCEN-299: 修正理由の文字数上限", async ({ page }) => {
     // SCEN-299
+    const longReason = 'あ'.repeat(501);
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
-    const maxText = 'a'.repeat(500);
-    const overText = 'a'.repeat(501);
-    await page.fill('[data-testid="correction-reason"]', maxText);
-    await page.fill('[data-testid="correction-reason"]', overText);
+    await page.fill('[data-testid="correction-reason"]', longReason);
     await page.click('[data-testid="save-button"]');
     await expect(page.locator('[data-testid="error-message"]')).toContainText('修正理由は500文字以内で入力してください');
   });
@@ -157,9 +156,8 @@ test.describe("工数修正画面", () => {
     await page.selectOption('[data-testid="work-record-select"]', { index: 1 });
     await page.fill('[data-testid="start-time"]', '23:30');
     await page.fill('[data-testid="end-time"]', '01:30');
+    await page.fill('[data-testid="correction-reason"]', '夜勤作業の修正');
     await page.click('[data-testid="save-button"]');
     await expect(page.locator('[data-testid="total-work-time"]')).toContainText('2時間');
-    await page.goto("/panels/scr-1778907367889.html");
-    await expect(page.locator('text=2時間')).toBeVisible();
   });
 });

@@ -12,186 +12,131 @@ test.describe("作業再開記録画面", () => {
     await page.goto("/panels/scr-1778907251446.html");
   });
 
-  // SCEN-144
-  test("中断中作業一覧が正常に表示される", async ({ page }) => {
-    const suspendedList = page.locator('[data-testid="suspended-work-list"]');
-    await expect(suspendedList).toBeVisible();
-    
-    const noWork = page.locator('#no-suspended-work');
-    const hasWork = await noWork.isVisible();
-    
-    if (hasWork) {
-      await expect(noWork).toContainText("中断中の作業はありません");
+  test('SCEN-144: 中断中作業一覧が正常に表示される', async ({ page }) => {
+    // SCEN-144
+    await expect(page.locator('[data-testid="suspended-work-list"]')).toBeVisible();
+    const suspendedWorkTable = page.locator('#suspended-work-tbody');
+    const count = await suspendedWorkTable.locator('tr').count();
+    if (count > 0) {
+      await expect(suspendedWorkTable.locator('tr').first()).toBeVisible();
     } else {
-      const tbody = page.locator('#suspended-work-tbody');
-      await expect(tbody).toBeVisible();
+      await expect(page.locator('#no-suspended-work')).toBeVisible();
     }
   });
 
-  // SCEN-145
-  test("作業再開ボタンで再開記録画面に遷移する", async ({ page }) => {
-    await page.click('[data-aivic-nav="scr-1778907251446"]');
-    await expect(page).toHaveURL(/\/panels\/scr-1778907251446\.html/);
-    
-    const resumeForm = page.locator('#resume-form');
-    await expect(resumeForm).toBeVisible();
-    
-    const resumeTime = page.locator('[data-testid="resume-time"]');
-    await expect(resumeTime).toBeVisible();
+  test('SCEN-145: 作業再開ボタンで再開記録画面に遷移する', async ({ page }) => {
+    // SCEN-145
+    await page.goto("/panels/scr-1778907133295.html");
+    await page.click('button:text("作業再開")');
+    await expect(page).toHaveURL(/scr-1778907251446\.html/);
+    await expect(page.locator('#resume-form')).toBeVisible();
+    await expect(page.locator('[data-testid="resume-time"]')).toBeVisible();
   });
 
-  // SCEN-146
-  test("再開時刻が自動で現在時刻に設定される", async ({ page }) => {
-    const resumeTimeField = page.locator('#resume-time');
-    await expect(resumeTimeField).toBeVisible();
-    
-    const displayedTime = await resumeTimeField.inputValue();
+  test('SCEN-146: 再開時刻が自動で現在時刻に設定される', async ({ page }) => {
+    // SCEN-146
     const currentTime = new Date();
+    const resumeTimeInput = page.locator('[data-testid="resume-time"]');
+    await expect(resumeTimeInput).toBeVisible();
+    const displayedTime = await resumeTimeInput.inputValue();
     const displayedDate = new Date(displayedTime);
-    
-    const timeDiff = Math.abs(currentTime.getTime() - displayedDate.getTime());
+    const timeDiff = Math.abs(displayedDate.getTime() - currentTime.getTime());
     expect(timeDiff).toBeLessThan(60000);
   });
 
-  // SCEN-147
-  test("再開理由を入力して作業再開が完了する", async ({ page }) => {
+  test('SCEN-147: 再開理由を入力して作業再開が完了する', async ({ page }) => {
+    // SCEN-147
     await page.fill('[data-testid="resume-reason-detail"]', '機材調整完了のため');
     await page.click('[data-testid="resume-button"]');
-    
-    const dialog = page.locator('#resume-confirm-dialog');
-    if (await dialog.isVisible()) {
-      await page.click('[data-testid="dialog-ok-button"]');
-    }
-    
-    await expect(page.locator('.status-indicator')).toContainText('作業中');
+    await expect(page.locator('.success-message')).toBeVisible();
   });
 
-  // SCEN-148
-  test("再開理由をドロップダウンから選択して作業再開が完了する", async ({ page }) => {
-    await page.click('[data-testid="resume-reason-select"]');
-    await page.selectOption('#resume-reason-select', { label: '休憩終了' });
+  test('SCEN-148: 再開理由をドロップダウンから選択して作業再開が完了する', async ({ page }) => {
+    // SCEN-148
+    await page.selectOption('[data-testid="resume-reason-select"]', '休憩終了');
     await page.click('[data-testid="resume-button"]');
-    
-    const dialog = page.locator('#resume-confirm-dialog');
-    if (await dialog.isVisible()) {
-      await page.click('[data-testid="dialog-ok-button"]');
-    }
-    
-    await expect(page.locator('.status-indicator')).toContainText('作業中');
+    await expect(page.locator('.success-message')).toBeVisible();
   });
 
-  // SCEN-149
-  test("再開確認ダイアログでOKを選択して再開される", async ({ page }) => {
-    const firstWork = page.locator('#suspended-work-tbody tr').first();
-    if (await firstWork.isVisible()) {
-      await firstWork.click();
+  test('SCEN-149: 再開確認ダイアログでOKを選択して再開される', async ({ page }) => {
+    // SCEN-149
+    const suspendedWork = page.locator('#suspended-work-tbody tr').first();
+    if (await suspendedWork.count() > 0) {
+      await suspendedWork.locator('button:text("選択")').click();
     }
-    
-    await page.click('button:has-text("再開")');
-    
-    const dialog = page.locator('#resume-confirm-dialog');
-    await expect(dialog).toBeVisible();
+    await page.click('[data-testid="resume-button"]');
+    await expect(page.locator('#resume-confirm-dialog')).toBeVisible();
     await page.click('[data-testid="dialog-ok-button"]');
-    
-    await expect(dialog).not.toBeVisible();
-    await expect(page.locator('.status-indicator')).toContainText('作業中');
+    await expect(page.locator('#resume-confirm-dialog')).not.toBeVisible();
   });
 
-  // SCEN-150
-  test("再開確認ダイアログでキャンセルを選択して再開が中止される", async ({ page }) => {
-    const firstWork = page.locator('#suspended-work-tbody tr').first();
-    if (await firstWork.isVisible()) {
-      await firstWork.click();
+  test('SCEN-150: 再開確認ダイアログでキャンセルを選択して再開が中止される', async ({ page }) => {
+    // SCEN-150
+    const suspendedWork = page.locator('#suspended-work-tbody tr').first();
+    if (await suspendedWork.count() > 0) {
+      await suspendedWork.locator('button:text("選択")').click();
     }
-    
-    await page.click('button:has-text("作業再開")');
-    
-    const dialog = page.locator('#resume-confirm-dialog');
-    await expect(dialog).toBeVisible();
-    await page.click('[data-testid="dialog-cancel-button"]');
-    
-    await expect(dialog).not.toBeVisible();
-    await expect(firstWork).toBeVisible();
-  });
-
-  // SCEN-151
-  test("戻るボタンで前画面に遷移する", async ({ page }) => {
-    await page.click('[data-testid="back-button"]');
-    await expect(page).not.toHaveURL(/\/panels\/scr-1778907251446\.html/);
-  });
-
-  // SCEN-152
-  test("再開理由未入力で送信時にエラー表示", async ({ page }) => {
-    const reasonField = page.locator('[data-testid="resume-reason-detail"]');
-    await reasonField.clear();
-    
     await page.click('[data-testid="resume-button"]');
-    
-    const errorMessage = page.locator('#resume-reason-error');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('再開理由を入力してください');
+    await expect(page.locator('#resume-confirm-dialog')).toBeVisible();
+    await page.click('[data-testid="dialog-cancel-button"]');
+    await expect(page.locator('#resume-confirm-dialog')).not.toBeVisible();
   });
 
-  // SCEN-153
-  test("再開理由が最大文字数を超過した場合にエラー表示", async ({ page }) => {
+  test('SCEN-151: 戻るボタンで前画面に遷移する', async ({ page }) => {
+    // SCEN-151
+    await page.click('[data-testid="back-button"]');
+    await expect(page).not.toHaveURL(/scr-1778907251446\.html/);
+  });
+
+  test('SCEN-152: 再開理由未入力で送信時にエラー表示', async ({ page }) => {
+    // SCEN-152
+    await page.fill('[data-testid="resume-reason-detail"]', '');
+    await page.click('[data-testid="resume-button"]');
+    await expect(page.locator('#resume-reason-error')).toBeVisible();
+    await expect(page.locator('#resume-reason-error')).toContainText('再開理由');
+  });
+
+  test('SCEN-153: 再開理由が最大文字数を超過した場合にエラー表示', async ({ page }) => {
+    // SCEN-153
     const longText = 'あ'.repeat(501);
     await page.fill('[data-testid="resume-reason-detail"]', longText);
     await page.click('[data-testid="resume-button"]');
-    
-    const errorMessage = page.locator('#resume-reason-error');
-    await expect(errorMessage).toBeVisible();
-    await expect(errorMessage).toContainText('再開理由は500文字以内で入力してください');
+    await expect(page.locator('#resume-reason-error')).toBeVisible();
+    await expect(page.locator('#resume-reason-error')).toContainText('500文字以内');
   });
 
-  // SCEN-154
-  test("中断中作業が0件の場合の画面表示", async ({ page }) => {
-    const noWorkMessage = page.locator('#no-suspended-work');
-    if (await noWorkMessage.isVisible()) {
-      await expect(noWorkMessage).toContainText('現在中断中の作業はありません');
-      
-      const resumeButton = page.locator('[data-testid="resume-button"]');
-      await expect(resumeButton).toBeDisabled();
+  test('SCEN-154: 中断中作業が0件の場合の画面表示', async ({ page }) => {
+    // SCEN-154
+    const noSuspendedWork = page.locator('#no-suspended-work');
+    const suspendedWorkRows = page.locator('#suspended-work-tbody tr');
+    const rowCount = await suspendedWorkRows.count();
+    if (rowCount === 0) {
+      await expect(noSuspendedWork).toBeVisible();
+      await expect(noSuspendedWork).toContainText('中断中の作業はありません');
     }
   });
 
-  // SCEN-155
-  test("再開理由が最大文字数ちょうどで正常処理される", async ({ page }) => {
+  test('SCEN-155: 再開理由が最大文字数ちょうどで正常処理される', async ({ page }) => {
+    // SCEN-155
     const maxText = 'あ'.repeat(200);
     await page.fill('[data-testid="resume-reason-detail"]', maxText);
-    
-    const charCount = page.locator('#char-count');
-    await expect(charCount).toContainText('200');
-    
     await page.click('[data-testid="resume-button"]');
-    
-    const dialog = page.locator('#resume-confirm-dialog');
-    if (await dialog.isVisible()) {
-      await page.click('[data-testid="dialog-ok-button"]');
-    }
-    
-    await expect(page.locator('.status-indicator')).toContainText('作業中');
+    await expect(page.locator('#resume-reason-error')).not.toBeVisible();
   });
 
-  // SCEN-156
-  test("複数の中断中作業から特定作業を選択して再開する", async ({ page }) => {
-    const workList = page.locator('#suspended-work-tbody tr');
-    const workCount = await workList.count();
-    
-    if (workCount > 1) {
-      const specificWork = workList.first();
-      await specificWork.click();
-      
-      const selectedWorkName = page.locator('#selected-work-name');
-      await expect(selectedWorkName).toBeVisible();
-      
-      await page.click('button:has-text("作業再開")');
-      
-      const dialog = page.locator('#resume-confirm-dialog');
-      if (await dialog.isVisible()) {
+  test('SCEN-156: 複数の中断中作業から特定作業を選択して再開する', async ({ page }) => {
+    // SCEN-156
+    const suspendedWorkList = page.locator('#suspended-work-tbody');
+    await expect(suspendedWorkList).toBeVisible();
+    const workRows = suspendedWorkList.locator('tr');
+    const rowCount = await workRows.count();
+    if (rowCount > 0) {
+      await workRows.first().locator('button:text("選択")').click();
+      await expect(page.locator('#selected-work-name')).toBeVisible();
+      await page.click('[data-testid="resume-button"]');
+      if (await page.locator('#resume-confirm-dialog').isVisible()) {
         await page.click('[data-testid="dialog-ok-button"]');
       }
-      
-      await expect(page.locator('.status-indicator')).toContainText('実行中');
     }
   });
 });

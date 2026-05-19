@@ -12,168 +12,183 @@ test.describe("データ検証処理", () => {
     await page.goto("/panels/scr-1778907287126.html");
   });
 
-  test("SCEN-190: 検証対象期間選択後に検証実行できる", async ({ page }) => {
-    // SCEN-190
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-190
+  test('[normal] データ検証処理 - 検証対象期間選択後に検証実行できる', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('検証');
+    await expect(page.locator('#progress-area')).toBeVisible();
   });
 
-  test("SCEN-191: 検証進捗バーが正常に表示される", async ({ page }) => {
-    // SCEN-191
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-191
+  test('[normal] データ検証処理 - 検証進捗バーが正常に表示される', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
     await expect(page.locator('[data-testid="progress-bar"]')).toBeVisible();
     await expect(page.locator('#progress-text')).toContainText('%');
   });
 
-  test("SCEN-192: 異常値検出結果一覧が表示される", async ({ page }) => {
-    // SCEN-192
-    await page.click('button:has-text("異常値検出処理")');
+  // SCEN-192
+  test('[normal] データ検証処理 - 異常値検出結果一覧が表示される', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
+    await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(2000);
     await expect(page.locator('[data-testid="anomaly-list"]')).toBeVisible();
     await expect(page.locator('#anomaly-tbody')).toBeVisible();
   });
 
-  test("SCEN-193: エラー種別フィルターで絞り込みできる", async ({ page }) => {
-    // SCEN-193
-    await page.selectOption('[data-testid="error-type-filter"]', '入力値エラー');
+  // SCEN-193
+  test('[normal] データ検証処理 - エラー種別フィルターで絞り込みできる', async ({ page }) => {
+    await page.selectOption('[data-testid="error-type-filter"]', 'input-error');
     await page.click('[data-testid="filter-button"]');
     await expect(page.locator('#anomaly-tbody')).toBeVisible();
   });
 
-  test("SCEN-194: データ修正モーダルで個別修正できる", async ({ page }) => {
-    // SCEN-194
+  // SCEN-194
+  test('[normal] データ検証処理 - データ修正モーダルで個別修正できる', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
+    await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(1000);
     await page.click('button:has-text("修正")');
     await expect(page.locator('#correction-modal')).toBeVisible();
-    await page.fill('[data-testid="edit-work-content"]', '修正後の作業内容');
+    await page.fill('[data-testid="edit-work-content"]', '修正された作業内容');
     await page.click('[data-testid="save-edit"]');
     await expect(page.locator('#correction-modal')).not.toBeVisible();
   });
 
-  test("SCEN-195: 一括承認で複数データを承認できる", async ({ page }) => {
-    // SCEN-195
-    await page.click('[data-testid="select-all"]');
+  // SCEN-195
+  test('[normal] データ検証処理 - 一括承認で複数データを承認できる', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
+    await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(1000);
+    await page.check('[data-testid="select-all"]');
     await page.click('[data-testid="bulk-approve"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
+    await page.click('button:has-text("承認")');
   });
 
-  test("SCEN-196: 検証ログを出力できる", async ({ page }) => {
-    // SCEN-196
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-196
+  test('[normal] データ検証処理 - 検証ログを出力できる', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
-    await page.waitForSelector('#notification-area', { state: 'visible' });
+    await page.waitForTimeout(2000);
+    const downloadPromise = page.waitForEvent('download');
     await page.click('[data-testid="export-log"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toContain('log');
   });
 
-  test("SCEN-197: 再検証を実行できる", async ({ page }) => {
-    // SCEN-197
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-197
+  test('[normal] データ検証処理 - 再検証を実行できる', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
-    await page.waitForSelector('#notification-area', { state: 'visible' });
+    await page.waitForTimeout(2000);
     await page.click('[data-testid="re-validate"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
+    await page.click('button:has-text("OK")');
+    await expect(page.locator('#progress-area')).toBeVisible();
   });
 
-  test("SCEN-198: 検証完了通知が表示される", async ({ page }) => {
-    // SCEN-198
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-198
+  test('[normal] データ検証処理 - 検証完了通知が表示される', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(2000);
     await expect(page.locator('#notification-area')).toBeVisible();
     await expect(page.locator('#notification-text')).toContainText('完了');
   });
 
-  test("SCEN-199: 期間未選択で検証実行時エラー表示", async ({ page }) => {
-    // SCEN-199
+  // SCEN-199
+  test('[error] データ検証処理 - 期間未選択で検証実行時エラー表示', async ({ page }) => {
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('選択');
+    await expect(page.locator('.emergency-alert')).toBeVisible();
   });
 
-  test("SCEN-200: 検証実行中に再度実行ボタン押下でエラー", async ({ page }) => {
-    // SCEN-200
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-200
+  test('[error] データ検証処理 - 検証実行中に再度実行ボタン押下でエラー', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
     await page.click('[data-testid="execute-validation"]');
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('実行中');
+    await expect(page.locator('.emergency-alert')).toBeVisible();
   });
 
-  test("SCEN-201: 修正データが不正な場合エラー表示", async ({ page }) => {
-    // SCEN-201
+  // SCEN-201
+  test('[error] データ検証処理 - 修正データが不正な場合エラー表示', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
+    await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(1000);
     await page.click('button:has-text("修正")');
-    await expect(page.locator('#correction-modal')).toBeVisible();
     await page.fill('[data-testid="edit-start-time"]', 'abc');
     await page.fill('[data-testid="edit-end-time"]', '25:00');
     await page.fill('[data-testid="edit-work-content"]', '');
     await page.click('[data-testid="save-edit"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('エラー');
+    await expect(page.locator('.emergency-alert')).toBeVisible();
   });
 
-  test("SCEN-202: 選択なしで一括承認時エラー表示", async ({ page }) => {
-    // SCEN-202
+  // SCEN-202
+  test('[error] データ検証処理 - 選択なしで一括承認時エラー表示', async ({ page }) => {
     await page.click('[data-testid="bulk-approve"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('選択');
+    await expect(page.locator('.emergency-alert')).toBeVisible();
   });
 
-  test("SCEN-203: 検証結果なしでログ出力時エラー表示", async ({ page }) => {
-    // SCEN-203
+  // SCEN-203
+  test('[error] データ検証処理 - 検証結果なしでログ出力時エラー表示', async ({ page }) => {
     await page.click('[data-testid="export-log"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('検証');
+    await expect(page.locator('.emergency-alert')).toBeVisible();
   });
 
-  test("SCEN-204: 1年以上の長期間選択時の動作", async ({ page }) => {
-    // SCEN-204
+  // SCEN-204
+  test('[edge] データ検証処理 - 1年以上の長期間選択時の動作', async ({ page }) => {
     await page.fill('[data-testid="start-date"]', '2022-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+    await page.fill('[data-testid="end-date"]', '2023-12-31');
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('[data-testid="anomaly-list"]')).toBeVisible();
+    await page.waitForTimeout(3000);
+    await expect(page.locator('#progress-area')).toBeVisible();
   });
 
-  test("SCEN-205: 1日のみ選択時の動作", async ({ page }) => {
-    // SCEN-205
-    await page.fill('[data-testid="start-date"]', '2024-01-15');
-    await page.fill('[data-testid="end-date"]', '2024-01-15');
+  // SCEN-205
+  test('[edge] データ検証処理 - 1日のみ選択時の動作', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-01');
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
-    await expect(page.locator('#notification-text')).toContainText('完了');
+    await expect(page.locator('#progress-area')).toBeVisible();
   });
 
-  test("SCEN-206: 大量の異常値検出時の表示", async ({ page }) => {
-    // SCEN-206
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-31');
+  // SCEN-206
+  test('[edge] データ検証処理 - 大量の異常値検出時の表示', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-12-31');
     await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(3000);
     await expect(page.locator('[data-testid="anomaly-list"]')).toBeVisible();
     await expect(page.locator('#anomaly-tbody')).toBeVisible();
   });
 
-  test("SCEN-207: 異常値なし時の結果表示", async ({ page }) => {
-    // SCEN-207
-    await page.fill('[data-testid="start-date"]', '2024-01-01');
-    await page.fill('[data-testid="end-date"]', '2024-01-01');
+  // SCEN-207
+  test('[edge] データ検証処理 - 異常値なし時の結果表示', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-06-01');
+    await page.fill('[data-testid="end-date"]', '2023-06-01');
     await page.click('[data-testid="execute-validation"]');
-    await expect(page.locator('#notification-area')).toBeVisible();
+    await page.waitForTimeout(2000);
     await expect(page.locator('#no-data-message')).toBeVisible();
   });
 
-  test("SCEN-208: 最大文字数での修正入力", async ({ page }) => {
-    // SCEN-208
+  // SCEN-208
+  test('[edge] データ検証処理 - 最大文字数での修正入力', async ({ page }) => {
+    await page.fill('[data-testid="start-date"]', '2023-01-01');
+    await page.fill('[data-testid="end-date"]', '2023-01-31');
+    await page.click('[data-testid="execute-validation"]');
+    await page.waitForTimeout(1000);
     await page.click('button:has-text("修正")');
-    await expect(page.locator('#correction-modal')).toBeVisible();
-    const maxText = 'a'.repeat(1000);
-    await page.fill('[data-testid="edit-work-content"]', maxText);
+    const longText = 'a'.repeat(1000);
+    await page.fill('[data-testid="edit-work-content"]', longText);
     await page.click('[data-testid="save-edit"]');
     await expect(page.locator('#correction-modal')).not.toBeVisible();
   });

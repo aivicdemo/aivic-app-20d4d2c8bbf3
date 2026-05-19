@@ -1,229 +1,592 @@
+```typescript
 // SIG-PLAN:
 // - 関数名: startWorkRecord
-//   呼び出し例 (テスト中): startWorkRecord("USER001", "WORK001", currentTime), startWorkRecord("", "WORK001", currentTime), startWorkRecord("USER001", "作業A", "SITE001"), startWorkRecord("USER001", "作業A", "SITE001", true)
+//   呼び出し例 (テスト中): startWorkRecord("USER001", "作業A", "SITE001"), startWorkRecord("USER001", "作業A", "SITE001", true)
 //   await されてる?: いいえ
-//   アクセスされるプロパティ: r.startTime, r.status, r.workerId, r.workTypeId, r.error, r.success, r.oneTouch, r.gpsLocation, r.timestamp, r.autoAcquired, r.requiresPreviousWorkConfirmation, r.message
-//   → 結論: function startWorkRecord(workerId: string, workType: string, startTime?: Date | string, oneTouch?: boolean): WorkRecordResult
+//   アクセスされるプロパティ: r.status, r.startTime, r.workerId, r.oneTouch, r.gpsLocation, r.timestamp, r.autoAcquired, r.success, r.error
+//   → 結論: function startWorkRecord(workerId: string, workType: string, facilityId: string, oneTouch?: boolean): WorkRecordResult
+// - 関数名: checkActiveWorkRecord
+//   呼び出し例 (テスト中): checkActiveWorkRecord("USER001")
+//   await されてる?: いいえ
+//   アクセスされるプロパティ: r.isActive
+//   → 結論: function checkActiveWorkRecord(workerId: string): ActiveWorkRecordResult
 // - 関数名: endWorkRecord
-//   呼び出し例 (テスト中): endWorkRecord("USER001", endTime), endWorkRecord("USER001", "09:00"), endWorkRecord("USER002", null)
+//   呼び出し例 (テスト中): endWorkRecord("USER001", "09:00"), endWorkRecord("USER002", null)
 //   await されてる?: いいえ
-//   アクセスされるプロパティ: r.endTime, r.workHours, r.status, r.error, r.success
-//   → 結論: function endWorkRecord(workerId: string, startTime?: string | null): WorkRecordResult
-// - 関数名: recordInterruption
-//   呼び出し例 (テスト中): recordInterruption("USER001", "設備故障", interruptTime)
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.interruptTime, r.reason, r.workerId
-//   → 結論: function recordInterruption(workerId: string, reason: string, interruptTime: Date): InterruptionResult
-// - 関数名: validateRequiredFields
-//   呼び出し例 (テスト中): validateRequiredFields("", "", "")
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.isValid, r.missingFields
-//   → 結論: function validateRequiredFields(workerId: string, workType: string, facilityId: string): ValidationResult
-// - 関数名: detectAnomalousValues
-//   呼び出し例 (テスト中): detectAnomalousValues(startTime, endTime)
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.isAnomalous, r.reason
-//   → 結論: function detectAnomalousValues(startTime: Date, endTime: Date): AnomalousResult
+//   アクセスされるプロパティ: r.endTime, r.error, r.success
+//   → 結論: function endWorkRecord(workerId: string, startTime: string | null): EndWorkRecordResult
 // - 関数名: calculateWorkTime
 //   呼び出し例 (テスト中): calculateWorkTime("09:00", "17:00")
 //   await されてる?: いいえ
 //   戻り値: 数値
 //   → 結論: function calculateWorkTime(startTime: string, endTime: string): number
-// - 関数名: saveWorkData
-//   呼び出し例 (テスト中): saveWorkData(workData)
-//   await されてる?: はい
-//   アクセスされるプロパティ: r.savedLocally, r.syncPending
-//   → 結論: async function saveWorkData(workData: WorkData): Promise<SaveResult>
-// - 関数名: syncLocalData
-//   呼び出し例 (テスト中): syncLocalData()
-//   await されてる?: いいえ
-//   → 結論: function syncLocalData(): SyncResult
-// - 関数名: getGPSLocation
-//   呼び出し例 (テスト中): getGPSLocation(currentTime)
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.latitude, r.longitude, r.timestamp, r.accuracy
-//   → 結論: function getGPSLocation(currentTime: Date): GPSResult
-// - 関数名: updateWorkStatus
-//   呼び出し例 (テスト中): updateWorkStatus("USER001", "completed", endTime)
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.endTime, r.status, r.currentWorkCompleted
-//   → 結論: function updateWorkStatus(workerId: string, status: string, endTime: Date): StatusUpdateResult
-// - 関数名: calculateActualWorkHours
-//   呼び出し例 (テスト中): calculateActualWorkHours(startTime, endTime, interruptionTime)
-//   await されてる?: いいえ
-//   戻り値: 数値
-//   → 結論: function calculateActualWorkHours(startTime: Date, endTime: Date, interruptionTime: number): number
-// - 関数名: minimizeTapOperations
-//   呼び出し例 (テスト中): minimizeTapOperations("USER001", "start", currentTime)
-//   await されてる?: いいえ
-//   アクセスされるプロパティ: r.startTime, r.tapCount, r.status, r.duplicateDetected, r.error
-//   → 結論: function minimizeTapOperations(workerId: string, operation: string, currentTime: Date): TapOperationResult
-// - 関数名: showConfirmationDialog
-//   呼び出し例 (テスト中): showConfirmationDialog(message, options)
-//   await されてる?: いいえ
-//   → 結論: function showConfirmationDialog(message: string, options: any): DialogResult
 
 interface WorkRecordResult {
-  startTime?: string;
-  endTime?: string;
   status?: string;
+  startTime?: string;
   workerId?: string;
-  workTypeId?: string;
-  error?: string;
-  success?: boolean;
-  workHours?: number;
   oneTouch?: boolean;
   gpsLocation?: string;
   timestamp?: string;
   autoAcquired?: boolean;
-  requiresPreviousWorkConfirmation?: boolean;
-  message?: string;
+  success?: boolean;
+  error?: string;
 }
 
-interface InterruptionResult {
-  interruptTime: string;
-  reason: string;
-  workerId: string;
+interface ActiveWorkRecordResult {
+  isActive: boolean;
+}
+
+interface EndWorkRecordResult {
+  endTime?: string;
+  error?: string;
+  success?: boolean;
 }
 
 interface ValidationResult {
   isValid: boolean;
-  missingFields: string[];
+  missingFields?: string[];
 }
 
-interface AnomalousResult {
+interface AnomalousValueResult {
   isAnomalous: boolean;
   reason?: string;
+  value?: number;
+  threshold?: number;
 }
 
-interface WorkData {
-  workerId: string;
-  workHours?: number;
-  endTime?: string;
+interface InterruptionRecord {
+  interruptionId: string;
+  workRecordId: string;
+  startTime: string;
+  reason: string;
+  success: boolean;
 }
 
-interface SaveResult {
-  savedLocally: boolean;
-  syncPending: boolean;
-  success?: boolean;
+interface ProgressRateResult {
+  progressRate: number;
+  deviationRate: number;
+}
+
+interface EfficiencyAnalysisResult {
+  efficiency: number;
+  isAlert: boolean;
+  bottlenecks?: string[];
+}
+
+interface CloudSaveResult {
+  success: boolean;
+  error?: string;
+}
+
+interface LocalStorageResult {
+  saved: boolean;
 }
 
 interface SyncResult {
   synced: boolean;
-  count?: number;
+  recordCount: number;
 }
 
-interface GPSResult {
-  latitude: number;
-  longitude: number;
+interface DataIntegrityResult {
+  isValid: boolean;
+  errors?: string[];
+}
+
+interface DailyAggregationResult {
+  totalHours: number;
+  completedTasks: number;
+  missingRecords: string[];
+}
+
+interface PerformanceAnalysisResult {
+  progressRate: number;
+  deviationRate: number;
+  bottlenecks: string[];
+}
+
+interface PersonnelAllocationResult {
+  requiredPersonnel: number;
+  allocation: Array<{ workerId: string; taskId: string }>;
+}
+
+interface ProductivityIndicators {
+  efficiency: number;
+  productivity: number;
+  costRatio: number;
+}
+
+interface WeeklyReportResult {
+  progressByTask: Array<{ taskId: string; progressRate: number; deviationRate: number }>;
+  delayedTasks: string[];
+  summary: string;
+}
+
+interface DelayedTasksResult {
+  delayedTasks: Array<{ taskId: string; progressRate: number; priority: string }>;
+}
+
+interface ImprovementInstructionsResult {
+  instructions: Array<{ taskId: string; priority: number; action: string }>;
+}
+
+interface EmergencyReportResult {
+  reportId: string;
   timestamp: string;
-  accuracy: number;
+  severity: string;
+  notified: boolean;
 }
 
-interface StatusUpdateResult {
-  endTime: string;
-  status: string;
-  currentWorkCompleted: boolean;
+interface EmergencyImpactResult {
+  impactLevel: string;
+  affectedPersonnel: number;
+  delayHours: number;
 }
 
-interface TapOperationResult {
-  startTime?: string;
-  tapCount: number;
-  status?: string;
-  duplicateDetected?: boolean;
-  error?: string;
+interface GlobalPersonnelResult {
+  totalActive: number;
+  totalStandby: number;
+  availableForReallocation: number;
 }
 
-interface DialogResult {
-  confirmed: boolean;
-  value?: any;
+interface PersonnelReallocationResult {
+  reallocationPlan: Array<{ workerId: string; fromSite: string; toSite: string; travelTime: number }>;
+  totalCost: number;
 }
 
-// グローバル状態管理（純関数の制約内で状態を管理）
-const workRecordState = new Map<string, any>();
-const localStorageData: any[] = [];
+interface MonthlyAggregationResult {
+  totalRecords: number;
+  aggregatedHours: number;
+  anomaliesDetected: number;
+}
 
-export function startWorkRecord(workerId: string, workType: string, startTime?: Date | string, oneTouch?: boolean): WorkRecordResult {
-  if (!workerId) {
-    return { error: "作業員IDは必須です", success: false };
-  }
+interface AnomaliesAndGapsResult {
+  anomalies: Array<{ recordId: string; type: string; value: number; threshold: number }>;
+  gaps: Array<{ workerId: string; date: string; missingFields: string[] }>;
+}
 
-  const existingRecord = workRecordState.get(workerId);
-  if (existingRecord && existingRecord.status === "active") {
-    if (oneTouch && existingRecord.lastOperation === "start") {
-      return { duplicateDetected: true, error: "重複操作を検出しました" };
-    }
-    return { 
-      error: "作業記録が既にアクティブです", 
+interface DataCorrectionResult {
+  corrected: boolean;
+  correctionId: string;
+  originalValue: any;
+  newValue: any;
+}
+
+interface ApprovalResult {
+  approved: boolean;
+  approvalId: string;
+  approver: string;
+  timestamp: string;
+}
+
+interface MonthlyFinalizationResult {
+  finalized: boolean;
+  totalHours: number;
+  finalizedRecords: number;
+}
+
+interface DepartmentalReportResult {
+  departmentAnalysis: Array<{ department: string; totalHours: number; efficiency: number; costRatio: number }>;
+  monthlyComparison: { currentMonth: number; previousMonth: number; changeRate: number };
+}
+
+interface PerformanceDataResult {
+  collectedRecords: number;
+  dataQuality: number;
+  completeness: number;
+}
+
+interface SalesDataCrossRefResult {
+  laborCostRatio: number;
+  revenuePerHour: number;
+  profitability: number;
+}
+
+interface LocationProfitabilityResult {
+  locationAnalysis: Array<{ locationId: string; profitability: number; efficiency: number; costRatio: number }>;
+  ranking: string[];
+}
+
+interface InvestmentJustificationResult {
+  roi: number;
+  paybackPeriod: number;
+  annualSavings: number;
+  recommendation: string;
+}
+
+interface MultiLocationDataResult {
+  locations: Array<{ locationId: string; totalHours: number; efficiency: number }>;
+  aggregatedMetrics: { totalHours: number; averageEfficiency: number };
+}
+
+interface IntegratedAnalysisResult {
+  overallProductivity: number;
+  locationComparison: Array<{ locationId: string; productivityIndex: number }>;
+  trends: string[];
+}
+
+interface ProductivityGapsResult {
+  gaps: Array<{ locationId: string; gapPercentage: number; category: string }>;
+  improvementPriority: string[];
+}
+
+interface ImprovementPlanResult {
+  plan: Array<{ locationId: string; action: string; expectedROI: number; timeline: string }>;
+  totalInvestment: number;
+}
+
+interface SmallStartEffectsResult {
+  efficiencyImprovement: number;
+  adoptionRate: number;
+  costSavings: number;
+}
+
+interface ROIResult {
+  actualROI: number;
+  paybackPeriod: number;
+  annualSavings: number;
+}
+
+interface AdoptionRateResult {
+  adoptionRate: number;
+  completionRate: number;
+  userSatisfaction: number;
+}
+
+interface NationwideExpansionResult {
+  expansionPlan: Array<{ phase: number; locations: string[]; timeline: string; investment: number }>;
+  totalROI: number;
+}
+
+interface OwnerReportsResult {
+  reports: Array<{ facilityId: string; efficiency: number; qualityScore: number; costAnalysis: any }>;
+  summary: string;
+}
+
+interface MaintenanceAnalysisResult {
+  seasonalPatterns: Array<{ month: number; workloadFactor: number }>;
+  trends: string[];
+  predictions: Array<{ month: number; predictedHours: number }>;
+}
+
+interface ImprovementProposalsResult {
+  proposals: Array<{ proposalId: string; description: string; expectedSavings: number; roi: number }>;
+  priorityRanking: string[];
+}
+
+interface ProposalROIResult {
+  roi: number;
+  paybackPeriod: number;
+  riskLevel: string;
+  recommendation: string;
+}
+
+interface HistoricalDataResult {
+  data: Array<{ month: string; hours: number; efficiency: number }>;
+  dataQuality: number;
+}
+
+interface SeasonalPatternsResult {
+  patterns: Array<{ month: number; seasonalFactor: number; variance: number }>;
+  peakMonths: number[];
+}
+
+interface BudgetForecastResult {
+  forecast: Array<{ month: number; budgetAllocation: number; expectedHours: number }>;
+  totalBudget: number;
+}
+
+interface InfrastructureCompatibilityResult {
+  compatible: boolean;
+  issues: string[];
+  recommendations: string[];
+}
+
+interface SystemIntegrationPlan {
+  phases: Array<{ phase: number; description: string; duration: number }>;
+  totalDuration: number;
+  risks: string[];
+}
+
+interface IntegrationTestResult {
+  passed: boolean;
+  testResults: Array<{ testName: string; status: string; responseTime?: number }>;
+  overallScore: number;
+}
+
+interface DataFormatUnificationResult {
+  unified: boolean;
+  convertedRecords: number;
+  validationErrors: string[];
+}
+
+interface SystemFailureResult {
+  failureDetected: boolean;
+  severity: string;
+  affectedSystems: string[];
+  estimatedDowntime: number;
+}
+
+interface FailureImpactResult {
+  impactLevel: string;
+  affectedLocations: number;
+  affectedUsers: number;
+  businessImpact: number;
+}
+
+interface RecoveryProceduresResult {
+  recoveryStarted: boolean;
+  estimatedRecoveryTime: number;
+  recoverySteps: Array<{ step: string; status: string; completionTime?: string }>;
+}
+
+// アクティブな作業記録を管理するためのメモリストレージ
+const activeWorkRecords = new Map<string, { workType: string; facilityId: string; startTime: string; isActive: boolean }>();
+const localStorageData = new Map<string, any>();
+
+export function startWorkRecord(workerId: string, workType: string, facilityId: string, oneTouch?: boolean): WorkRecordResult {
+  // 必須項目チェック
+  if (!workerId || !workType || !facilityId) {
+    return {
       success: false,
-      requiresPreviousWorkConfirmation: true,
-      message: "前の作業を終了してください"
+      error: "必須項目が不足しています"
     };
   }
 
-  const currentTime = startTime instanceof Date ? startTime : new Date();
-  const timeString = currentTime.toISOString();
-
-  const record = {
-    workerId,
-    workTypeId: workType,
-    startTime: timeString,
-    status: "active",
-    lastOperation: "start"
-  };
-
-  workRecordState.set(workerId, record);
-
-  const result: WorkRecordResult = {
-    startTime: timeString,
-    status: "active",
-    workerId,
-    workTypeId: workType,
-    success: true
-  };
-
-  if (oneTouch) {
-    result.oneTouch = true;
-    result.tapCount = 1;
-    result.gpsLocation = "35.6762,139.6503";
-    result.timestamp = timeString;
-    result.autoAcquired = true;
+  // 既存のアクティブ記録をチェック
+  const existingRecord = activeWorkRecords.get(workerId);
+  if (existingRecord && existingRecord.isActive) {
+    return {
+      success: false,
+      error: "既存の記録がアクティブです"
+    };
   }
 
-  return result;
-}
-
-export function endWorkRecord(workerId: string, startTime?: string | null): WorkRecordResult {
-  const existingRecord = workRecordState.get(workerId);
+  const currentTime = new Date().toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  const timestamp = new Date().toISOString();
   
-  if (!existingRecord || existingRecord.status !== "active") {
-    return { 
-      error: startTime === null ? "アクティブな記録が存在しません" : "アクティブな作業記録が見つかりません", 
-      success: false 
-    };
-  }
+  // GPS位置情報の模擬（ワンタップ操作時）
+  const gpsLocation = oneTouch ? "35.6762,139.6503" : undefined;
 
-  const endTime = new Date().toISOString();
-  const workHours = startTime ? calculateWorkTime(startTime, "17:00") : 8;
-
-  existingRecord.status = "completed";
-  existingRecord.endTime = endTime;
-  workRecordState.set(workerId, existingRecord);
+  // アクティブ記録として保存
+  activeWorkRecords.set(workerId, {
+    workType,
+    facilityId,
+    startTime: currentTime,
+    isActive: true
+  });
 
   return {
-    endTime: startTime ? "17:00" : endTime,
-    workHours,
-    status: "completed",
+    status: "active",
+    startTime: currentTime,
+    workerId,
+    oneTouch: oneTouch || false,
+    gpsLocation,
+    timestamp: oneTouch ? timestamp : undefined,
+    autoAcquired: oneTouch || false,
     success: true
   };
 }
 
-export function recordInterruption(workerId: string, reason: string, interruptTime: Date): InterruptionResult {
+export function checkActiveWorkRecord(workerId: string): ActiveWorkRecordResult {
+  const record = activeWorkRecords.get(workerId);
   return {
-    interruptTime: interruptTime.toISOString(),
-    reason,
-    workerId
+    isActive: record ? record.isActive : false
   };
+}
+
+export function endWorkRecord(workerId: string, startTime: string | null): EndWorkRecordResult {
+  if (!startTime) {
+    return {
+      success: false,
+      error: "アクティブな記録が存在しません"
+    };
+  }
+
+  const record = activeWorkRecords.get(workerId);
+  if (!record || !record.isActive) {
+    return {
+      success: false,
+      error: "アクティブな記録が存在しません"
+    };
+  }
+
+  const endTime = new Date().toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  
+  // 記録を非アクティブに変更
+  record.isActive = false;
+  activeWorkRecords.set(workerId, record);
+
+  return {
+    endTime,
+    success: true
+  };
+}
+
+export function calculateWorkTime(startTime: string, endTime: string): number {
+  const [startHour, startMin] = startTime.split(':').map(Number);
+  const [endHour, endMin] = endTime.split(':').map(Number);
+  
+  const startMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+  
+  const diffMinutes = endMinutes - startMinutes;
+  return Math.round(diffMinutes / 60 * 100) / 100; // 時間単位で返す
+}
+
+export function validateWorkRecord(workRecord: any): ValidationResult {
+  const missingFields: string[] = [];
+  
+  if (!workRecord.workerId) missingFields.push("workerId");
+  if (!workRecord.startTime) missingFields.push("startTime");
+  if (!workRecord.workType) missingFields.push("workType");
+  if (!workRecord.facilityId) missingFields.push("facilityId");
+  
+  return {
+    isValid: missingFields.length === 0,
+    missingFields: missingFields.length > 0 ? missingFields : undefined
+  };
+}
+
+export function detectAnomalousValue(value: number, type: string): AnomalousValueResult {
+  let threshold: number;
+  let isAnomalous = false;
+  let reason: string | undefined;
+
+  switch (type) {
+    case "workTime":
+      threshold = 24; // 24時間
+      if (value > threshold) {
+        isAnomalous = true;
+        reason = "作業時間が24時間を超過";
+      } else if (value < 0.5) { // 30分未満
+        isAnomalous = true;
+        reason = "作業時間が30分未満";
+      }
+      break;
+    case "interruptionTime":
+      threshold = 8; // 8時間
+      if (value > threshold) {
+        isAnomalous = true;
+        reason = "中断時間が8時間を超過";
+      }
+      break;
+    default:
+      threshold = 0;
+  }
+
+  return {
+    isAnomalous,
+    reason,
+    value,
+    threshold
+  };
+}
+
+export function recordInterruption(workRecordId: string, reason: string, startTime?: string): InterruptionRecord {
+  const interruptionId = `INT_${Date.now()}`;
+  const timestamp = startTime || new Date().toISOString();
+  
+  return {
+    interruptionId,
+    workRecordId,
+    startTime: timestamp,
+    reason,
+    success: true
+  };
+}
+
+export function calculateInterruptionTime(startTime: string, endTime: string): number {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const diffMs = end.getTime() - start.getTime();
+  return Math.round(diffMs / (1000 * 60)); // 分単位で返す
+}
+
+export function calculateProgressRate(actualHours: number, plannedHours: number): ProgressRateResult {
+  if (plannedHours === 0) {
+    return { progressRate: 0, deviationRate: 0 };
+  }
+  
+  const progressRate = (actualHours / plannedHours) * 100;
+  const deviationRate = Math.abs(progressRate - 100);
+  
+  return {
+    progressRate: Math.round(progressRate * 100) / 100,
+    deviationRate: Math.round(deviationRate * 100) / 100
+  };
+}
+
+export function analyzeWorkEfficiency(workData: Array<{ hours: number; completed: boolean; date: string }>): EfficiencyAnalysisResult {
+  if (workData.length === 0) {
+    return { efficiency: 0, isAlert: false };
+  }
+
+  const totalHours = workData.reduce((sum, work) => sum + work.hours, 0);
+  const completedTasks = workData.filter(work => work.completed).length;
+  const efficiency = (completedTasks / workData.length) * 100;
+  
+  // 効率が80%未満の場合はアラート
+  const isAlert = efficiency < 80;
+  
+  // ボトルネック検出（完了していないタスクの特定）
+  const bottlenecks = workData
+    .filter(work => !work.completed)
+    .map(work => work.date);
+
+  return {
+    efficiency: Math.round(efficiency * 100) / 100,
+    isAlert,
+    bottlenecks: bottlenecks.length > 0 ? bottlenecks : undefined
+  };
+}
+
+export function saveWorkDataToCloud(workData: any): CloudSaveResult {
+  try {
+    // fetchMockでモックされたfetchを使用
+    fetch('/api/work-records', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(workData)
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Network error');
+      }
+      return response.json();
+    });
+    
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'クラウド保存に失敗しました' };
+  }
+}
+
+export function syncLocalDataOnReconnection(): SyncResult {
+  const localData = Array.from(localStorageData.values());
+  
+  try {
+    // ローカルデータをクラウドに同期
+    localData.forEach(data => {
+      fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    });
+    
+    // 同期完了後、ローカルデータをクリア
+    localStorageData.clear();
+    
+    return {
+      synced: true,
+      recordCount: localData.length
+    };
+  } catch (error) {
+    return {
+      synced: false,
+      recordCount: 0
+    };
+  }
 }
 
 export function validateRequiredFields(workerId: string, workType: string, facilityId: string): ValidationResult {
@@ -232,487 +595,261 @@ export function validateRequiredFields(workerId: string, workType: string, facil
   if (!workerId) missingFields.push("workerId");
   if (!workType) missingFields.push("workType");
   if (!facilityId) missingFields.push("facilityId");
-
-  return {
-    isValid: missingFields.length === 0,
-    missingFields
-  };
-}
-
-export function detectAnomalousValues(startTime: Date, endTime: Date): AnomalousResult {
-  if (endTime < startTime) {
-    return {
-      isAnomalous: true,
-      reason: "終了時刻が開始時刻より前です"
-    };
-  }
-
-  const workHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-  if (workHours > 24) {
-    return {
-      isAnomalous: true,
-      reason: "作業時間が24時間を超えています"
-    };
-  }
-
-  if (workHours < 0.5) {
-    return {
-      isAnomalous: true,
-      reason: "作業時間が30分未満です"
-    };
-  }
-
-  return { isAnomalous: false };
-}
-
-export function calculateWorkTime(startTime: string, endTime: string): number {
-  const start = new Date(`2024-01-15T${startTime}:00`);
-  const end = new Date(`2024-01-15T${endTime}:00`);
-  return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-}
-
-export async function saveWorkData(workData: WorkData): Promise<SaveResult> {
-  try {
-    const response = await fetch('/api/work-data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(workData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Network error');
-    }
-
-    return { savedLocally: false, syncPending: false, success: true };
-  } catch (error) {
-    localStorageData.push(workData);
-    return { savedLocally: true, syncPending: true, success: false };
-  }
-}
-
-export function syncLocalData(): SyncResult {
-  return { synced: true, count: localStorageData.length };
-}
-
-export function getGPSLocation(currentTime: Date): GPSResult {
-  return {
-    latitude: 35.6762,
-    longitude: 139.6503,
-    timestamp: currentTime.toISOString(),
-    accuracy: 10
-  };
-}
-
-export function updateWorkStatus(workerId: string, status: string, endTime: Date): StatusUpdateResult {
-  const record = workRecordState.get(workerId);
-  if (record) {
-    record.status = status === "completed" ? "ready_for_next" : status;
-    workRecordState.set(workerId, record);
-  }
-
-  return {
-    endTime: endTime.toISOString(),
-    status: status === "completed" ? "ready_for_next" : status,
-    currentWorkCompleted: status === "completed"
-  };
-}
-
-export function calculateActualWorkHours(startTime: Date, endTime: Date, interruptionTime: number): number {
-  const totalHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-  const interruptionHours = interruptionTime / 60;
-  return Math.max(0, totalHours - interruptionHours);
-}
-
-export function minimizeTapOperations(workerId: string, operation: string, currentTime: Date): TapOperationResult {
-  const existingRecord = workRecordState.get(workerId);
-  
-  if (existingRecord && existingRecord.lastOperation === operation) {
-    return {
-      tapCount: 1,
-      duplicateDetected: true,
-      error: "重複操作です"
-    };
-  }
-
-  if (operation === "start") {
-    const record = {
-      workerId,
-      startTime: currentTime.toISOString(),
-      status: "active",
-      lastOperation: "start"
-    };
-    workRecordState.set(workerId, record);
-
-    return {
-      startTime: currentTime.toISOString(),
-      tapCount: 1,
-      status: "active"
-    };
-  }
-
-  return { tapCount: 1 };
-}
-
-export function showConfirmationDialog(message: string, options: any): DialogResult {
-  return { confirmed: true, value: options };
-}
-
-export function checkActiveWorkRecord(workerId: string): { isActive: boolean } {
-  const record = workRecordState.get(workerId);
-  return { isActive: record && record.status === "active" };
-}
-
-export function validateWorkRecord(workData: any): ValidationResult {
-  const missingFields: string[] = [];
-  if (!workData.workerId) missingFields.push("workerId");
-  if (!workData.startTime) missingFields.push("startTime");
   
   return {
     isValid: missingFields.length === 0,
-    missingFields
+    missingFields: missingFields.length > 0 ? missingFields : undefined
   };
 }
 
-export function detectAnomalousValue(value: number, threshold: number): AnomalousResult {
-  return {
-    isAnomalous: Math.abs(value) > threshold,
-    reason: Math.abs(value) > threshold ? "閾値を超過しています" : undefined
-  };
-}
-
-export function calculateInterruptionTime(startTime: Date, endTime: Date): number {
-  return (endTime.getTime() - startTime.getTime()) / (1000 * 60);
-}
-
-export function calculateProgressRate(actualHours: number, plannedHours: number): number {
-  return plannedHours > 0 ? (actualHours / plannedHours) * 100 : 0;
-}
-
-export function analyzeWorkEfficiency(workData: any[]): { efficiency: number; bottlenecks: string[] } {
-  const totalPlanned = workData.reduce((sum, work) => sum + (work.plannedHours || 8), 0);
-  const totalActual = workData.reduce((sum, work) => sum + (work.actualHours || 8), 0);
-  const efficiency = totalPlanned > 0 ? (totalActual / totalPlanned) * 100 : 100;
-  
-  const bottlenecks = workData
-    .filter(work => (work.actualHours || 8) > (work.plannedHours || 8) * 1.2)
-    .map(work => work.workType || "不明な作業");
-
-  return { efficiency, bottlenecks };
-}
-
-export async function saveWorkDataToCloud(workData: any): Promise<{ success: boolean }> {
-  try {
-    const response = await fetch('/api/cloud-save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(workData)
-    });
-    return { success: response.ok };
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-export function syncLocalDataOnReconnection(): { synced: boolean; count: number } {
-  const count = localStorageData.length;
-  localStorageData.length = 0;
-  return { synced: true, count };
-}
-
-export function checkDataIntegrity(data: any[]): { isValid: boolean; errors: string[] } {
+export function checkDataIntegrity(workData: any): DataIntegrityResult {
   const errors: string[] = [];
   
-  data.forEach((item, index) => {
-    if (!item.workerId) errors.push(`項目${index}: 作業員IDが不足`);
-    if (!item.startTime) errors.push(`項目${index}: 開始時刻が不足`);
-  });
-
+  // 開始時刻と終了時刻の整合性チェック
+  if (workData.startTime && workData.endTime) {
+    const startTime = new Date(`2024-01-01 ${workData.startTime}`);
+    const endTime = new Date(`2024-01-01 ${workData.endTime}`);
+    
+    if (startTime >= endTime) {
+      errors.push("開始時刻が終了時刻より後になっています");
+    }
+  }
+  
+  // 作業時間の妥当性チェック
+  if (workData.workTime && workData.workTime > 24) {
+    errors.push("作業時間が24時間を超えています");
+  }
+  
+  if (workData.workTime && workData.workTime < 0) {
+    errors.push("作業時間が負の値です");
+  }
+  
   return {
     isValid: errors.length === 0,
-    errors
+    errors: errors.length > 0 ? errors : undefined
   };
 }
 
-export function saveToLocalStorage(data: any): { saved: boolean } {
-  localStorageData.push(data);
-  return { saved: true };
+export function saveToLocalStorage(workData: any): LocalStorageResult {
+  try {
+    const key = `work_${Date.now()}`;
+    localStorageData.set(key, workData);
+    return { saved: true };
+  } catch (error) {
+    return { saved: false };
+  }
 }
 
-export function aggregateDailyWorkData(date: string): { totalHours: number; workerCount: number } {
-  const dayData = Array.from(workRecordState.values())
-    .filter(record => record.startTime && record.startTime.startsWith(date));
+export function aggregateDailyWorkData(date: string, workerIds: string[]): DailyAggregationResult {
+  // 模擬的な日次集計処理
+  let totalHours = 0;
+  let completedTasks = 0;
+  const missingRecords: string[] = [];
   
-  return {
-    totalHours: dayData.length * 8,
-    workerCount: dayData.length
-  };
-}
-
-export function analyzeWorkPerformance(workData: any[]): { averageEfficiency: number; topPerformers: string[] } {
-  const efficiencies = workData.map(work => {
-    const planned = work.plannedHours || 8;
-    const actual = work.actualHours || 8;
-    return planned > 0 ? (actual / planned) * 100 : 100;
-  });
-
-  const averageEfficiency = efficiencies.reduce((sum, eff) => sum + eff, 0) / efficiencies.length;
-  const topPerformers = workData
-    .filter((_, index) => efficiencies[index] >= averageEfficiency)
-    .map(work => work.workerId)
-    .slice(0, 3);
-
-  return { averageEfficiency, topPerformers };
-}
-
-export function optimizePersonnelAllocation(workload: any[], availableWorkers: any[]): { allocation: any[]; efficiency: number } {
-  const allocation = workload.map((work, index) => ({
-    workId: work.id,
-    workerId: availableWorkers[index % availableWorkers.length]?.id || "UNASSIGNED",
-    estimatedHours: work.estimatedHours || 8
-  }));
-
-  const efficiency = 85; // 基準効率値
-  return { allocation, efficiency };
-}
-
-export function calculateProductivityIndicators(workData: any[]): { hourlyOutput: number; costEfficiency: number } {
-  const totalHours = workData.reduce((sum, work) => sum + (work.actualHours || 8), 0);
-  const totalOutput = workData.length;
-  
-  return {
-    hourlyOutput: totalHours > 0 ? totalOutput / totalHours : 0,
-    costEfficiency: 0.85
-  };
-}
-
-export function generateWeeklyReport(weekData: any[]): { summary: string; metrics: any } {
-  const totalHours = weekData.reduce((sum, day) => sum + (day.totalHours || 0), 0);
-  const averageDaily = totalHours / 7;
-
-  return {
-    summary: `週間総工数: ${totalHours}時間`,
-    metrics: {
-      totalHours,
-      averageDaily,
-      efficiency: 0.85
-    }
-  };
-}
-
-export function identifyDelayedTasks(tasks: any[]): { delayedTasks: any[]; criticalCount: number } {
-  const delayedTasks = tasks.filter(task => {
-    const progress = task.actualHours / (task.plannedHours || 8);
-    return progress < 0.8;
-  });
-
-  return {
-    delayedTasks,
-    criticalCount: delayedTasks.filter(task => task.priority === "high").length
-  };
-}
-
-export function generateImprovementInstructions(bottlenecks: any[]): { instructions: string[]; priority: string } {
-  const instructions = bottlenecks.map(bottleneck => 
-    `${bottleneck.area}の効率改善が必要です`
-  );
-
-  return {
-    instructions,
-    priority: bottlenecks.length > 3 ? "high" : "medium"
-  };
-}
-
-export function reportEmergencyResponse(incident: any): { reportId: string; timestamp: string; severity: string } {
-  const timestamp = new Date().toISOString();
-  const severity = incident.type === "equipment_failure" ? "high" : "medium";
-
-  return {
-    reportId: `EMG-${Date.now()}`,
-    timestamp,
-    severity
-  };
-}
-
-export function analyzeEmergencyImpact(incident: any, workData: any[]): { affectedWorkers: number; estimatedDelay: number } {
-  const affectedWorkers = workData.filter(work => 
-    work.location === incident.location
-  ).length;
-
-  const estimatedDelay = affectedWorkers * 2; // 2時間の遅延想定
-
-  return { affectedWorkers, estimatedDelay };
-}
-
-export function checkGlobalPersonnelStatus(): { availableWorkers: number; totalWorkers: number; utilizationRate: number } {
-  const totalWorkers = 680;
-  const availableWorkers = Math.floor(totalWorkers * 0.3);
-  const utilizationRate = 0.7;
-
-  return { availableWorkers, totalWorkers, utilizationRate };
-}
-
-export function generatePersonnelReallocation(demand: any[]): { reallocations: any[]; estimatedTime: number } {
-  const reallocations = demand.map((req, index) => ({
-    fromLocation: `SITE-${index + 1}`,
-    toLocation: req.location,
-    workerCount: req.requiredWorkers,
-    travelTime: 60
-  }));
-
-  return {
-    reallocations,
-    estimatedTime: Math.max(...reallocations.map(r => r.travelTime))
-  };
-}
-
-export function executeMonthlyAggregation(monthData: any[]): { totalHours: number; anomalies: any[]; completionRate: number } {
-  const totalHours = monthData.reduce((sum, day) => sum + (day.totalHours || 0), 0);
-  const anomalies = monthData.filter(day => day.totalHours > 200 || day.totalHours < 50);
-  const completionRate = monthData.filter(day => day.completed).length / monthData.length;
-
-  return { totalHours, anomalies, completionRate };
-}
-
-export function detectAnomaliesAndGaps(data: any[]): { anomalies: any[]; gaps: any[]; severity: string } {
-  const anomalies = data.filter(item => 
-    item.value > (item.average * 2) || item.value < (item.average * 0.5)
-  );
-  
-  const gaps = data.filter(item => !item.value || item.value === null);
-
-  return {
-    anomalies,
-    gaps,
-    severity: anomalies.length > 5 ? "high" : "low"
-  };
-}
-
-export function correctWorkData(corrections: any[]): { correctedCount: number; errors: string[] } {
-  const errors: string[] = [];
-  let correctedCount = 0;
-
-  corrections.forEach(correction => {
-    if (correction.newValue && correction.reason) {
-      correctedCount++;
+  workerIds.forEach(workerId => {
+    const record = activeWorkRecords.get(workerId);
+    if (record) {
+      // 8時間の標準作業時間を仮定
+      totalHours += 8;
+      completedTasks += 1;
     } else {
-      errors.push(`修正データが不完全です: ${correction.id}`);
+      missingRecords.push(workerId);
     }
   });
-
-  return { correctedCount, errors };
-}
-
-export function approveDataCorrections(corrections: any[], approverId: string): { approvedCount: number; rejectedCount: number } {
-  const approvedCount = corrections.filter(c => c.isValid).length;
-  const rejectedCount = corrections.length - approvedCount;
-
-  return { approvedCount, rejectedCount };
-}
-
-export function finalizeMonthlyResults(data: any[]): { finalizedCount: number; status: string } {
-  const finalizedCount = data.filter(item => item.approved).length;
-  const status = finalizedCount === data.length ? "completed" : "pending";
-
-  return { finalizedCount, status };
-}
-
-export function generateDepartmentalReport(departmentData: any[]): { report: any; insights: string[] } {
-  const totalHours = departmentData.reduce((sum, dept) => sum + dept.hours, 0);
-  const avgEfficiency = departmentData.reduce((sum, dept) => sum + dept.efficiency, 0) / departmentData.length;
-
+  
   return {
-    report: {
-      totalHours,
-      avgEfficiency,
-      departmentCount: departmentData.length
-    },
-    insights: [
-      `総工数: ${totalHours}時間`,
-      `平均効率: ${avgEfficiency.toFixed(2)}%`
-    ]
+    totalHours,
+    completedTasks,
+    missingRecords
   };
 }
 
-export function collectPerformanceData(period: string): { workHours: number[]; efficiency: number[]; quality: number[] } {
-  const days = period === "monthly" ? 30 : 7;
-  
-  return {
-    workHours: Array(days).fill(0).map(() => Math.floor(Math.random() * 50) + 150),
-    efficiency: Array(days).fill(0).map(() => Math.random() * 20 + 80),
-    quality: Array(days).fill(0).map(() => Math.random() * 10 + 90)
-  };
-}
-
-export function crossReferenceWithSalesData(workData: any[], salesData: any[]): { correlation: number; costRatio: number } {
-  const workHours = workData.map(w => w.hours || 0);
-  const sales = salesData.map(s => s.amount || 0);
-  
-  // Pearson相関係数の計算
-  const n = Math.min(workHours.length, sales.length);
-  if (n < 2) return { correlation: 0, costRatio: 0 };
-  
-  const meanWork = workHours.slice(0, n).reduce((a, b) => a + b, 0) / n;
-  const meanSales = sales.slice(0, n).reduce((a, b) => a + b, 0) / n;
-  
-  let numerator = 0, workVar = 0, salesVar = 0;
-  for (let i = 0; i < n; i++) {
-    const workDiff = workHours[i] - meanWork;
-    const salesDiff = sales[i] - meanSales;
-    numerator += workDiff * salesDiff;
-    workVar += workDiff * workDiff;
-    salesVar += salesDiff * salesDiff;
+export function analyzeWorkPerformance(workData: Array<{ actualHours: number; plannedHours: number; taskId: string }>): PerformanceAnalysisResult {
+  if (workData.length === 0) {
+    return { progressRate: 0, deviationRate: 0, bottlenecks: [] };
   }
   
-  const correlation = Math.sqrt(workVar * salesVar) === 0 ? 0 : numerator / Math.sqrt(workVar * salesVar);
-  const totalCost = workHours.reduce((sum, h) => sum + h * 3000, 0); // 時給3000円想定
-  const totalSales = sales.reduce((sum, s) => sum + s, 0);
-  const costRatio = totalSales > 0 ? totalCost / totalSales : 0;
-
-  return { correlation, costRatio };
+  const totalActual = workData.reduce((sum, work) => sum + work.actualHours, 0);
+  const totalPlanned = workData.reduce((sum, work) => sum + work.plannedHours, 0);
+  
+  const progressRate = totalPlanned > 0 ? (totalActual / totalPlanned) * 100 : 0;
+  const deviationRate = Math.abs(progressRate - 100);
+  
+  // 進捗率が80%未満のタスクをボトルネックとして特定
+  const bottlenecks = workData
+    .filter(work => work.plannedHours > 0 && (work.actualHours / work.plannedHours) < 0.8)
+    .map(work => work.taskId);
+  
+  return {
+    progressRate: Math.round(progressRate * 100) / 100,
+    deviationRate: Math.round(deviationRate * 100) / 100,
+    bottlenecks
+  };
 }
 
-export function analyzeProfitabilityByLocation(locationData: any[]): { profitability: any[]; ranking: string[] } {
-  const profitability = locationData.map(location => {
-    const revenue = location.sales || 0;
-    const costs = (location.workHours || 0) * 3000;
-    const profit = revenue - costs;
-    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+export function optimizePersonnelAllocation(workload: Array<{ taskId: string; requiredHours: number; priority: number }>, availableWorkers: string[]): PersonnelAllocationResult {
+  // 必要人員数の計算（8時間/日の標準作業時間を仮定）
+  const totalRequiredHours = workload.reduce((sum, task) => sum + task.requiredHours, 0);
+  const requiredPersonnel = Math.ceil(totalRequiredHours / 8);
+  
+  // 優先度順にタスクをソートして人員配置
+  const sortedTasks = workload.sort((a, b) => b.priority - a.priority);
+  const allocation: Array<{ workerId: string; taskId: string }> = [];
+  
+  let workerIndex = 0;
+  sortedTasks.forEach(task => {
+    if (workerIndex < availableWorkers.length) {
+      allocation.push({
+        workerId: availableWorkers[workerIndex],
+        taskId: task.taskId
+      });
+      workerIndex++;
+    }
+  });
+  
+  return {
+    requiredPersonnel,
+    allocation
+  };
+}
+
+export function calculateProductivityIndicators(workData: Array<{ hours: number; output: number; cost: number }>): ProductivityIndicators {
+  if (workData.length === 0) {
+    return { efficiency: 0, productivity: 0, costRatio: 0 };
+  }
+  
+  const totalHours = workData.reduce((sum, work) => sum + work.hours, 0);
+  const totalOutput = workData.reduce((sum, work) => sum + work.output, 0);
+  const totalCost = workData.reduce((sum, work) => sum + work.cost, 0);
+  
+  const productivity = totalHours > 0 ? totalOutput / totalHours : 0;
+  const efficiency = totalOutput > 0 ? (totalOutput / workData.length) * 100 : 0;
+  const costRatio = totalOutput > 0 ? (totalCost / totalOutput) * 100 : 0;
+  
+  return {
+    efficiency: Math.round(efficiency * 100) / 100,
+    productivity: Math.round(productivity * 100) / 100,
+    costRatio: Math.round(costRatio * 100) / 100
+  };
+}
+
+export function generateWeeklyReport(weekData: Array<{ taskId: string; actualHours: number; plannedHours: number; status: string }>): WeeklyReportResult {
+  const progressByTask = weekData.map(task => {
+    const progressRate = task.plannedHours > 0 ? (task.actualHours / task.plannedHours) * 100 : 0;
+    const deviationRate = Math.abs(progressRate - 100);
     
     return {
-      locationId: location.id,
-      profit,
-      margin,
-      efficiency: location.efficiency || 85
+      taskId: task.taskId,
+      progressRate: Math.round(progressRate * 100) / 100,
+      deviationRate: Math.round(deviationRate * 100) / 100
     };
   });
-
-  const ranking = profitability
-    .sort((a, b) => b.margin - a.margin)
-    .map(p => p.locationId);
-
-  return { profitability, ranking };
+  
+  const delayedTasks = progressByTask
+    .filter(task => task.progressRate < 80)
+    .map(task => task.taskId);
+  
+  const summary = `週次実績: ${weekData.length}件のタスク中、${delayedTasks.length}件が遅延`;
+  
+  return {
+    progressByTask,
+    delayedTasks,
+    summary
+  };
 }
 
-export function generateInvestmentJustification(data: any): { roi: number; paybackPeriod: number; recommendation: string } {
-  const annualSavings = data.costSavings || 1000000;
-  const initialInvestment = data.investment || 5000000;
-  const roi = initialInvestment > 0 ? (annualSavings / initialInvestment) * 100 : 0;
-  const paybackPeriod = annualSavings > 0 ? initialInvestment / annualSavings : 0;
-
-  const recommendation = roi >= 15 && paybackPeriod <= 3 ? "推奨" : "要検討";
-
-  return { roi, paybackPeriod, recommendation };
+export function identifyDelayedTasks(taskData: Array<{ taskId: string; progressRate: number; importance: string }>): DelayedTasksResult {
+  const delayedTasks = taskData
+    .filter(task => task.progressRate < 80)
+    .map(task => ({
+      taskId: task.taskId,
+      progressRate: task.progressRate,
+      priority: task.importance === "high" ? "高" : task.importance === "medium" ? "中" : "低"
+    }))
+    .sort((a, b) => a.progressRate - b.progressRate); // 進捗率の低い順
+  
+  return { delayedTasks };
 }
 
-export function collectMultiLocationData(locations: string[]): { locationData: any[]; aggregatedMetrics: any } {
-  const locationData = locations.map(location => ({
-    locationId: location,
-    workHours: Math.floor(Math.random() * 1000) + 2000,
-    efficiency: Math.random() * 20 + 80,
-    costs: Math.floor(Math.random() * 500000) + 1000000
-  }));
+export function generateImprovementInstructions(delayedTasks: Array<{ taskId: string; progressRate: number; deviationRate: number }>): ImprovementInstructionsResult {
+  const instructions = delayedTasks
+    .map(task => {
+      let priority = 1;
+      let action = "進捗確認";
+      
+      if (task.deviationRate > 50) {
+        priority = 3;
+        action = "緊急対応・人員追加";
+      } else if (task.deviationRate > 20) {
+        priority = 2;
+        action = "作業プロセス見直し";
+      }
+      
+      return {
+        taskId: task.taskId,
+        priority,
+        action
+      };
+    })
+    .sort((a, b) => b.priority - a.priority);
+  
+  return { instructions };
+}
 
-  const aggregatedMetrics = {
-    totalHours: locationData.reduce((sum, loc) => sum + loc.workHours, 0),
-    avgEfficiency: locationData.reduce((sum, loc) => sum + loc.efficiency, 0) / locationData.length,
-    totalCosts: locationData.reduce((
+export function reportEmergencyResponse(emergencyType: string, severity: string, location: string): EmergencyReportResult {
+  const reportId = `EMG_${Date.now()}`;
+  const timestamp = new Date().toISOString();
+  
+  return {
+    reportId,
+    timestamp,
+    severity,
+    notified: true
+  };
+}
+
+export function analyzeEmergencyImpact(emergencyData: { type: string; location: string; startTime: string }): EmergencyImpactResult {
+  // 緊急事態の種類に基づく影響度算出
+  let impactLevel = "軽微";
+  let affectedPersonnel = 1;
+  let delayHours = 1;
+  
+  switch (emergencyData.type) {
+    case "設備故障":
+      impactLevel = "重大";
+      affectedPersonnel = 5;
+      delayHours = 4;
+      break;
+    case "安全事故":
+      impactLevel = "致命的";
+      affectedPersonnel = 10;
+      delayHours = 8;
+      break;
+    case "材料不足":
+      impactLevel = "中程度";
+      affectedPersonnel = 3;
+      delayHours = 2;
+      break;
+  }
+  
+  return {
+    impactLevel,
+    affectedPersonnel,
+    delayHours
+  };
+}
+
+export function checkGlobalPersonnelStatus(locations: string[]): GlobalPersonnelResult {
+  // 全拠点の人員状況を模擬的に算出
+  const totalActive = locations.length * 10; // 拠点あたり10名稼働と仮定
+  const totalStandby = locations.length * 2;  // 拠点あたり2名待機と仮定
+  const availableForReallocation = Math.floor(totalStandby * 0.7); // 待機人員の70%が移動可能
+  
+  return {
+    totalActive,
+    totalStandby,
+    availableForReallocation
+  };
+}
+
+export function generatePersonnelReallocation(emergencyLocation: string, requiredPersonnel: number, availableWorkers: Array<{ workerId: string; current
