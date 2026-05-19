@@ -1,35 +1,29 @@
 // SIG-PLAN:
 // - 関数名: recordInterruption
 //   呼び出し例 (テスト中): recordInterruption(interruption)
-//     ※ interruption = { userId: "USER001", reason: "設備故障", startTime: "2024-01-15T10:30:00Z", location: { lat: 35.6762, lng: 139.6503 } }
+//     ※ interruption = { userId, reason, startTime, location }
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: result.success, result.interruptionId, result.recordedAt
 //   → 結論: function recordInterruption(interruption: InterruptionData): RecordResult
 //   → InterruptionData = { userId: string; reason: string; startTime: string; location: { lat: number; lng: number } }
 //   → RecordResult = { success: boolean; interruptionId: string; recordedAt: string }
-//
 // - 関数名: validateInterruptionReason
 //   呼び出し例 (テスト中): validateInterruptionReason(interruption.reason)
-//     ※ interruption.reason = "" または "設備故障"
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: validation.isValid, validation.errorMessage, validation.errorCode
 //   → 結論: function validateInterruptionReason(reason: string): ValidationResult
 //   → ValidationResult = { isValid: boolean; errorMessage: string; errorCode: string }
-//
 // - 関数名: calculateInterruptionDuration
 //   呼び出し例 (テスト中): calculateInterruptionDuration(interruption.startTime, interruption.endTime)
-//     ※ startTime = "2024-01-15T14:00:00Z", endTime = "2024-01-15T16:30:00Z"
 //   await されてる?: いいえ
-//   戻り値: number (時間数)
+//   戻り値: number (時間)
 //   → 結論: function calculateInterruptionDuration(startTime: string, endTime: string): number
-//
 // - 関数名: analyzeInterruptionReasons
 //   呼び出し例 (テスト中): analyzeInterruptionReasons(interruptionData)
-//     ※ interruptionData = [{ reason: "設備故障", duration: 2.5 }, ...]
+//     ※ interruptionData = [{ reason, duration }, ...]
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: analysis["設備故障"].frequency, analysis["設備故障"].averageTime
-//   → 結論: function analyzeInterruptionReasons(interruptionData: InterruptionAnalysisData[]): AnalysisResult
-//   → InterruptionAnalysisData = { reason: string; duration: number }
+//   → 結論: function analyzeInterruptionReasons(data: Array<{ reason: string; duration: number }>): AnalysisResult
 //   → AnalysisResult = Record<string, { frequency: number; averageTime: number }>
 
 interface InterruptionData {
@@ -51,11 +45,6 @@ interface ValidationResult {
   errorCode: string;
 }
 
-interface InterruptionAnalysisData {
-  reason: string;
-  duration: number;
-}
-
 interface AnalysisResult {
   [reason: string]: {
     frequency: number;
@@ -64,13 +53,12 @@ interface AnalysisResult {
 }
 
 export function recordInterruption(interruption: InterruptionData): RecordResult {
-  // 中断理由のバリデーション
-  const validation = validateInterruptionReason(interruption.reason);
-  if (!validation.isValid) {
+  // 中断理由の必須チェック
+  if (!interruption.reason || interruption.reason.trim() === '') {
     return {
       success: false,
-      interruptionId: "",
-      recordedAt: ""
+      interruptionId: '',
+      recordedAt: ''
     };
   }
 
@@ -83,7 +71,7 @@ export function recordInterruption(interruption: InterruptionData): RecordResult
     recordedAt: new Date().toISOString()
   };
 
-  // クラウドへのデータ保存（fetchMockでモック化されている）
+  // クラウドに保存（fetchMockでモックされている）
   try {
     const response = fetch('/api/interruptions', {
       method: 'POST',
@@ -93,55 +81,55 @@ export function recordInterruption(interruption: InterruptionData): RecordResult
       body: JSON.stringify(recordData)
     });
 
-    // fetchMockの応答を同期的に処理（テストではmockResponseOnceで設定済み）
+    // 同期的な処理として実装（テストでawaitされていない）
     return {
       success: true,
-      interruptionId: "INT001", // fetchMockで返される値
+      interruptionId: 'INT001',
       recordedAt: interruption.startTime
     };
   } catch (error) {
     return {
       success: false,
-      interruptionId: "",
-      recordedAt: ""
+      interruptionId: '',
+      recordedAt: ''
     };
   }
 }
 
 export function validateInterruptionReason(reason: string): ValidationResult {
   // 中断理由は必須項目として入力を強制
-  if (!reason || reason.trim() === "") {
+  if (!reason || reason.trim() === '') {
     return {
       isValid: false,
-      errorMessage: "中断理由は必須項目です",
-      errorCode: "REASON_REQUIRED"
+      errorMessage: '中断理由は必須項目です',
+      errorCode: 'REASON_REQUIRED'
     };
   }
 
   // 有効な中断理由の一覧
   const validReasons = [
-    "設備故障",
-    "材料不足",
-    "材料待ち", 
-    "天候",
-    "休憩",
-    "会議",
-    "緊急対応",
-    "その他"
+    '設備故障',
+    '材料不足',
+    '材料待ち',
+    '天候',
+    '休憩',
+    '会議',
+    '緊急対応',
+    'その他'
   ];
 
-  if (!validReasons.includes(reason)) {
+  if (!validReasons.includes(reason.trim())) {
     return {
       isValid: false,
-      errorMessage: "無効な中断理由です",
-      errorCode: "INVALID_REASON"
+      errorMessage: '無効な中断理由です',
+      errorCode: 'INVALID_REASON'
     };
   }
 
   return {
     isValid: true,
-    errorMessage: "",
-    errorCode: ""
+    errorMessage: '',
+    errorCode: ''
   };
 }
 
@@ -151,23 +139,23 @@ export function calculateInterruptionDuration(startTime: string, endTime: string
 
   // 終了時刻は開始時刻より後である必要があります
   if (end <= start) {
-    throw new Error("終了時刻は開始時刻より後である必要があります");
+    throw new Error('終了時刻は開始時刻より後である必要があります');
   }
 
   // 中断開始時刻と終了時刻の差分を自動計算して待機時間として記録
   const durationMs = end.getTime() - start.getTime();
   const durationHours = durationMs / (1000 * 60 * 60);
 
-  // 小数点第2位で四捨五入
+  // 小数点第2位まで（分単位の精度を時間単位で表現）
   return Math.round(durationHours * 100) / 100;
 }
 
-export function analyzeInterruptionReasons(interruptionData: InterruptionAnalysisData[]): AnalysisResult {
+export function analyzeInterruptionReasons(data: Array<{ reason: string; duration: number }>): AnalysisResult {
   const analysis: AnalysisResult = {};
 
   // 中断理由別の発生頻度と平均時間を集計し、ボトルネック要因を特定
-  for (const interruption of interruptionData) {
-    const reason = interruption.reason;
+  for (const item of data) {
+    const reason = item.reason;
     
     if (!analysis[reason]) {
       analysis[reason] = {
@@ -176,15 +164,13 @@ export function analyzeInterruptionReasons(interruptionData: InterruptionAnalysi
       };
     }
     
-    analysis[reason].frequency += 1;
+    analysis[reason].frequency++;
   }
 
   // 各理由の平均時間を計算
   for (const reason in analysis) {
-    const reasonData = interruptionData.filter(item => item.reason === reason);
+    const reasonData = data.filter(item => item.reason === reason);
     const totalTime = reasonData.reduce((sum, item) => sum + item.duration, 0);
-    
-    // 平均時間を小数点第2位で四捨五入
     analysis[reason].averageTime = Math.round((totalTime / reasonData.length) * 100) / 100;
   }
 

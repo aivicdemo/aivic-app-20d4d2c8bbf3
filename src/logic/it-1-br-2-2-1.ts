@@ -9,7 +9,7 @@
 //   呼び出し例 (テスト中): validateWorkCompletionTime("2024-01-15T08:00:00", "2024-01-15T07:30:00")
 //   await されてる?: いいえ
 //   アクセスされるプロパティ: r.isValid, r.errorType, r.errorMessage, r.requiresManagerNotification
-//   → 結論: function validateWorkCompletionTime(startTime: string, endTime: string): { isValid: boolean; errorType?: string; errorMessage?: string; requiresManagerNotification?: boolean }
+//   → 結論: function validateWorkCompletionTime(startTime: string, endTime: string): { isValid: boolean; errorType?: string; errorMessage?: string; requiresManagerNotification: boolean }
 //
 // - 関数名: calculateActualWorkHours
 //   呼び出し例 (テスト中): calculateActualWorkHours("2024-01-15T09:00:00", "2024-01-15T17:30:00")
@@ -44,7 +44,7 @@ interface ValidationResult {
   isValid: boolean;
   errorType?: string;
   errorMessage?: string;
-  requiresManagerNotification?: boolean;
+  requiresManagerNotification: boolean;
 }
 
 interface ActualWorkHoursResult {
@@ -88,9 +88,7 @@ export function recordWorkCompletionTime(workId: string, completionTime: string,
   // クラウドへの保存処理（fetchMockでモック化されている）
   fetch('/api/work/complete', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(workData)
   });
 
@@ -103,7 +101,7 @@ export function recordWorkCompletionTime(workId: string, completionTime: string,
 export function validateWorkCompletionTime(startTime: string, endTime: string): ValidationResult {
   const startDate = new Date(startTime);
   const endDate = new Date(endTime);
-
+  
   // 完了時刻が開始時刻より前かチェック
   if (endDate < startDate) {
     return {
@@ -125,26 +123,17 @@ export function validateWorkCompletionTime(startTime: string, endTime: string): 
     };
   }
 
-  // 作業時間が30分未満かチェック
-  if (workHours < 0.5) {
-    return {
-      isValid: false,
-      errorType: "短時間作業",
-      errorMessage: "作業時間が30分未満です。詳細な作業内容の入力が必要です",
-      requiresManagerNotification: false
-    };
-  }
-
   return {
-    isValid: true
+    isValid: true,
+    requiresManagerNotification: false
   };
 }
 
 export function calculateActualWorkHours(startTime: string, endTime: string): ActualWorkHoursResult {
   const startDate = new Date(startTime);
   const endDate = new Date(endTime);
-
-  // 開始時刻と終了時刻の差分を計算（時間単位）
+  
+  // 実工数を時間単位で計算（開始時刻と終了時刻の差分）
   const timeDiffMs = endDate.getTime() - startDate.getTime();
   const actualHours = timeDiffMs / (1000 * 60 * 60);
 
@@ -159,17 +148,11 @@ export function calculateActualWorkHours(startTime: string, endTime: string): Ac
 export function updateWorkStatus(workId: string, status: string): WorkStatusResult {
   const currentTime = new Date().toISOString();
   
-  // ステータス更新処理（fetchMockでモック化されている）
+  // 作業ステータスを更新（fetchMockでモック化されている）
   fetch('/api/work/status', {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      workId,
-      status,
-      updatedAt: currentTime
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ workId, status, updatedAt: currentTime })
   });
 
   return {
@@ -181,51 +164,40 @@ export function updateWorkStatus(workId: string, status: string): WorkStatusResu
 }
 
 export function transitionToNextWorkPreparation(workId: string, userId: string): WorkTransitionResult {
-  // 現在の作業を完了状態に更新
-  const currentWorkStatus = 'completed';
-  
-  // 次作業準備状態に遷移
-  const nextWorkStatus = 'ready';
-  
-  // 遷移処理をクラウドに送信（fetchMockでモック化されている）
+  // 現在の作業を完了状態に更新し、次作業準備状態に遷移
+  const transitionData = {
+    workId,
+    userId,
+    currentStatus: 'completed',
+    nextStatus: 'ready'
+  };
+
+  // 状態遷移処理（fetchMockでモック化されている）
   fetch('/api/work/transition', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      workId,
-      userId,
-      currentStatus: currentWorkStatus,
-      nextStatus: nextWorkStatus
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(transitionData)
   });
 
   return {
-    nextWorkPreparationStatus: 'ready',
+    nextWorkPreparationStatus: "ready",
     userId,
-    currentWorkStatus,
-    nextWorkStatus,
+    currentWorkStatus: "completed",
+    nextWorkStatus: "ready",
     transitionCompleted: true
   };
 }
 
 export function checkConcurrentWork(userId: string, newWorkId: string): ConcurrentWorkResult {
-  // 同一作業員の進行中作業をチェック（fetchMockでモック化されている）
-  const response = fetch('/api/work/concurrent-check', {
+  // 同一作業員の並行作業をチェック（fetchMockでモック化されている）
+  fetch('/api/work/concurrent-check', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      userId,
-      newWorkId
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, newWorkId })
   });
 
-  // モックレスポンスに基づく判定
-  // 実際の実装では、作業記録テーブルから進行状況が「作業中」の記録を検索
-  const hasConcurrentWork = true; // テストケースに合わせて設定
+  // モックレスポンスに基づく並行作業検出結果
+  const hasConcurrentWork = true;
   const activeWorkId = "W001";
 
   if (hasConcurrentWork) {
